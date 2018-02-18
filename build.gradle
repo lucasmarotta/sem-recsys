@@ -1,0 +1,18 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+
+	compile 'org.apache.jena:apache-jena-libs:3.6.0'
+	compile 'org.apache.opennlp:opennlp:1.8.4'
+	compile 'org.apache.opennlp:opennlp-uima:1.8.4'
+	compile 'org.apache.opennlp:opennlp-tools:1.8.4'
+	compile "org.springframework.boot:spring-boot-starter-log4j2:1.5.9.RELEASE"
+
+    testImplementation 'junit:junit:4.12'
+}
+

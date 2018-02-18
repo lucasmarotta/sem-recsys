@@ -1,0 +1,26 @@
+#Gradle
+/.gradle
+
+# Eclipse
+/.settings
+/bin
+/build
+.classpath
+.project
+
+# VSCODE
+./vscode
+
+#Windows
+*.ini
+[Tt]humbs.db
+*.DS_Store
+
+# IDEA
+/.idea
+*.iml
+
+# Project
+/layout
+/logs
+!*.gitkeep
