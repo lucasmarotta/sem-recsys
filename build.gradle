@@ -1,18 +1,44 @@
 apply plugin: 'java'
 
+buildscript {
+	ext {
+		springBootVersion = "2.0.1.RELEASE"
+	}
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+    }
+    repositories {
+        mavenLocal()
+        mavenCentral()    
+    }
+}
+
+apply plugin: "java"
+apply plugin: "java-library"
+apply plugin: "org.springframework.boot"
+
+group = "br.dcc.ufba"
+version = "0.1.0"
+sourceCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
+
 repositories {
     mavenCentral()
     jcenter()
 }
 
 dependencies {
-
-	compile 'org.apache.jena:apache-jena-libs:3.6.0'
-	compile 'org.apache.opennlp:opennlp:1.8.4'
-	compile 'org.apache.opennlp:opennlp-uima:1.8.4'
-	compile 'org.apache.opennlp:opennlp-tools:1.8.4'
-	compile "org.springframework.boot:spring-boot-starter-log4j2:1.5.9.RELEASE"
-
-    testImplementation 'junit:junit:4.12'
+	api "mysql:mysql-connector-java:6.0.6"
+	implementation "org.apache.commons:commons-lang3:3.7"
+	implementation "org.apache.jena:apache-jena-libs:3.7.0"
+	implementation "org.apache.opennlp:opennlp-tools:1.8.4"
+	implementation "org.springframework.boot:spring-boot-starter:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-log4j2:${springBootVersion}"
+    
+    testImplementation "junit:junit:4.12"
 }
 
+configurations {
+    compile.exclude module: 'spring-boot-starter-logging'
+}
