@@ -47,6 +47,16 @@ public class MoviesService
 		return (movies != null) ? movies : new ArrayList<Movie>();
 	}
 	
+	public Movie findFirstByTitle(String title)
+	{
+		return movieRepo.findFirstByTitle(title);
+	}
+	
+	public long countMovies()
+	{
+		return movieRepo.count();
+	}
+	
 	public void updateMovieTokens()
 	{
 		updateMovieTokens(getAllMovies());

@@ -1,10 +1,7 @@
 package br.dcc.ufba.semrecsys;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,9 +10,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import br.dcc.ufba.semrecsys.models.Idf;
 import br.dcc.ufba.semrecsys.models.Movie;
-import br.dcc.ufba.semrecsys.repositories.IDFRepository;
+import br.dcc.ufba.semrecsys.models.User;
+import br.dcc.ufba.semrecsys.repositories.UserRepository;
+import br.dcc.ufba.semrecsys.services.MovieSimilarityService;
 import br.dcc.ufba.semrecsys.services.MoviesService;
 
 @SpringBootApplication
@@ -25,7 +23,10 @@ public class App implements CommandLineRunner
 	private MoviesService movieService;
 	
 	@Autowired
-	private IDFRepository idfRespository;
+	private MovieSimilarityService simService;
+	
+	@Autowired
+	private UserRepository userRepo;
 	
 	private static final Logger LOGGER = LogManager.getLogger(App.class);
 	
@@ -37,21 +38,11 @@ public class App implements CommandLineRunner
 	@Override
 	public void run(String... args) throws Exception 
 	{
-		List<Movie> movies = movieService.getAllMovies();
-		Set<String> uniqueTokens = new HashSet<String>();
-		for (Movie movie : movies) {
-			List<String> tokens = movie.getExtendedTokensList();
-			for (String token : tokens) {
-				uniqueTokens.add(token);
-			}
-		}
-		
-		List<Idf> idfList = new ArrayList<Idf>();
-		for (String token : uniqueTokens) {
-			idfList.add(new Idf(token, 0f, 0f));
-		}
-		idfRespository.saveAll(idfList);
-		System.out.println(idfList.size());
+		User user = userRepo.findByName("Lucas");
+		System.out.println(simService.getSimilarityFromUser(user, movieService.findFirstByTitle("GoldenEye")));
+		System.out.println();
+		simService.setExtendedMode(false);
+		System.out.println(simService.getSimilarityFromUser(user, movieService.findFirstByTitle("GoldenEye")));
 	}
 	
 	public void listMovies()

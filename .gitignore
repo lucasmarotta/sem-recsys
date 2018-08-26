@@ -23,4 +23,5 @@
 # Project
 /layout
 /logs
+*.sql
 !*.gitkeep

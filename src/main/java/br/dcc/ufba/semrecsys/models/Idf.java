@@ -13,7 +13,8 @@ public class Idf
 	
 	public Idf()
 	{
-		
+		value = 0f;
+		extendedValue = 0f;
 	}
 	
 	public Idf(String term, Float value, Float extendedValue)
