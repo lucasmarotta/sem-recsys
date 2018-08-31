@@ -86,7 +86,10 @@ public class NLPTokenizer
 	            if(entity.length() > 0) {
 		            entity = entity.trim().replaceAll("\\s", "_").replaceAll("\\_+", "_");
 		            if(entity.charAt(entity.length() - 1) == '_') entity = entity.substring(0, entity.length() - 1);
-		            entityTokens.add(entity.trim());
+		            entity = entity.replaceAll("\\?+", "").trim();
+		            if(entity.length() > 1) {
+			            entityTokens.add(entity);
+		            }
 	            }
 			}
 		}

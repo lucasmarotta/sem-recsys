@@ -12,21 +12,22 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import br.dcc.ufba.semrecsys.models.Movie;
 import br.dcc.ufba.semrecsys.models.User;
-import br.dcc.ufba.semrecsys.repositories.UserRepository;
-import br.dcc.ufba.semrecsys.services.MovieSimilarityService;
-import br.dcc.ufba.semrecsys.services.MoviesService;
+import br.dcc.ufba.semrecsys.services.MovieService;
+import br.dcc.ufba.semrecsys.services.UserMovieSimilarityService;
+import br.dcc.ufba.semrecsys.services.UserService;
+import br.dcc.ufba.semrecsys.utils.MovieSimilarity;
 
 @SpringBootApplication
 public class App implements CommandLineRunner
 {
 	@Autowired
-	private MoviesService movieService;
+	private MovieService movieService;
 	
 	@Autowired
-	private MovieSimilarityService simService;
+	private UserMovieSimilarityService simService;
 	
 	@Autowired
-	private UserRepository userRepo;
+	private UserService userService;
 	
 	private static final Logger LOGGER = LogManager.getLogger(App.class);
 	
@@ -38,11 +39,37 @@ public class App implements CommandLineRunner
 	@Override
 	public void run(String... args) throws Exception 
 	{
-		User user = userRepo.findByName("Lucas");
+		User user = userService.findByName("Lucas");
+		//user.getMovies().add(movieService.findFirstByLikeTitle("The Matrix"));
+		//userService.save(user);
+		
+		for (Movie movie : user.getMovies()) {
+			System.out.println(movie.getTitle());
+		}
+		
+		System.out.println("\nNormal Recomendations");
+		List<MovieSimilarity> recomendations = userService.getRecomendations(user, 20, false);
+		for (MovieSimilarity movieSimilarity : recomendations) {
+			System.out.println(movieSimilarity.movie.getTitle());
+		}
+		
+		System.out.println("\nRecomendations with DbPedia");
+		recomendations = userService.getRecomendations(user, 20, true);
+		for (MovieSimilarity movieSimilarity : recomendations) {
+			System.out.println(movieSimilarity.movie.getTitle());
+		}
+		
+		/*
 		System.out.println(simService.getSimilarityFromUser(user, movieService.findFirstByTitle("GoldenEye")));
-		System.out.println();
 		simService.setExtendedMode(false);
 		System.out.println(simService.getSimilarityFromUser(user, movieService.findFirstByTitle("GoldenEye")));
+		simService.setExtendedMode(true);
+		user.getMovies().clear();
+		user.getMovies().add(movieService.findFirstByTitle("GoldenEye"));
+		System.out.println(simService.getSimilarityFromUser(user, movieService.findFirstByTitle("GoldenEye")));
+		*/
+		
+		
 	}
 	
 	public void listMovies()

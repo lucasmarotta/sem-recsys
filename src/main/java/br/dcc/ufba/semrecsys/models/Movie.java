@@ -41,6 +41,12 @@ public class Movie
 	@Transient
 	private List<String> tokensList;
 	
+	public Movie() {}
+	
+	public Movie(int id)
+	{
+		this.id = id;
+	}
 	
 	public Integer getId() 
 	{
@@ -163,6 +169,30 @@ public class Movie
 		}
 		return null;
 	}
+	
+    @Override
+    public boolean equals(Object o) 
+    {
+        if (this == o) return true;
+        if (!(o instanceof Movie)) return false;
+        Movie m = (Movie) o;
+        if(id.intValue() == m.getId().intValue()) {
+        	return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() 
+    {
+        int tmp = 0;
+        if(id != null) {
+            tmp = (id.intValue() + title).hashCode();	
+        } else if(title != null) {
+        	tmp = (title).hashCode();
+        }
+        return tmp;
+    }    
 
 	@Override
 	public String toString() 

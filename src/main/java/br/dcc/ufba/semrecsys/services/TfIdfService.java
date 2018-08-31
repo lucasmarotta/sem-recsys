@@ -1,5 +1,6 @@
 package br.dcc.ufba.semrecsys.services;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
@@ -18,10 +19,10 @@ import br.dcc.ufba.semrecsys.repositories.IdfRepository;
 public class TfIdfService 
 {
 	@Autowired
-	private IdfRepository idfRepository;
+	private IdfRepository idfRepo;
 	
 	@Autowired
-	private MoviesService movieService;
+	private MovieService movieService;
 	
 	private long docCounter;
 	
@@ -61,14 +62,14 @@ public class TfIdfService
 				
 				idf.setValue(tfIdfSimilarity.idf(counter, docCounter));
 				idf.setExtendedValue(tfIdfSimilarity.idf(extendedCounter, docCounter));
-				idfRepository.save(idf);
+				idfRepo.save(idf);
 			}
 		}
 	}
 	
-	public Float getTfIdfExtended(Collection<String> terms, String term)
+	public float getTfIdfExtended(Collection<String> terms, String term)
 	{
-		Idf idf = idfRepository.findByTerm(term);
+		Idf idf = idfRepo.findByTerm(term);
 		if(idf != null) {
 			float freq = 0f;
 			for (String token : terms) {
@@ -76,14 +77,14 @@ public class TfIdfService
 					freq++;
 				}
 			}
-			return tfIdfSimilarity.tf(freq/terms.size()) * idf.getExtendedValue();
+			return tfIdfSimilarity.tf(freq) * idf.getExtendedValue() * tfIdfSimilarity.lengthNorm(terms.size());
 		}
-		return null;
+		return 0f;
 	}
 	
-	public Float getTfIdf(Collection<String> terms, String term)
+	public float getTfIdf(Collection<String> terms, String term)
 	{
-		Idf idf = idfRepository.findByTerm(term);
+		Idf idf = idfRepo.findByTerm(term);
 		if(idf != null) {
 			float freq = 0f;
 			for (String token : terms) {
@@ -91,8 +92,40 @@ public class TfIdfService
 					freq++;
 				}
 			}
-			return tfIdfSimilarity.tf(freq/terms.size()) * idf.getValue();
+			return tfIdfSimilarity.tf(freq) * idf.getValue() * tfIdfSimilarity.lengthNorm(terms.size());
 		}
-		return null;
+		return 0f;
+	}
+	
+	public List<Float> getBulkTfIdf(Collection<String> terms, String[] toCompareTerms)
+	{
+		List<Float> tfIdfs = new ArrayList<Float>();
+		List<Idf> idfList = idfRepo.findByTermIn(toCompareTerms);
+		for (Idf idf : idfList) {
+			float freq = 0f;
+			for (String token : terms) {
+				if(token.equalsIgnoreCase(idf.getTerm())) {
+					freq++;
+				}
+			}
+			tfIdfs.add(tfIdfSimilarity.tf(freq) * idf.getValue() * tfIdfSimilarity.lengthNorm(terms.size()));
+		}
+		return tfIdfs;
+	}
+	
+	public List<Float> getBulkTfIdfExtended(Collection<String> terms, String[] toCompareTerms)
+	{
+		List<Float> tfIdfs = new ArrayList<Float>();
+		List<Idf> idfList = idfRepo.findByTermIn(toCompareTerms);
+		for (Idf idf : idfList) {
+			float freq = 0f;
+			for (String token : terms) {
+				if(token.equalsIgnoreCase(idf.getTerm())) {
+					freq++;
+				}
+			}
+			tfIdfs.add(tfIdfSimilarity.tf(freq) * idf.getExtendedValue() * tfIdfSimilarity.lengthNorm(terms.size()));
+		}
+		return tfIdfs;
 	}
 }

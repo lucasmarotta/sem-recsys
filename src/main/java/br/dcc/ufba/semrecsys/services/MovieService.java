@@ -2,17 +2,19 @@ package br.dcc.ufba.semrecsys.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.semrecsys.models.Movie;
 import br.dcc.ufba.semrecsys.repositories.MovieRepository;
 
 @Service
-public class MoviesService 
+public class MovieService 
 {
 	@Autowired
 	private MovieRepository movieRepo;
@@ -23,7 +25,7 @@ public class MoviesService
 	@Autowired
 	private DBPediaService dbPediaService;
 	
-	private static final Logger LOGGER = LogManager.getLogger(MoviesService.class);
+	private static final Logger LOGGER = LogManager.getLogger(MovieService.class);
 	
 	public Movie getMovieById(Integer id)
 	{
@@ -47,9 +49,37 @@ public class MoviesService
 		return (movies != null) ? movies : new ArrayList<Movie>();
 	}
 	
+	public List<Movie> getAllMoviesExcept(Set<Movie> movies)
+	{
+		List<Integer> movieIds = new ArrayList<Integer>();
+		for (Movie movie : movies) {
+			movieIds.add(movie.getId());
+		}
+		return movieRepo.findByIdNotIn(movieIds);
+	}
+	
 	public Movie findFirstByTitle(String title)
 	{
 		return movieRepo.findFirstByTitle(title);
+	}
+	
+	public Movie findFirstByLikeTitle(String title)
+	{
+		List<Movie> movies = findByLikeTitle(title, 1);
+		if(movies.size() > 0) {
+			return movies.get(0);
+		}
+		return null;
+	}
+	
+	public List<Movie> findByLikeTitle(String title, int qtdMovies)
+	{
+		return movieRepo.findByLikeTitle(title, PageRequest.of(0, qtdMovies)).getContent();
+	}
+	
+	public List<Movie> findAllByLikeTitle(String title)
+	{
+		return movieRepo.findAllByLikeTitle(title);
 	}
 	
 	public long countMovies()

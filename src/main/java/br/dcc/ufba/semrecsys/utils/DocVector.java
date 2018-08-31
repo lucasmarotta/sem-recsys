@@ -1,6 +1,6 @@
 package br.dcc.ufba.semrecsys.utils;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,19 +18,21 @@ public class DocVector
     {
     	if(terms != null) {
     		Set<String> uniqueTermsSet = new TreeSet<String>(terms);
-    		vectorTerms = new HashMap<String, Integer>();
+    		vectorTerms = new LinkedHashMap<String, Integer>();
     		int index = 0;
     		for (String term : uniqueTermsSet) {
-				vectorTerms.put(term, index);
-				index++;
+    			if(term != null && term.length() > 0) {
+    				vectorTerms.put(term, index);
+    				index++;	
+    			}
 			}
-            vector = new OpenMapRealVector(uniqueTermsSet.size()); 	
+            vector = new OpenMapRealVector(uniqueTermsSet.size());
     	} else {
     		throw new NullPointerException();
     	}
     }
 
-    public void setVectorValue(String term, Float value)
+    public void setVectorValue(String term, float value)
     {
         if (vectorTerms.containsKey(term)) {
             vector.setEntry(vectorTerms.get(term), value);

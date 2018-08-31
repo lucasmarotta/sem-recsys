@@ -10,4 +10,5 @@ public interface IdfRepository extends JpaRepository<Idf, Long>
 {
 	List<Idf> findAllByOrderByTermAsc();
 	Idf findByTerm(String term);
+	List<Idf> findByTermIn(String[] toCompareTerms);
 }
