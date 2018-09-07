@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 buildscript {
 	ext {
-		springBootVersion = "2.0.3.RELEASE"
+		springBootVersion = "2.0.4.RELEASE"
 	}
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
@@ -15,7 +15,12 @@ buildscript {
 
 apply plugin: "java"
 apply plugin: "java-library"
+apply plugin: "eclipse"
 apply plugin: "org.springframework.boot"
+bootJar {
+    baseName = 'the-movie-finder'
+    version =  '0.1.0'
+}
 
 group = "br.dcc.ufba"
 version = "0.1.0"
@@ -35,9 +40,10 @@ dependencies {
 	implementation "org.apache.lucene:lucene-core:7.4.0"
 	implementation "org.apache.lucene:lucene-memory:7.4.0"
 	implementation "org.apache.opennlp:opennlp-tools:1.8.4"
-	implementation "org.springframework.boot:spring-boot-starter:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-log4j2:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-thymeleaf:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
     
     testImplementation "junit:junit:4.12"
 }

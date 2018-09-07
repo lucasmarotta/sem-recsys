@@ -15,4 +15,4 @@ include 'api'
 include 'services:webservice'
 */
 
-rootProject.name = 'semantic-recomendation-system'
+rootProject.name = 'the-movie-finder'

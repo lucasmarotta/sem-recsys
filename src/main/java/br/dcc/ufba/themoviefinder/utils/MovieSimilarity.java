@@ -1,6 +1,6 @@
-package br.dcc.ufba.semrecsys.utils;
+package br.dcc.ufba.themoviefinder.utils;
 
-import br.dcc.ufba.semrecsys.models.Movie;
+import br.dcc.ufba.themoviefinder.models.Movie;
 
 public class MovieSimilarity implements Comparable<MovieSimilarity>
 {

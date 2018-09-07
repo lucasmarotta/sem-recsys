@@ -1,4 +1,4 @@
-package br.dcc.ufba.semrecsys.models;
+package br.dcc.ufba.themoviefinder.models;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;

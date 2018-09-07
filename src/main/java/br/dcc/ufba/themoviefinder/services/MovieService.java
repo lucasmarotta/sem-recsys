@@ -1,4 +1,4 @@
-package br.dcc.ufba.semrecsys.services;
+package br.dcc.ufba.themoviefinder.services;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import br.dcc.ufba.semrecsys.models.Movie;
-import br.dcc.ufba.semrecsys.repositories.MovieRepository;
+import br.dcc.ufba.themoviefinder.models.Movie;
+import br.dcc.ufba.themoviefinder.repositories.MovieRepository;
 
 @Service
 public class MovieService 

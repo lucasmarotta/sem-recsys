@@ -1,4 +1,4 @@
-package br.dcc.ufba.semrecsys.services;
+package br.dcc.ufba.themoviefinder.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;

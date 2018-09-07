@@ -1,9 +1,9 @@
-package br.dcc.ufba.semrecsys.repositories;
+package br.dcc.ufba.themoviefinder.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import br.dcc.ufba.semrecsys.models.User;
+import br.dcc.ufba.themoviefinder.models.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>

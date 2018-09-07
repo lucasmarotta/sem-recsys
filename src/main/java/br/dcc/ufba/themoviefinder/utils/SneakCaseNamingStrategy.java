@@ -1,4 +1,4 @@
-package br.dcc.ufba.semrecsys.utils;
+package br.dcc.ufba.themoviefinder.utils;
 
 import org.apache.jena.ext.com.google.common.base.CaseFormat;
 import org.hibernate.boot.model.naming.Identifier;

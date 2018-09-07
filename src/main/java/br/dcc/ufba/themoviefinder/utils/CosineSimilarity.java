@@ -1,4 +1,4 @@
-package br.dcc.ufba.semrecsys.utils;
+package br.dcc.ufba.themoviefinder.utils;
 
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.logging.log4j.LogManager;

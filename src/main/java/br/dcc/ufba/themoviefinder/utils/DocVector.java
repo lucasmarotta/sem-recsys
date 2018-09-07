@@ -1,4 +1,4 @@
-package br.dcc.ufba.semrecsys.utils;
+package br.dcc.ufba.themoviefinder.utils;
 
 import java.util.LinkedHashMap;
 import java.util.List;

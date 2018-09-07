@@ -1,10 +1,10 @@
-package br.dcc.ufba.semrecsys.repositories;
+package br.dcc.ufba.themoviefinder.repositories;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import br.dcc.ufba.semrecsys.models.Idf;
+import br.dcc.ufba.themoviefinder.models.Idf;
 
 public interface IdfRepository extends JpaRepository<Idf, Long>
 {

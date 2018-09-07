@@ -1,4 +1,4 @@
-package br.dcc.ufba.semrecsys;
+package br.dcc.ufba.themoviefinder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,13 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
-import br.dcc.ufba.semrecsys.models.Movie;
-import br.dcc.ufba.semrecsys.models.User;
-import br.dcc.ufba.semrecsys.services.MovieService;
-import br.dcc.ufba.semrecsys.services.UserMovieSimilarityService;
-import br.dcc.ufba.semrecsys.services.UserService;
-import br.dcc.ufba.semrecsys.utils.MovieSimilarity;
+import br.dcc.ufba.themoviefinder.models.Movie;
+import br.dcc.ufba.themoviefinder.models.User;
+import br.dcc.ufba.themoviefinder.services.MovieService;
+import br.dcc.ufba.themoviefinder.services.UserMovieSimilarityService;
+import br.dcc.ufba.themoviefinder.services.UserService;
+import br.dcc.ufba.themoviefinder.utils.MovieSimilarity;
 
 @SpringBootApplication
 public class App implements CommandLineRunner
@@ -29,6 +30,9 @@ public class App implements CommandLineRunner
 	@Autowired
 	private UserService userService;
 	
+	@Autowired
+	private ConfigurableApplicationContext context;
+	
 	private static final Logger LOGGER = LogManager.getLogger(App.class);
 	
 	public static void main(String args[])
@@ -39,9 +43,17 @@ public class App implements CommandLineRunner
 	@Override
 	public void run(String... args) throws Exception 
 	{
+		Movie toyStory = movieService.findFirstByLikeTitle("Toy Story");
+		System.out.println();
+		System.out.println(toyStory.getDescription());
+		System.out.println(movieService.generateMovieTokens(toyStory));
+		System.out.println(movieService.generateExtendedMovieTokens(toyStory));
+		System.out.println();
+		
 		User user = userService.findByName("Lucas");
-		//user.getMovies().add(movieService.findFirstByLikeTitle("The Matrix"));
-		//userService.save(user);
+		//Movie matrix = movieService.findFirstByLikeTitle("The Matrix");
+		//user.getMovies().add(matrix);
+		userService.save(user);
 		
 		for (Movie movie : user.getMovies()) {
 			System.out.println(movie.getTitle());
@@ -50,13 +62,13 @@ public class App implements CommandLineRunner
 		System.out.println("\nNormal Recomendations");
 		List<MovieSimilarity> recomendations = userService.getRecomendations(user, 20, false);
 		for (MovieSimilarity movieSimilarity : recomendations) {
-			System.out.println(movieSimilarity.movie.getTitle());
+			System.out.println(movieSimilarity.movie.getTitle() + " " + movieSimilarity.similarity);
 		}
 		
 		System.out.println("\nRecomendations with DbPedia");
 		recomendations = userService.getRecomendations(user, 20, true);
 		for (MovieSimilarity movieSimilarity : recomendations) {
-			System.out.println(movieSimilarity.movie.getTitle());
+			System.out.println(movieSimilarity.movie.getTitle() + " " + movieSimilarity.similarity);
 		}
 		
 		/*
@@ -69,7 +81,8 @@ public class App implements CommandLineRunner
 		System.out.println(simService.getSimilarityFromUser(user, movieService.findFirstByTitle("GoldenEye")));
 		*/
 		
-		
+		context.stop();
+		context.close();
 	}
 	
 	public void listMovies()
