@@ -1,5 +1,8 @@
 package br.dcc.ufba.themoviefinder.utils;
 
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
 import br.dcc.ufba.themoviefinder.models.Movie;
 
 public class MovieSimilarity implements Comparable<MovieSimilarity>
@@ -19,7 +22,12 @@ public class MovieSimilarity implements Comparable<MovieSimilarity>
 	{
 		int c = Double.compare(similarity, toCompare.similarity);
 		if(c == 0) {
-			c = movie.getTitle().compareToIgnoreCase(toCompare.movie.getTitle());
+			Random random = ThreadLocalRandom.current();
+			if(random.nextInt(2) == 0) {
+				return -1;
+			}
+			return 1;
+			//c = movie.getTitle().compareToIgnoreCase(toCompare.movie.getTitle());
 		}
 		return -c;
 	}	
@@ -27,6 +35,6 @@ public class MovieSimilarity implements Comparable<MovieSimilarity>
 	@Override
 	public String toString() 
 	{
-		return "MovieSimilarity [movie=(" + movie.getId() + ", " + movie.getTitle() + ", similarity=" + similarity + "]";
+		return "MovieSimilarity [movie=" + movie.getId() + ", " + movie.getTitle() + ", similarity=" + similarity + "]";
 	}
 }

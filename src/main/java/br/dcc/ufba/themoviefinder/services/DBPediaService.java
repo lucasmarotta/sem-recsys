@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DBPediaService 
 {
-	@Value("${app.dbpedia-service-url}") 
+	@Value("${app.dbpedia-service-uri}") 
 	public String url;
 	
 	@Value("${app.dbpedia-service-timeout}") 

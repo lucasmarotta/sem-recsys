@@ -55,7 +55,7 @@ public class MovieService
 		for (Movie movie : movies) {
 			movieIds.add(movie.getId());
 		}
-		return movieRepo.findByIdNotIn(movieIds);
+		return movieRepo.findByIdNotInOrderByTitleAsc(movieIds);
 	}
 	
 	public Movie findFirstByTitle(String title)

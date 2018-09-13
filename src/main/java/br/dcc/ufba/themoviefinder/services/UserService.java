@@ -3,13 +3,17 @@ package br.dcc.ufba.themoviefinder.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.dcc.ufba.themoviefinder.lodweb.TFIDFCalculator;
 import br.dcc.ufba.themoviefinder.models.Movie;
 import br.dcc.ufba.themoviefinder.models.User;
 import br.dcc.ufba.themoviefinder.repositories.UserRepository;
 import br.dcc.ufba.themoviefinder.utils.MovieSimilarity;
+import br.dcc.ufba.themoviefinder.utils.TermValue;
 
 @Service
 public class UserService 
@@ -17,11 +21,12 @@ public class UserService
 	@Autowired
 	private UserRepository userRepo;
 	
-	@Autowired
-	private UserMovieSimilarityService simService;
+	private UserMovieSimilarity simService;
 	
 	@Autowired
 	private MovieService movieService;
+	
+	private static final Logger LOGGER = LogManager.getLogger(UserService.class);
 	
 	public void save(User user)
 	{
@@ -61,6 +66,11 @@ public class UserService
 		return userRepo.findAll();
 	}
 	
+	public void setUserMovieSimilarity(UserMovieSimilarity userMovieSimilarity)
+	{
+		simService = userMovieSimilarity;
+	}
+	
 	public void updateRecomendations(User user, int qtdMovies)
 	{
 		
@@ -71,28 +81,58 @@ public class UserService
 		
 	}
 	
-	public List<MovieSimilarity> getRecomendations(User user, int qtdMovies, boolean extendedMode)
+	public List<MovieSimilarity> getRecomendationsWithAllTerms(User user, int qtMovies, boolean extendedMode)
 	{
-		List<MovieSimilarity> simList = new ArrayList<MovieSimilarity>();
-		if(user.getMovies() != null) {
-			List<Movie> movies = movieService.getAllMoviesExcept(user.getMovies());
-			List<String> userTokens = getUserMovieTokens(user, false);
-			for (Movie movie : movies) {
-				List<String> movieTokens = null;
-				if(extendedMode) {
-					movieTokens = movie.getExtendedTokensList();	
-				} else {
-					movieTokens = movie.getTokensList();	
+		if(simService != null) {
+			List<MovieSimilarity> simList = new ArrayList<MovieSimilarity>();
+			if(user.getMovies() != null) {
+				List<Movie> movies = movieService.getAllMoviesExcept(user.getMovies());
+				List<String> userTokens = getUserMovieTokens(user, false);
+				for (Movie movie : movies) {
+					List<String> movieTokens = null;
+					if(extendedMode) {
+						movieTokens = movie.getExtendedTokensList();	
+					} else {
+						movieTokens = movie.getTokensList();	
+					}
+					MovieSimilarity mv = new MovieSimilarity(movie, simService.getSimilarity(userTokens, movieTokens));
+					LOGGER.info(mv);
+					simList.add(mv);
 				}
-				simList.add(new MovieSimilarity(movie, simService.getSimilarity(userTokens, movieTokens)));
+				simList.sort((MovieSimilarity a, MovieSimilarity b) -> a.compareTo(b));
 			}
-			simList.sort((MovieSimilarity a, MovieSimilarity b) -> a.compareTo(b));
+			int max = 0;
+			if(qtMovies >= 0) {
+				max = Math.min(qtMovies, simList.size());
+			}
+			return simList.subList(0, max);	
+		} else {
+			throw new IllegalStateException("a userMovieSimilarity service must be setted");
 		}
-		int max = 0;
-		if(qtdMovies >= 0) {
-			max = Math.min(qtdMovies, simList.size());
+	}
+	
+	public List<MovieSimilarity> getRecomendationsWithBestTerms(User user, int qtMovies, int qtTerms)
+	{
+		if(simService != null) {
+			List<MovieSimilarity> simList = new ArrayList<MovieSimilarity>();
+			if(user.getMovies() != null) {
+				List<Movie> movies = movieService.getAllMoviesExcept(user.getMovies());
+				List<String> userTokens = getUserBestNTerms(user, qtTerms);
+				for (Movie movie : movies) {
+					MovieSimilarity mv = new MovieSimilarity(movie, simService.getSimilarity(userTokens, movie.getTokensList()));
+					LOGGER.info(mv);
+					simList.add(mv);
+				}
+				simList.sort((MovieSimilarity a, MovieSimilarity b) -> a.compareTo(b));
+			}
+			int max = 0;
+			if(qtMovies >= 0) {
+				max = Math.min(qtMovies, simList.size());
+			}
+			return simList.subList(0, max);	
+		} else {
+			throw new IllegalStateException("a userMovieSimilarity service must be setted");
 		}
-		return simList.subList(0, max);
 	}
 	
 	private List<String> getUserMovieTokens(User user, boolean extendedMode)
@@ -106,6 +146,39 @@ public class UserService
 			}
 		}
 		return userTokens;
+	}
+	
+	public List<String> getUserBestNTerms(User user, int qtTerms)
+	{
+		List<List<String>> listOfDocs = new ArrayList<List<String>>();
+		List<String> uniqueValues = new ArrayList<String>();
+	
+		for(Movie movie : user.getMovies()) {
+			listOfDocs.add(movie.getTokensList());
+			uniqueValues.addAll(movie.getTokensList());
+		}
+		uniqueValues = TFIDFCalculator.uniqueValues(uniqueValues);
+		
+		List<TermValue> termValueList = new ArrayList<TermValue>();
+		for(String term : uniqueValues) {
+			for (Movie movie : user.getMovies()) {
+				termValueList.add(new TermValue(term, TFIDFCalculator.tfIdf(movie.getTokensList(), listOfDocs, term)));
+			}
+		}
+		
+		termValueList.sort((TermValue a, TermValue b) -> a.compareTo(b));
+		int max = 0;
+		if(qtTerms >= 0) {
+			max = Math.min(qtTerms, termValueList.size());
+		}
+		termValueList = termValueList.subList(0, max);
+		uniqueValues = new ArrayList<String>();
+		for (TermValue termValue : termValueList) {
+			if(! uniqueValues.contains(termValue.term)) {
+				uniqueValues.add(termValue.term);	
+			}
+		}
+		return uniqueValues;
 	}
 	
 	/*

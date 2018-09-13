@@ -17,3 +17,26 @@ WHERE {
 	&& !STRSTARTS(STR(?value), "http://www.wikidata.org/entity/")
 	&& !STRSTARTS(STR(?value), "http://wikidata.dbpedia.org/resource/"))
 }
+
+SELECT (count (distinct ?p1) as ?x)
+WHERE {
+	values (?r1 ?r2) {( <http://dbpedia.org/resource/Buzz_Lightyear>  <http://dbpedia.org/resource/Animation> )}
+	. ?r1 ?p1 ?r2 .
+	FILTER (?r1 != ?r2)
+}
+
+SELECT (count (distinct ?r3) as ?x)
+WHERE {
+	values (?r1) { (<http://dbpedia.org/resource/Buzz_Lightyear>)} . ?r2 ?p1 ?r1 . ?r2 ?p2 ?r3 . FILTER ( ! isLiteral(?r2) )
+}
+
+SELECT  (COUNT(DISTINCT ?p1) AS ?x)
+WHERE{
+	{ VALUES ( ?r1 ?r3 ) {
+			( <http://dbpedia.org/resource/Buzz_Lightyear>  <http://dbpedia.org/resource/Buzz_Lightyear> )
+		}
+		?r2  ?p1  ?r1 ;
+		?p1  ?r3
+		FILTER ( ! isLiteral(?r2) )
+	}
+}

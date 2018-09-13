@@ -12,13 +12,13 @@ import br.dcc.ufba.themoviefinder.utils.CosineSimilarity;
 import br.dcc.ufba.themoviefinder.utils.DocVector;
 
 @Service
-public class UserMovieSimilarityService 
+public class UserMovieCosineSimilarityService implements UserMovieSimilarity
 {
 	@Autowired
 	private TfIdfService tfIdfService;
 	private boolean extendedMode;
 	
-	public UserMovieSimilarityService()
+	public UserMovieCosineSimilarityService()
 	{
 		extendedMode = true;
 	}
@@ -80,23 +80,6 @@ public class UserMovieSimilarityService
 			queryVector.setVectorValue(uniqueTerms[i], queryTfIdfList.get(i));
 			docVector.setVectorValue(uniqueTerms[i], docTfIdfList.get(i));
 		}
-		
-		/*
-		for (Map.Entry<String, Integer> entry : queryVector.vectorTerms.entrySet()) {
-			if(entry.getKey() != null && entry.getKey().length() > 0) {
-				float queryTfIdf, docTfIdf = 0f;
-				if(extendedMode) {
-					queryTfIdf = tfIdfService.getTfIdfExtended(queryTokens, entry.getKey());
-					docTfIdf = tfIdfService.getTfIdfExtended(docTokens, entry.getKey());
-				} else {
-					queryTfIdf = tfIdfService.getTfIdf(queryTokens, entry.getKey());
-					docTfIdf = tfIdfService.getTfIdf(docTokens, entry.getKey());
-				}
-				queryVector.setVectorValue(entry.getKey(), queryTfIdf);
-				docVector.setVectorValue(entry.getKey(), docTfIdf);
-			}
-		}
-		*/
 		return CosineSimilarity.getSimilarity(queryVector, docVector);
 	}
 }
