@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.models;
+package br.dcc.ufba.themoviefinder.entities.models;
 
 import java.util.ArrayList;
 import java.util.Arrays;

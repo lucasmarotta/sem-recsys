@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.services;
+package br.dcc.ufba.themoviefinder.entities.services;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,11 +8,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.dcc.ufba.themoviefinder.lodweb.TFIDFCalculator;
-import br.dcc.ufba.themoviefinder.models.Movie;
-import br.dcc.ufba.themoviefinder.models.User;
-import br.dcc.ufba.themoviefinder.repositories.UserRepository;
+import br.dcc.ufba.themoviefinder.entities.models.Movie;
+import br.dcc.ufba.themoviefinder.entities.models.User;
+import br.dcc.ufba.themoviefinder.entities.repositories.UserRepository;
+import br.dcc.ufba.themoviefinder.services.UserMovieSimilarity;
 import br.dcc.ufba.themoviefinder.utils.MovieSimilarity;
+import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 import br.dcc.ufba.themoviefinder.utils.TermValue;
 
 @Service

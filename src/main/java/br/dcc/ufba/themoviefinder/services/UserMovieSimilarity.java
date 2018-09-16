@@ -2,8 +2,8 @@ package br.dcc.ufba.themoviefinder.services;
 
 import java.util.List;
 
-import br.dcc.ufba.themoviefinder.models.Movie;
-import br.dcc.ufba.themoviefinder.models.User;
+import br.dcc.ufba.themoviefinder.entities.models.Movie;
+import br.dcc.ufba.themoviefinder.entities.models.User;
 
 public interface UserMovieSimilarity
 {

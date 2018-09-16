@@ -3,7 +3,7 @@ package br.dcc.ufba.themoviefinder.utils;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import br.dcc.ufba.themoviefinder.models.Movie;
+import br.dcc.ufba.themoviefinder.entities.models.Movie;
 
 public class MovieSimilarity implements Comparable<MovieSimilarity>
 {

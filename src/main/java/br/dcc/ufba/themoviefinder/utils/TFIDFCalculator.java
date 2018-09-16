@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.lodweb;
+package br.dcc.ufba.themoviefinder.utils;
 
 import java.util.ArrayList;
 import java.util.List;

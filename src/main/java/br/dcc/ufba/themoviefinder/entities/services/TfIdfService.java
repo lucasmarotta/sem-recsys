@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.services;
+package br.dcc.ufba.themoviefinder.entities.services;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,9 +11,9 @@ import org.apache.lucene.search.similarities.TFIDFSimilarity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.dcc.ufba.themoviefinder.models.Idf;
-import br.dcc.ufba.themoviefinder.models.Movie;
-import br.dcc.ufba.themoviefinder.repositories.IdfRepository;
+import br.dcc.ufba.themoviefinder.entities.models.Idf;
+import br.dcc.ufba.themoviefinder.entities.models.Movie;
+import br.dcc.ufba.themoviefinder.entities.repositories.IdfRepository;
 
 @Service
 public class TfIdfService 

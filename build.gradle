@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 buildscript {
 	ext {
-		springBootVersion = "2.0.4.RELEASE"
+		springBootVersion = "2.0.3.RELEASE"
 	}
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
@@ -34,12 +34,13 @@ repositories {
 
 dependencies {
 	api "mysql:mysql-connector-java:6.0.6"
+	implementation "net.codecrafting:springfx-core:0.1.0-BETA3"
 	implementation "org.apache.commons:commons-lang3:3.7"
 	implementation "org.apache.commons:commons-math3:3.6.1"
-	implementation "org.apache.jena:apache-jena-libs:3.7.0"
+	implementation "org.apache.jena:apache-jena-libs:3.8.0"
 	implementation "org.apache.lucene:lucene-core:7.4.0"
 	implementation "org.apache.lucene:lucene-memory:7.4.0"
-	implementation "org.apache.opennlp:opennlp-tools:1.8.4"
+	implementation "org.apache.opennlp:opennlp-tools:1.9.0"
     implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-log4j2:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-thymeleaf:${springBootVersion}"

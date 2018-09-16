@@ -184,17 +184,22 @@ public class Sparql {
 	{
 		StringBuilder prefix = new StringBuilder(); 
 		prefix.append(""); 
-		prefix.append("PREFIX owl: <http://www.w3.org/2002/07/owl#>");
-		prefix.append("PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>");
-		prefix.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>");
+		prefix.append("PREFIX owl: <http://www.w3.org/2002/07/owl#> ");
+		prefix.append("PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> ");
+		prefix.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ");
+		prefix.append("PREFIX dbo: <http://dbpedia.org/ontology/> ");
 		prefix.append("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ");
-		prefix.append("PREFIX foaf: <http://xmlns.com/foaf/0.1/> " + "PREFIX dc: <http://purl.org/dc/elements/1.1/>");
-		prefix.append("PREFIX bif: <bif:>"); // adicionado por João Paulo
-		prefix.append("PREFIX : <http://dbpedia.org/resource/> " + "PREFIX dbpedia2: <http://dbpedia.org/property/>");
-		prefix.append("PREFIX dbpedia: <http://dbpedia.org/> " + "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>");
-		prefix.append("PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>");
-		prefix.append("PREFIX e: <http://learningsparql.com/ns/expenses#>");
-		prefix.append("PREFIX d: <http://learningsparql.com/ns/data#>");
+		prefix.append("PREFIX foaf: <http://xmlns.com/foaf/0.1/> ");
+		prefix.append("PREFIX dct: <http://www.w3.org/2000/01/rdf-schema#> ");
+		prefix.append("PREFIX dc: <http://purl.org/dc/elements/1.1/> ");
+		prefix.append("PREFIX bif: <bif:> ");
+		prefix.append("PREFIX : <http://dbpedia.org/resource/> ");
+		prefix.append("PREFIX dbpedia2: <http://dbpedia.org/property/> ");
+		prefix.append("PREFIX dbpedia: <http://dbpedia.org/> ");
+		prefix.append("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> ");
+		prefix.append("PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> ");
+		prefix.append("PREFIX e: <http://learningsparql.com/ns/expenses#> ");
+		prefix.append("PREFIX d: <http://learningsparql.com/ns/data#> ");
 		return prefix.toString();
 
 	}
@@ -331,7 +336,7 @@ public class Sparql {
 			property2.append(" FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageID>) . FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageRevisionID>) . FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageWikiLink>). FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageRedirects>) .  FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageDisambiguates>) . ");
 		}
 		if (object != null) {
-			object3.append(" FILTER(!isLiteral(?" + object + ")) . ");
+			object3.append(" FILTER(!isLiteral(?" + object + "))");
 		}
 		return property2.toString() + object3.toString();
 	}

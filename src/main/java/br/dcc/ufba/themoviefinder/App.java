@@ -1,23 +1,21 @@
 package br.dcc.ufba.themoviefinder;
 
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 
-import br.dcc.ufba.themoviefinder.models.User;
-import br.dcc.ufba.themoviefinder.services.MovieService;
+import br.dcc.ufba.themoviefinder.entities.models.User;
+import br.dcc.ufba.themoviefinder.entities.services.MovieService;
+import br.dcc.ufba.themoviefinder.entities.services.UserService;
+import br.dcc.ufba.themoviefinder.launcher.controllers.LauncherContext;
 import br.dcc.ufba.themoviefinder.services.UserMovieRLWSimilarityService;
-import br.dcc.ufba.themoviefinder.services.UserService;
-import br.dcc.ufba.themoviefinder.utils.MovieSimilarity;
+import net.codecrafting.springfx.context.ViewStage;
+import net.codecrafting.springfx.core.SpringFXApplication;
+import net.codecrafting.springfx.core.SpringFXLauncher;
 
 @SpringBootApplication
-public class App implements CommandLineRunner
+public class App extends SpringFXApplication
 {
 	@Autowired
 	private MovieService movieService;
@@ -28,27 +26,27 @@ public class App implements CommandLineRunner
 	@Autowired
 	private UserMovieRLWSimilarityService rlwSimilarityService; 
 	
-	@Autowired
-	private ConfigurableApplicationContext context;
-	
 	private static final Logger LOGGER = LogManager.getLogger(App.class);
 	
 	public static void main(String args[])
 	{
-		SpringApplication.run(App.class, args);
+        try {
+			SpringFXLauncher.launch(new LauncherContext(App.class), args);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+		}
 	}
 
 	@Override
-	public void run(String... args) throws Exception 
-	{	
+	public void start(ViewStage viewStage) throws Exception 
+	{
 		//Movie toyStory = movieService.findFirstByLikeTitle("Toy Story");
 		//Movie matrix = movieService.findFirstByLikeTitle("Matrix");
 		
 		User user = userService.findByName("Lucas");
 		userService.setUserMovieSimilarity(rlwSimilarityService);
-		
-		System.out.println(rlwSimilarityService.getSimilarityFromMovie(movieService.findFirstByTitle("Toy Story"), movieService.findFirstByTitle("Toy Story 2")));
-		System.out.println(rlwSimilarityService.getSimilarityFromMovie(movieService.findFirstByTitle("Toy Story 2"), movieService.findFirstByTitle("Halloween II")));
+		//System.out.println(rlwSimilarityService.getSimilarityFromMovie(movieService.findFirstByTitle("Toy Story 2"), movieService.findFirstByTitle("Toy Story")));
+		//System.out.println(rlwSimilarityService.getSimilarityFromMovie(movieService.findFirstByTitle("Toy Story 2"), movieService.findFirstByTitle("Halloween II")));
 		
 		/*
 		System.out.println("\nRecomendations with RLW Similarity");
@@ -58,7 +56,6 @@ public class App implements CommandLineRunner
 		}
 		*/
 		
-		context.stop();
-		context.close();
+		SpringFXLauncher.exit();
 	}
 }

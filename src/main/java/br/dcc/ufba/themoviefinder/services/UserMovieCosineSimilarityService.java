@@ -6,8 +6,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.dcc.ufba.themoviefinder.models.Movie;
-import br.dcc.ufba.themoviefinder.models.User;
+import br.dcc.ufba.themoviefinder.entities.models.Movie;
+import br.dcc.ufba.themoviefinder.entities.models.User;
+import br.dcc.ufba.themoviefinder.entities.services.TfIdfService;
 import br.dcc.ufba.themoviefinder.utils.CosineSimilarity;
 import br.dcc.ufba.themoviefinder.utils.DocVector;
 

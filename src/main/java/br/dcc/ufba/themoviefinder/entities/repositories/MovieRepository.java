@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.repositories;
+package br.dcc.ufba.themoviefinder.entities.repositories;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import br.dcc.ufba.themoviefinder.models.Movie;
+import br.dcc.ufba.themoviefinder.entities.models.Movie;
 
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long>
