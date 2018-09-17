@@ -42,22 +42,11 @@ public class User
 		cascade = {CascadeType.PERSIST, CascadeType.MERGE}
 	)
 	@JoinTable(
-		name = "cs_recomendation", 
+		name = "user_recomendation", 
 		joinColumns = {@JoinColumn(name = "user_id")},
 		inverseJoinColumns = {@JoinColumn(name = "movie_id")}
 	)
 	private Set<Movie> recomendedMovies;
-    
-	@ManyToMany(
-		fetch = FetchType.LAZY,
-		cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-	)
-    @JoinTable(
-		name = "extended_cs_recomendation", 
-		joinColumns = {@JoinColumn(name = "user_id")},
-		inverseJoinColumns = {@JoinColumn(name = "movie_id")}
-    )
-	private Set<Movie> extendedRecomendedMovies;
 	
 	private String pass;
 	
@@ -81,14 +70,12 @@ public class User
 	{
 		movies = new HashSet<Movie>();
 		recomendedMovies = new HashSet<Movie>();
-		extendedRecomendedMovies = new HashSet<Movie>();
 	}
 	
 	public User(int id)
 	{
 		movies = new HashSet<Movie>();
 		recomendedMovies = new HashSet<Movie>();
-		extendedRecomendedMovies = new HashSet<Movie>();
 		this.id = id;
 	}
 
@@ -190,11 +177,6 @@ public class User
 	public Set<Movie> getRecomendedMovies() 
 	{
 		return recomendedMovies;
-	}
-
-	public Set<Movie> getExtendedRecomendedMovies() 
-	{
-		return extendedRecomendedMovies;
 	}
 	
     @Override

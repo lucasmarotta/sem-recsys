@@ -6,12 +6,12 @@ import java.util.TreeSet;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import br.dcc.ufba.themoviefinder.entities.models.LodCounter;
-import br.dcc.ufba.themoviefinder.entities.models.LodRelationCounter;
-import br.dcc.ufba.themoviefinder.entities.services.LodCacheCounterService;
+import br.dcc.ufba.themoviefinder.entities.models.LodCache;
+import br.dcc.ufba.themoviefinder.entities.models.LodCacheRelation;
+import br.dcc.ufba.themoviefinder.entities.models.LodRelationId;
+import br.dcc.ufba.themoviefinder.entities.services.LodCacheService;
 import br.dcc.ufba.themoviefinder.lodweb.Sparql;
 import br.dcc.ufba.themoviefinder.lodweb.SparqlWalk;
 
@@ -21,29 +21,57 @@ public class RLWSimilarity
 	@Autowired
 	private SparqlWalk sparqlWalk;
 	
-	@Value("${app.rlw-use-cache: true}")
-	public boolean useCache;
-	
 	@Autowired
-	private LodCacheCounterService lodCacheService;
+	private LodCacheService lodCacheService;
 	
-	public double getSimilarity(List<String> terms1, List<String> terms2, double directWeight, double indirectWeight)
+	private List<LodCache> localLodCache;
+	private List<LodCacheRelation> localLodCacheRelation;
+	private double directWeight = 0.65;
+	private double indirectWeight = 0.35;
+	
+	public RLWSimilarity()
+	{
+		localLodCache = new ArrayList<LodCache>();
+		localLodCacheRelation = new ArrayList<LodCacheRelation>();
+	}
+	
+	public double getDirectWeight() 
+	{
+		return directWeight;
+	}
+
+	public void setDirectWeight(double directWeight) 
+	{
+		this.directWeight = directWeight;
+	}
+
+	public double getIndirectWeight() 
+	{
+		return indirectWeight;
+	}
+
+	public void setIndirectWeight(double indirectWeight) 
+	{
+		this.indirectWeight = indirectWeight;
+	}
+	
+	public double getSimilarity(List<String> terms1, List<String> terms2, boolean useCache)
 	{
 		if(ObjectUtils.allNotNull(terms1, terms2)) {
 			if(terms1.equals(terms2)) {
 				return 1;
 			}
+			double similarity = 0;
 			terms1 = uniqueValues(terms1);
 			terms2 = uniqueValues(terms2);
-			double similarity = 0;
-		
 			System.out.println(terms1);
 			System.out.println(terms2);
-			
+	
+			updateLocalCache(terms1, terms2);
 			for (String term1 : terms1) {
 				for (String term2 : terms2) {
-					double temp = getSimilarityBetween2Terms(term1, term2, directWeight, indirectWeight);
-					//System.out.println(term1 + " " + term2 + " " + temp);
+					double temp = getSimilarityBetween2Terms(term1, term2, useCache);
+					System.out.println(term1 + " " + term2 + " " + temp);
 					similarity += temp;
 				}
 			}
@@ -53,63 +81,75 @@ public class RLWSimilarity
 		}
 	}
 	
-	public double getSimilarityBetween2Terms(String term1, String term2, double directWeight, double indirectWeight)
+	public double getSimilarityBetween2Terms(String term1, String term2, boolean useCache)
 	{
 		if(ObjectUtils.allNotNull(term1, term2)) {
 			if(term1.equalsIgnoreCase(term2)) {
 				return 1;
 			}
-			String term1Resource = Sparql.wrapStringAsResource(term1);
-			String term2Resource = Sparql.wrapStringAsResource(term2);
-			if(resourceExists(term1Resource) && resourceExists(term2Resource)) {
-				
-				double totalTermDirect = 0, totalTermIndirect = 0, totalDirect = 0, totalIndirect = 0; 
-				
-				if(useCache) {
-					LodCounter lodCounter1 = lodCacheService.getResourceCache(term1Resource);
-					LodCounter lodCounter2 = lodCacheService.getResourceCache(term2Resource);
-					if(lodCounter1 == null) {
-						lodCounter1 = new LodCounter(term1Resource);
-						lodCounter1.setDirectLinks(sparqlWalk.countDirectLinksFromResource(term1Resource));
-						lodCounter1.setIndirectLinks(sparqlWalk.countIndirectLinksFromResource(term1Resource));
-						lodCacheService.saveResourceToCache(lodCounter1);
+			double totalTermDirect = 0, totalTermIndirect = 0, totalDirect = 0, totalIndirect = 0;
+			term1 = Sparql.wrapStringAsResource(term1);
+			term2 = Sparql.wrapStringAsResource(term2);
+			
+			if(useCache) {
+				LodCache lodCache1 = findOnLocalLodCache(term1);
+				LodCache lodCache2 = findOnLocalLodCache(term2);
+				if((lodCache1 != null && lodCache2 != null) || (sparqlWalk.resourceExists(term1) && sparqlWalk.resourceExists(term2))) {
+					if(lodCache1 == null) {
+						lodCache1 = new LodCache(term1);
+						lodCache1.setDirectLinks(sparqlWalk.countDirectLinksFromResource(term1)); 
+						lodCache1.setIndirectLinks(sparqlWalk.countIndirectLinksFromResource(term1));
+						lodCacheService.saveResource(lodCache1);
+						localLodCache.add(lodCache1);
 					}
-					if(lodCounter2 == null) {
-						lodCounter2 = new LodCounter(term2Resource);
-						lodCounter2.setDirectLinks(sparqlWalk.countDirectLinksFromResource(term2Resource));
-						lodCounter2.setIndirectLinks(sparqlWalk.countIndirectLinksFromResource(term2Resource));
-						lodCacheService.saveResourceToCache(lodCounter2);
+					if(lodCache2 == null) {
+						lodCache2 = new LodCache(term2);
+						lodCache2.setDirectLinks(sparqlWalk.countDirectLinksFromResource(term2));
+						lodCache2.setIndirectLinks(sparqlWalk.countIndirectLinksFromResource(term2));
+						lodCacheService.saveResource(lodCache2);
+						localLodCache.add(lodCache2);
 					}
-					totalTermDirect = lodCounter1.getDirectLinks() + lodCounter2.getDirectLinks();
-					totalTermIndirect = lodCounter1.getIndirectLinks() + lodCounter2.getIndirectLinks();
-					
-					LodRelationCounter lodRelation = lodCacheService.getResourceRelationCache(term1Resource, term2Resource);
-					if(lodRelation == null) {
-						lodRelation = new LodRelationCounter(term1Resource, term2Resource);
-						lodRelation.setDirectLinks(sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource));
-						lodRelation.setIndirectLinks(sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource));
-						lodCacheService.saveResourceRelationToCache(lodRelation);
+					totalTermDirect = lodCache1.getDirectLinks() + lodCache2.getDirectLinks();
+					totalTermIndirect = lodCache1.getIndirectLinks() + lodCache2.getIndirectLinks();
+					LodCacheRelation lodCacheRelation = findOnLocalLodCacheRelation(term1, term2);
+					if(lodCacheRelation == null) {
+						lodCacheRelation = new LodCacheRelation(term1, term2);
+						lodCacheRelation.setDirectLinks(sparqlWalk.countDirectLinksBetween2Resources(term1, term2));
+						lodCacheRelation.setIndirectLinks(sparqlWalk.countIndirectLinksBetween2Resources(term1, term2));
+						lodCacheService.saveResourceRelation(lodCacheRelation);
+						localLodCacheRelation.add(lodCacheRelation);
 					}
-					
-					totalDirect = lodRelation.getDirectLinks();
-					totalIndirect = lodRelation.getIndirectLinks();
-				} else {
-					totalTermDirect = sparqlWalk.countDirectLinksFromResource(term1Resource) + sparqlWalk.countDirectLinksFromResource(term2Resource);
-					totalTermIndirect = sparqlWalk.countIndirectLinksFromResource(term1Resource) + sparqlWalk.countIndirectLinksFromResource(term2Resource);
-					totalDirect = sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource);
-					totalIndirect = sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource);
-				}
-				
-				//System.out.println(totalTermDirect + " " + totalTermIndirect + " " + totalDirect + " " + totalIndirect);
-				
-				double sDirect = totalDirect / (1 + Math.log(totalTermDirect)) * directWeight;
-				double sIndirect = totalIndirect / (1 + Math.log(totalTermIndirect)) * indirectWeight;
-				return Math.min(1, (sDirect + sIndirect) / (directWeight + indirectWeight));
+					totalDirect = lodCacheRelation.getDirectLinks();
+					totalIndirect = lodCacheRelation.getIndirectLinks();	
+				}	
+			} else if(sparqlWalk.resourceExists(term1) && sparqlWalk.resourceExists(term2)) {
+				totalTermDirect = sparqlWalk.countDirectLinksFromResource(term1) + sparqlWalk.countDirectLinksFromResource(term2);
+				totalTermIndirect = sparqlWalk.countIndirectLinksFromResource(term1) + sparqlWalk.countIndirectLinksFromResource(term2);
+				totalDirect = sparqlWalk.countDirectLinksBetween2Resources(term1, term2);
+				totalIndirect = sparqlWalk.countIndirectLinksBetween2Resources(term1, term2);	
 			}
+			
+			double sDirect = totalDirect / (1 + Math.log(totalTermDirect)) * directWeight;
+			double sIndirect = totalIndirect / (1 + Math.log(totalTermIndirect)) * indirectWeight;
+			//return Math.min(1, (sDirect + sIndirect) / (directWeight + indirectWeight));
+			return 1 - 1 / (1 + (sDirect + sIndirect) / (directWeight + indirectWeight));
 		} else {
 			throw new NullPointerException("terms1 and terms2 must not be null");
 		}
-		return 0;
+	}
+	
+	public void updateLocalCache(List<String> terms1, List<String> terms2)
+	{
+		List<String> allTerms = new ArrayList<String>(terms1);
+		allTerms.addAll(terms2);
+		localLodCache = lodCacheService.getResourceList(allTerms);
+		localLodCacheRelation = getLodCacheRelationList(terms1, terms2);		
+	}
+	
+	public void clearLocalCache()
+	{
+		localLodCache.clear();
+		localLodCacheRelation.clear();
 	}
 	
 	private List<String> uniqueValues(List<String> listValues)
@@ -117,13 +157,32 @@ public class RLWSimilarity
 		return new ArrayList<String>(new TreeSet<String>(listValues));
 	}
 	
-	private boolean resourceExists(String resource)
+	private LodCache findOnLocalLodCache(String resource)
 	{
-		if(useCache) {
-			if(lodCacheService.getResourceCache(resource) != null) {
-				return true;
+		int index = localLodCache.indexOf(new LodCache(resource));
+		if(index >= 0) {
+			return localLodCache.get(index);
+		}
+		return null;
+	}
+	
+	private LodCacheRelation findOnLocalLodCacheRelation(String resource1, String resource2)
+	{
+		int index = localLodCacheRelation.indexOf(new LodCacheRelation(resource1, resource2));
+		if(index >= 0) {
+			return localLodCacheRelation.get(index);
+		}
+		return null;
+	}
+	
+	private List<LodCacheRelation> getLodCacheRelationList(List<String> resources1, List<String> resources2)
+	{
+		List<LodRelationId> lodRelationIds = new ArrayList<LodRelationId>();
+		for (String resource1 : resources1) {
+			for (String resource2 : resources2) {
+				lodRelationIds.add(new LodRelationId(resource1, resource2));
 			}
 		}
-		return sparqlWalk.resourceExists(resource);
+		return lodCacheService.getResourceRelationList(lodRelationIds);
 	}
 }

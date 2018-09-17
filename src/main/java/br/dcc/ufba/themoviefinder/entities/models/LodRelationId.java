@@ -6,6 +6,8 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 @Embeddable
 public class LodRelationId implements Serializable
 {
@@ -24,11 +26,15 @@ public class LodRelationId implements Serializable
 
 	public LodRelationId(String resource1, String resource2) 
 	{
-		if(! resource1.equalsIgnoreCase(resource2)) {
-			this.resource1 = resource1;
-			this.resource2 = resource2;	
+		if(ObjectUtils.allNotNull(resource1, resource2)) {
+			if(! resource1.equalsIgnoreCase(resource2)) {
+				this.resource1 = resource1;
+				this.resource2 = resource2;
+			} else {
+				throw new IllegalArgumentException("resource1 and resource2 must be different");
+			}	
 		} else {
-			throw new IllegalArgumentException("resource1 and resource2 must be different");
+			throw new NullPointerException("resource1 and resource2 must not be null");
 		}
 	}
 	
@@ -51,15 +57,23 @@ public class LodRelationId implements Serializable
 	{
 		this.resource2 = resource2;
 	}
-	
-    @Override
+
+	@Override
+	public String toString() 
+	{
+		return "LodRelationId [resource1=" + resource1 + ", resource2=" + resource2 + "]";
+	}
+
+	@Override
     public boolean equals(Object o) 
     {
         if (this == o) return true;
         if (!(o instanceof LodRelationId)) return false;
         LodRelationId that = (LodRelationId) o;
-        return Objects.equals(getResource1(), that.getResource1()) &&
-                Objects.equals(getResource2(), that.getResource2());
+        return (Objects.equals(getResource1(), that.getResource1()) &&
+                Objects.equals(getResource2(), that.getResource2())) ||
+        		(Objects.equals(getResource1(), that.getResource2()) &&
+        		Objects.equals(getResource2(), that.getResource1()));
     }
  
     @Override

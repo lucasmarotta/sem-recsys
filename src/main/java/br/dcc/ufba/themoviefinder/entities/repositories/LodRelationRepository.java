@@ -5,11 +5,11 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import br.dcc.ufba.themoviefinder.entities.models.LodRelationCounter;
+import br.dcc.ufba.themoviefinder.entities.models.LodCacheRelation;
 import br.dcc.ufba.themoviefinder.entities.models.LodRelationId;
 
 @Repository
-public interface LodRelationCounterRepository extends JpaRepository<LodRelationCounter, LodRelationId>
+public interface LodRelationRepository extends JpaRepository<LodCacheRelation, LodRelationId>
 {
-	List<LodRelationCounter> findByIdIn(List<String> lodRelationIds);
+	List<LodCacheRelation> findByIdIn(List<LodRelationId> lodRelationIds);
 }

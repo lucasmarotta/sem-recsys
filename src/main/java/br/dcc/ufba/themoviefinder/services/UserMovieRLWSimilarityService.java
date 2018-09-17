@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
@@ -15,28 +16,17 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarity
 	@Autowired
 	private RLWSimilarity rlwSimilarity;
 	
-	private double directWeight = 0.7;
-	
-	private double indirectWeight = 0.3;
-
-	public double getDirectWeight() 
-	{
-		return directWeight;
-	}
+	@Value("${app.rlw-use-cache: true}")
+	public boolean useCache;
 
 	public void setDirectWeight(double directWeight) 
 	{
-		this.directWeight = directWeight;
-	}
-
-	public double getIndirectWeight() 
-	{
-		return indirectWeight;
+		rlwSimilarity.setDirectWeight(directWeight);
 	}
 
 	public void setIndirectWeight(double indirectWeight) 
 	{
-		this.indirectWeight = indirectWeight;
+		rlwSimilarity.setIndirectWeight(indirectWeight);
 	}
 
 	@Override
@@ -57,12 +47,12 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarity
 	
 	public double getSimilarityBetween2Terms(String term1, String term2)
 	{
-		return rlwSimilarity.getSimilarityBetween2Terms(term1, term2, directWeight, indirectWeight);
+		return rlwSimilarity.getSimilarityBetween2Terms(term1, term2, useCache);
 	}
 
 	@Override
 	public double getSimilarity(List<String> queryTokens, List<String> docTokens) 
 	{
-		return rlwSimilarity.getSimilarity(queryTokens, docTokens, directWeight, indirectWeight);
+		return rlwSimilarity.getSimilarity(queryTokens, docTokens, useCache);
 	}
 }
