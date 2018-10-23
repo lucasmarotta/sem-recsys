@@ -53,3 +53,5 @@ SELECT (count (distinct ?p1) as ?x)
 WHERE {
 	{values (?r1 ?r3) {(<http://dbpedia.org/resource/Plant> <http://dbpedia.org/resource/Coconut>)} ?r2 ?p1 ?r1 . ?r2 ?p1 ?r3 . FILTER (?r1 != ?r3) . FILTER (!isLiteral(?r2) )}
 }
+
+movie 2276, 3626

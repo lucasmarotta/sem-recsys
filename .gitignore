@@ -23,6 +23,7 @@
 # Project
 /layout
 /logs
+/docs
 /src/main/resources/public/node_modules
 /src/main/resources/public/js/semantic
 *.sql

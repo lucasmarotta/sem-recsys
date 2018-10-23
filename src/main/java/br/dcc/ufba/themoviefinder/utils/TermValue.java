@@ -1,8 +1,5 @@
 package br.dcc.ufba.themoviefinder.utils;
 
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
-
 public class TermValue implements Comparable<TermValue>
 {
 	public String term;
@@ -20,11 +17,13 @@ public class TermValue implements Comparable<TermValue>
 	{
 		int c = Double.compare(value, toCompare.value);
 		if(c == 0) {
+			/*
 			Random random = ThreadLocalRandom.current();
 			if(random.nextInt(2) == 0) {
 				return -1;
 			}
 			return 1;
+			*/
 		}
 		return -c;
 	}

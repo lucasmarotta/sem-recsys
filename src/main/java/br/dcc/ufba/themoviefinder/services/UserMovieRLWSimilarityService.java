@@ -3,12 +3,15 @@ package br.dcc.ufba.themoviefinder.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.User;
+import br.dcc.ufba.themoviefinder.exception.ResourceNotFoundException;
 
 @Service
 public class UserMovieRLWSimilarityService implements UserMovieSimilarity
@@ -18,6 +21,8 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarity
 	
 	@Value("${app.rlw-use-cache: true}")
 	public boolean useCache;
+	
+	private static final Logger LOGGER = LogManager.getLogger(UserMovieRLWSimilarityService.class);
 
 	public void setDirectWeight(double directWeight) 
 	{
@@ -47,12 +52,24 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarity
 	
 	public double getSimilarityBetween2Terms(String term1, String term2)
 	{
-		return rlwSimilarity.getSimilarityBetween2Terms(term1, term2, useCache);
+		try {
+			return rlwSimilarity.getSimilarityBetween2Terms(term1, term2, useCache);
+		} catch (ResourceNotFoundException e) {
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug(e.getMessage(), e);
+			}
+		}
+		return 0;
 	}
 
 	@Override
 	public double getSimilarity(List<String> queryTokens, List<String> docTokens) 
 	{
 		return rlwSimilarity.getSimilarity(queryTokens, docTokens, useCache);
+	}
+	
+	public void clearRLWCache()
+	{
+		rlwSimilarity.clearLocalCache();
 	}
 }

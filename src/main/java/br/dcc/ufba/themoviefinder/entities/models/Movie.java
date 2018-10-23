@@ -28,7 +28,7 @@ public class Movie
 	@Type(type="text")
 	private String tokens;
 	
-	@Type(type="text")
+	@Transient
 	private String extendedTokens;
 	
 	private Double imdbRating;

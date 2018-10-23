@@ -1,16 +1,19 @@
 package br.dcc.ufba.themoviefinder;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.User;
-import br.dcc.ufba.themoviefinder.entities.services.LodCacheService;
 import br.dcc.ufba.themoviefinder.entities.services.MovieService;
 import br.dcc.ufba.themoviefinder.entities.services.UserService;
 import br.dcc.ufba.themoviefinder.launcher.controllers.LauncherContext;
 import br.dcc.ufba.themoviefinder.services.UserMovieRLWSimilarityService;
+import br.dcc.ufba.themoviefinder.utils.MovieSimilarity;
 import net.codecrafting.springfx.context.ViewStage;
 import net.codecrafting.springfx.core.SpringFXApplication;
 import net.codecrafting.springfx.core.SpringFXLauncher;
@@ -23,9 +26,6 @@ public class App extends SpringFXApplication
 	
 	@Autowired
 	private UserService userService;
-	
-	@Autowired
-	private LodCacheService lodCacheService;
 	
 	@Autowired
 	private UserMovieRLWSimilarityService rlwSimilarityService; 
@@ -44,36 +44,25 @@ public class App extends SpringFXApplication
 	@Override
 	public void start(ViewStage viewStage) throws Exception 
 	{
-		User user = userService.findByName("Lucas");
-		userService.setUserMovieSimilarity(rlwSimilarityService);
-
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Car", "Automobile"));
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Car", "Insect"));
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Mouse", "Rat"));
-		System.out.println();
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Ariana_Grande", "Selena_Gomez"));
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Ariana_Grande", "Pop_music"));
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Ariana_Grande", "Tom_Cruise"));
-		System.out.println("\n");
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Car", "Automobile"));
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Car", "Insect"));
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Mouse", "Rat"));
-		System.out.println();
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Ariana_Grande", "Selena_Gomez"));
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Ariana_Grande", "Pop_music"));
-		System.out.println(rlwSimilarityService.getSimilarityBetween2Terms("Ariana_Grande", "Tom_Cruise"));
 		
-		//System.out.println(rlwSimilarityService.getSimilarityFromMovie(movieService.findFirstByTitle("Toy Story 2"), movieService.findFirstByTitle("Toy Story")));
-		//System.out.println(rlwSimilarityService.getSimilarityFromMovie(movieService.findFirstByTitle("Toy Story 2"), movieService.findFirstByTitle("Halloween II")));
+		User user = userService.findByName("Lucas");
+		for (Movie movie : user.getMovies()) {
+			System.out.println(movie.getTitle());
+		}
+		userService.setUserMovieSimilarity(rlwSimilarityService);
 		
 		/*
+		Movie m = movieService.findFirstByTitle("The Last Castle");
+		System.out.println(m.getDescription());
+		System.out.println(rlwSimilarityService.getSimilarity(userService.getUserBestNTerms(user, 15), m.getTokensList()));
+		*/
+		
 		System.out.println("\nRecomendations with RLW Similarity");
 		List<MovieSimilarity> recomendations = userService.getRecomendationsWithBestTerms(user, 20, 15);
 		for (MovieSimilarity movieSimilarity : recomendations) {
 			System.out.println(movieSimilarity.movie.getTitle() + " " + movieSimilarity.similarity);
 		}
-		*/
-		
 		SpringFXLauncher.exit();
+		
 	}
 }

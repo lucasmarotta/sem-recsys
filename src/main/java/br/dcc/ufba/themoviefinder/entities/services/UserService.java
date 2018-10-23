@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.repositories.UserRepository;
+import br.dcc.ufba.themoviefinder.services.UserMovieRLWSimilarityService;
 import br.dcc.ufba.themoviefinder.services.UserMovieSimilarity;
 import br.dcc.ufba.themoviefinder.utils.MovieSimilarity;
 import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
@@ -77,12 +78,7 @@ public class UserService
 		
 	}
 	
-	public void updateExtendedRecomendations(User user, int qtdMovies)
-	{
-		
-	}
-	
-	public List<MovieSimilarity> getRecomendationsWithAllTerms(User user, int qtMovies, boolean extendedMode)
+	public List<MovieSimilarity> getRecomendationsWithAllTerms(User user, int qtMovies)
 	{
 		if(simService != null) {
 			List<MovieSimilarity> simList = new ArrayList<MovieSimilarity>();
@@ -90,15 +86,14 @@ public class UserService
 				List<Movie> movies = movieService.getAllMoviesExcept(user.getMovies());
 				List<String> userTokens = getUserMovieTokens(user, false);
 				for (Movie movie : movies) {
-					List<String> movieTokens = null;
-					if(extendedMode) {
-						movieTokens = movie.getExtendedTokensList();	
-					} else {
-						movieTokens = movie.getTokensList();	
+					try {
+						MovieSimilarity mv = new MovieSimilarity(movie, simService.getSimilarity(userTokens, movie.getTokensList()));
+						LOGGER.info(mv);
+						simList.add(mv);	
+					} catch(Exception e) {
+						LOGGER.error(e.getMessage(), e);
 					}
-					MovieSimilarity mv = new MovieSimilarity(movie, simService.getSimilarity(userTokens, movieTokens));
-					LOGGER.info(mv);
-					simList.add(mv);
+					System.out.println(simList.size() / ((double) movies.size()) * 100);
 				}
 				simList.sort((MovieSimilarity a, MovieSimilarity b) -> a.compareTo(b));
 			}
@@ -118,11 +113,25 @@ public class UserService
 			List<MovieSimilarity> simList = new ArrayList<MovieSimilarity>();
 			if(user.getMovies() != null) {
 				List<Movie> movies = movieService.getAllMoviesExcept(user.getMovies());
+				
+				//movies.clear();
+				//movies.add(movieService.getMovieById(6345));
+				//movies.add(movieService.getMovieById(3626));
+				
 				List<String> userTokens = getUserBestNTerms(user, qtTerms);
 				for (Movie movie : movies) {
-					MovieSimilarity mv = new MovieSimilarity(movie, simService.getSimilarity(userTokens, movie.getTokensList()));
-					LOGGER.info(mv);
-					simList.add(mv);
+					try {
+						MovieSimilarity mv = new MovieSimilarity(movie, simService.getSimilarity(userTokens, movie.getTokensList()));
+						LOGGER.info(mv);
+						simList.add(mv);
+						System.out.println();
+					} catch(Exception e) {
+						LOGGER.error(e.getMessage(), e);
+					}
+					System.out.println(simList.size() + " - " + simList.size() / ((double) movies.size()) * 100 + "%");
+				}
+				if(simService instanceof UserMovieRLWSimilarityService) {
+					((UserMovieRLWSimilarityService) simService).clearRLWCache();
 				}
 				simList.sort((MovieSimilarity a, MovieSimilarity b) -> a.compareTo(b));
 			}

@@ -20,7 +20,7 @@ public class NLPTokenizer
 	private Tokenizer basicTokenizer;
 	private POSTaggerME speechTagger;
 	private List<TokenNameFinderModel> entityModels;
-	private static final List<String> SPEECH_TAGS = Arrays.asList("NN", "JJ", "JJR", "JJS");
+	private static final List<String> SPEECH_TAGS = Arrays.asList("NN", "NNS", "JJ", "JJR", "JJS");
 	private static final List<String> ESCAPE_CHARS = Arrays.asList("'", "\"", ".", "-");
 	//private static final Logger LOGGER = LogManager.getLogger(NLPTokenizer.class);
 	

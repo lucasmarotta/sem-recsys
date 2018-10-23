@@ -58,9 +58,9 @@ public class SparqlWalk
 		return serviceUri;
 	}
 	
-	public boolean resourceExists(String uri)
+	public boolean isResource(String uri)
 	{
-		System.out.println("resourceExists");
+		//System.out.println(uri);
 		String queryString = Sparql.addService(usingGraph, serviceUri) 
 				+ "SELECT (count (distinct ?p) as ?x) WHERE {<" + uri + "> ?p ?v}"
 				+ Sparql.addServiceClosing(usingGraph);
@@ -154,8 +154,6 @@ public class SparqlWalk
 				RDFNode x = rb.get("x");
 				finding = (int) x.asLiteral().getValue();
 			}
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage(), e);
 		} finally {
 			qexec.close();
 		}
