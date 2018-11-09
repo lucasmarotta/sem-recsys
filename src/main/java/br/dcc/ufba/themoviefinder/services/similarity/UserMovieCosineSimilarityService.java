@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.services;
+package br.dcc.ufba.themoviefinder.services.similarity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,47 +17,19 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarity
 {
 	@Autowired
 	private TfIdfService tfIdfService;
-	private boolean extendedMode;
-	
-	public UserMovieCosineSimilarityService()
-	{
-		extendedMode = true;
-	}
-	
-	public boolean isExtendedMode() 
-	{
-		return extendedMode;
-	}
-
-	public void setExtendedMode(boolean extendedMode) 
-	{
-		this.extendedMode = extendedMode;
-	}
 
 	public double getSimilarityFromMovie(Movie movie1, Movie movie2)
 	{
-		if(extendedMode) {
-			return getSimilarity(movie1.getExtendedTokensList(), movie2.getExtendedTokensList());
-		} else {
-			return getSimilarity(movie1.getTokensList(), movie2.getTokensList());
-		}
+		return getSimilarity(movie1.getTokensList(), movie2.getTokensList());
 	}
 	
 	public double getSimilarityFromUser(User user, Movie movie)
 	{
 		List<String> userTokens = new ArrayList<String>();
 		for(Movie userMovie : user.getMovies()) {
-			if(extendedMode) {
-				userTokens.addAll(userMovie.getExtendedTokensList());
-			} else {
-				userTokens.addAll(userMovie.getTokensList());
-			}
+			userTokens.addAll(userMovie.getTokensList());
 		}
-		if(extendedMode) {
-			return getSimilarity(userTokens, movie.getExtendedTokensList());
-		} else {
-			return getSimilarity(userTokens, movie.getTokensList());
-		}
+		return getSimilarity(userTokens, movie.getTokensList());
 	}
 	
 	public double getSimilarity(List<String> queryTokens, List<String> docTokens)
@@ -68,13 +40,8 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarity
 		List<Float> queryTfIdfList = null;
 		List<Float> docTfIdfList = null;
 		
-		if(extendedMode) {
-			queryTfIdfList = tfIdfService.getBulkTfIdfExtended(queryTokens, uniqueTerms);
-			docTfIdfList = tfIdfService.getBulkTfIdfExtended(docTokens, uniqueTerms);
-		} else {
-			queryTfIdfList = tfIdfService.getBulkTfIdf(queryTokens, uniqueTerms);
-			docTfIdfList = tfIdfService.getBulkTfIdf(docTokens, uniqueTerms);
-		}
+		queryTfIdfList = tfIdfService.getBulkTfIdf(queryTokens, uniqueTerms);
+		docTfIdfList = tfIdfService.getBulkTfIdf(docTokens, uniqueTerms);
 		
 		int size = queryTfIdfList.size();
 		for (int i = 0; i < size; i++) {

@@ -60,7 +60,6 @@ public class SparqlWalk
 	
 	public boolean isResource(String uri)
 	{
-		//System.out.println(uri);
 		String queryString = Sparql.addService(usingGraph, serviceUri) 
 				+ "SELECT (count (distinct ?p) as ?x) WHERE {<" + uri + "> ?p ?v}"
 				+ Sparql.addServiceClosing(usingGraph);

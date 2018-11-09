@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.services;
+package br.dcc.ufba.themoviefinder.services.similarity;
 
 import java.util.ArrayList;
 import java.util.List;

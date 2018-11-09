@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.utils;
+package br.dcc.ufba.themoviefinder.services.similarity;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -27,7 +27,6 @@ public class MovieSimilarity implements Comparable<MovieSimilarity>
 				return -1;
 			}
 			return 1;
-			//c = movie.getTitle().compareToIgnoreCase(toCompare.movie.getTitle());
 		}
 		return -c;
 	}	

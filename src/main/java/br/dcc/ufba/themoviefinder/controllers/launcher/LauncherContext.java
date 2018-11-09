@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.launcher.controllers;
+package br.dcc.ufba.themoviefinder.controllers.launcher;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;

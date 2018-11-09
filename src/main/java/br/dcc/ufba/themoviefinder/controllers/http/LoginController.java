@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.http.controllers;
+package br.dcc.ufba.themoviefinder.controllers.http;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

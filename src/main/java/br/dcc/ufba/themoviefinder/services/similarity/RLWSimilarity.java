@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.services;
+package br.dcc.ufba.themoviefinder.services.similarity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -72,8 +72,10 @@ public class RLWSimilarity
 			double similarity = 0;
 			terms1 = uniqueValues(terms1);
 			terms2 = uniqueValues(terms2);
-			System.out.println(terms1);
-			System.out.println(terms2);
+			if(LOGGER.isDebugEnabled()) {
+				LOGGER.debug(terms1);
+				LOGGER.debug(terms2);
+			}
 			updateLocalCache(terms1, terms2);
 			int combinations = 0;
 			for (String term1 : terms1) {
@@ -131,9 +133,11 @@ public class RLWSimilarity
 						lodCacheRelation = new LodCacheRelation(term1, term2);
 						lodCacheRelation.setDirectLinks(sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource));
 						lodCacheRelation.setIndirectLinks(sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource));
-						System.out.println(lodCacheRelation);
 						lodCacheService.saveResourceRelation(lodCacheRelation);
 						localLodCacheRelation.add(lodCacheRelation);
+						if(LOGGER.isDebugEnabled()) {
+							LOGGER.debug(lodCacheRelation);
+						}
 					}
 					totalDirect = lodCacheRelation.getDirectLinks();
 					totalIndirect = lodCacheRelation.getIndirectLinks();	
@@ -185,7 +189,9 @@ public class RLWSimilarity
 			}
 		}
 		localLodCacheRelation = new HashSet<LodCacheRelation>(lodCacheService.getResourceRelationList(lodRelationIds));
-		System.out.println("Search size " + lodRelationIds.size() + ", Local Lod Cache Size " + localLodCache.size() + ", Local Lod Cache Relation " + localLodCacheRelation.size());
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Search size " + lodRelationIds.size() + ", Local Lod Cache Size " + localLodCache.size() + ", Local Lod Cache Relation " + localLodCacheRelation.size());
+		}
 	}
 	
 	private LodCache findOnLocalLodCache(String resource)

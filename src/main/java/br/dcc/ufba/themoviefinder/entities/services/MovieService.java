@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.repositories.MovieRepository;
-import br.dcc.ufba.themoviefinder.services.DBPediaService;
 import br.dcc.ufba.themoviefinder.services.NLPTokenizer;
 
 @Service
@@ -23,9 +22,6 @@ public class MovieService
 	
 	@Autowired
 	private NLPTokenizer nlpTokenizer;
-	
-	@Autowired
-	private DBPediaService dbPediaService;
 	
 	private static final Logger LOGGER = LogManager.getLogger(MovieService.class);
 	
@@ -101,29 +97,6 @@ public class MovieService
 			{
 				List<String> tokens = generateMovieTokens(movie);
 				if(!tokens.isEmpty()) {
-					movie.setExtendedTokens(tokens);
-					movieRepo.save(movie);
-				}
-			}	
-		}		
-	}
-	
-	public void updateMovieExtendedTokens()
-	{
-		updateMovieExtendedTokens(getAllMovies());
-	}
-	
-	public void updateMovieExtendedTokens(List<Movie> movies)
-	{
-		if(movies != null) {
-			for (Movie movie : movies) 
-			{
-				List<String> tokens = generateExtendedMovieTokens(movie);
-				if(!tokens.isEmpty()) {
-					movie.setExtendedTokens(tokens);
-					LOGGER.info("Update movie: "+ movie.getId() + " - " + movie.getTitle());
-					LOGGER.info(movie.getExtendedTokensList());
-					LOGGER.info("");
 					movieRepo.save(movie);
 				}
 			}	
@@ -140,12 +113,5 @@ public class MovieService
 			return tokens;	
 		}
 		return movie.getTokensList();
-	}
-	
-	public List<String> generateExtendedMovieTokens(Movie movie)
-	{
-		List<String> tokens = generateMovieTokens(movie);
-		tokens.addAll(dbPediaService.getResourceTokens(tokens));
-		return tokens;
 	}
 }

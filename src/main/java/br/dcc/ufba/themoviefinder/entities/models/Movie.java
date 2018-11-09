@@ -28,15 +28,9 @@ public class Movie
 	@Type(type="text")
 	private String tokens;
 	
-	@Transient
-	private String extendedTokens;
-	
 	private Double imdbRating;
 	private Integer imdbId;
 	private Integer tmdbId;
-	
-	@Transient
-	private List<String> extendedTokensList;
 	
 	@Transient
 	private List<String> tokensList;
@@ -99,29 +93,6 @@ public class Movie
 	public void setTokens(List<String> tokens)
 	{
 		this.tokens = listToString(tokens);
-	}
-	
-	public String getExtendedTokens() 
-	{
-		return extendedTokens;
-	}
-	
-	public List<String> getExtendedTokensList()
-	{
-		if(extendedTokensList == null) {
-			extendedTokensList = stringToList(extendedTokens);
-		}
-		return extendedTokensList;
-	}
-
-	public void setExtendedTokens(String extendedTokens) 
-	{
-		this.extendedTokens = extendedTokens;
-	}
-	
-	public void setExtendedTokens(List<String> extendedTokens)
-	{
-		this.extendedTokens = listToString(extendedTokens);
 	}
 
 	public Double getImdbRating() 

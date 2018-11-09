@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.launcher.controllers;
+package br.dcc.ufba.themoviefinder.controllers.launcher;
 
 import javafx.fxml.FXML;
 import javafx.scene.layout.AnchorPane;

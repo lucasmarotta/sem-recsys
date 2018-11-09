@@ -39,7 +39,7 @@ public class TfIdfService
 		List<Movie> movies = movieService.getAllMovies();
 		SortedSet<String> uniqueTokens = new TreeSet<String>();
 		for (Movie movie : movies) {
-			List<String> tokens = movie.getExtendedTokensList();
+			List<String> tokens = movie.getTokensList();
 			for (String token : tokens) {
 				uniqueTokens.add(token);
 			}
@@ -49,37 +49,16 @@ public class TfIdfService
 				Idf idf = new Idf();
 				idf.setTerm(token);
 				int counter = 0;
-				int extendedCounter = 0;
 				
 				for (Movie movie : movies) {
-					if(movie.getExtendedTokensList().contains(token)) {
-						extendedCounter++;
-					}
 					if(movie.getTokensList().contains(token)) {
 						counter++;
 					}
 				}
-				
 				idf.setValue(tfIdfSimilarity.idf(counter, docCounter));
-				idf.setExtendedValue(tfIdfSimilarity.idf(extendedCounter, docCounter));
 				idfRepo.save(idf);
 			}
 		}
-	}
-	
-	public float getTfIdfExtended(Collection<String> terms, String term)
-	{
-		Idf idf = idfRepo.findByTerm(term);
-		if(idf != null) {
-			float freq = 0f;
-			for (String token : terms) {
-				if(token.equalsIgnoreCase(term)) {
-					freq++;
-				}
-			}
-			return tfIdfSimilarity.tf(freq) * idf.getExtendedValue() * tfIdfSimilarity.lengthNorm(terms.size());
-		}
-		return 0f;
 	}
 	
 	public float getTfIdf(Collection<String> terms, String term)
@@ -109,22 +88,6 @@ public class TfIdfService
 				}
 			}
 			tfIdfs.add(tfIdfSimilarity.tf(freq) * idf.getValue() * tfIdfSimilarity.lengthNorm(terms.size()));
-		}
-		return tfIdfs;
-	}
-	
-	public List<Float> getBulkTfIdfExtended(Collection<String> terms, String[] toCompareTerms)
-	{
-		List<Float> tfIdfs = new ArrayList<Float>();
-		List<Idf> idfList = idfRepo.findByTermIn(toCompareTerms);
-		for (Idf idf : idfList) {
-			float freq = 0f;
-			for (String token : terms) {
-				if(token.equalsIgnoreCase(idf.getTerm())) {
-					freq++;
-				}
-			}
-			tfIdfs.add(tfIdfSimilarity.tf(freq) * idf.getExtendedValue() * tfIdfSimilarity.lengthNorm(terms.size()));
 		}
 		return tfIdfs;
 	}

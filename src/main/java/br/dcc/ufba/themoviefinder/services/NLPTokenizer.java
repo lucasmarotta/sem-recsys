@@ -1,5 +1,6 @@
 package br.dcc.ufba.themoviefinder.services;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,9 +21,8 @@ public class NLPTokenizer
 	private Tokenizer basicTokenizer;
 	private POSTaggerME speechTagger;
 	private List<TokenNameFinderModel> entityModels;
-	private static final List<String> SPEECH_TAGS = Arrays.asList("NN", "NNS", "JJ", "JJR", "JJS");
+	private static final List<String> SPEECH_TAGS = Arrays.asList("NN", "NNS", "JJ", "JJR", "JJS", "FW", "VB");
 	private static final List<String> ESCAPE_CHARS = Arrays.asList("'", "\"", ".", "-");
-	//private static final Logger LOGGER = LogManager.getLogger(NLPTokenizer.class);
 	
 	public NLPTokenizer() throws Exception
 	{
@@ -32,10 +32,7 @@ public class NLPTokenizer
 	public NLPTokenizer(Tokenizer basicTokenizer) throws Exception
 	{
 		this.basicTokenizer = basicTokenizer;
-		TokenNameFinderModel personModel = new TokenNameFinderModel(getClass().getResource("/nlp_models/en-ner-person.bin"));
-		TokenNameFinderModel locationModel = new TokenNameFinderModel(getClass().getResource("/nlp_models/en-ner-location.bin"));
-		TokenNameFinderModel organizationModel = new TokenNameFinderModel(getClass().getResource("/nlp_models/en-ner-organization.bin"));
-		entityModels = Arrays.asList(personModel, locationModel, organizationModel);
+		entityModels = getEntityModels(Arrays.asList("en-ner-person.bin", "en-ner-location.bin", "en-ner-organization.bin", "en-ner-money.bin"));
 		speechTagger = new POSTaggerME(new POSModel(getClass().getResource("/nlp_models/en-pos-maxent.bin")));
 	}
 	
@@ -62,11 +59,21 @@ public class NLPTokenizer
 	    for (int i = 0; i < tags.length; i++){
 	    	String token = tokens[i].toLowerCase();
 	    	token = token.substring(0, 1).toUpperCase() + token.substring(1);
+	    	token = token.trim();
 	    	if(SPEECH_TAGS.contains(tags[i]) && token.length() > 1) {
 	    		speechTokens.add((token.substring(0, 1).toUpperCase() + token.substring(1)).trim());
 	    	}
 	    }
 		return speechTokens;	
+	}
+	
+	private List<TokenNameFinderModel> getEntityModels(List<String> nerResources) throws IOException
+	{
+		List<TokenNameFinderModel> nerModels = new ArrayList<TokenNameFinderModel>();
+		for (String resource : nerResources) {
+			nerModels.add(new TokenNameFinderModel(getClass().getResource("/nlp_models/"+resource)));
+		}
+		return nerModels;
 	}
 	
 	private List<String> getEntityTokens(final String[] tokens)
