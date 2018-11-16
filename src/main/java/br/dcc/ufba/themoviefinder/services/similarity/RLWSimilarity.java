@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
@@ -15,10 +14,12 @@ import org.springframework.stereotype.Component;
 import br.dcc.ufba.themoviefinder.entities.models.LodCache;
 import br.dcc.ufba.themoviefinder.entities.models.LodCacheRelation;
 import br.dcc.ufba.themoviefinder.entities.models.LodRelationId;
+import br.dcc.ufba.themoviefinder.entities.models.NotResource;
 import br.dcc.ufba.themoviefinder.entities.services.LodCacheService;
 import br.dcc.ufba.themoviefinder.exception.ResourceNotFoundException;
 import br.dcc.ufba.themoviefinder.lodweb.Sparql;
 import br.dcc.ufba.themoviefinder.lodweb.SparqlWalk;
+import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 
 @Component
 public class RLWSimilarity 
@@ -31,16 +32,16 @@ public class RLWSimilarity
 	
 	private Set<LodCache> localLodCache;
 	private Set<LodCacheRelation> localLodCacheRelation;
-	private Set<String> notResource;
-	private double directWeight = 0.65;
-	private double indirectWeight = 0.35;
+	private Set<NotResource> notResource;
+	private double directWeight = 0.8;
+	private double indirectWeight = 0.2;
 	private static final Logger LOGGER = LogManager.getLogger(RLWSimilarity.class);
 	
 	public RLWSimilarity()
 	{
 		localLodCache = new HashSet<LodCache>();
 		localLodCacheRelation = new HashSet<LodCacheRelation>();
-		notResource = new HashSet<String>();
+		notResource = new HashSet<NotResource>();
 	}
 	
 	public double getDirectWeight() 
@@ -70,11 +71,11 @@ public class RLWSimilarity
 				return 1;
 			}
 			double similarity = 0;
-			terms1 = uniqueValues(terms1);
-			terms2 = uniqueValues(terms2);
-			if(LOGGER.isDebugEnabled()) {
-				LOGGER.debug(terms1);
-				LOGGER.debug(terms2);
+			terms1 = TFIDFCalculator.uniqueValues(terms1);
+			terms2 = TFIDFCalculator.uniqueValues(terms2);
+			if(LOGGER.isTraceEnabled()) {
+				LOGGER.trace(terms1);
+				LOGGER.trace(terms2);
 			}
 			updateLocalCache(terms1, terms2);
 			int combinations = 0;
@@ -84,14 +85,16 @@ public class RLWSimilarity
 						similarity += getSimilarityBetween2Terms(term1, term2, useCache);
 						combinations++;
 					} catch (ResourceNotFoundException e) {
-						if(LOGGER.isDebugEnabled()) {
-							LOGGER.debug(e.getMessage(), e);
+						if(LOGGER.isTraceEnabled()) {
+							LOGGER.trace(e.getMessage(), e);
 						}
 					}
 				}
 			}
+			
+			//Average similarity
 			if(combinations > 0) {
-				return Math.min(1, similarity / combinations);
+				return similarity / combinations;
 			}
 			return 0;
 		} else {
@@ -131,12 +134,17 @@ public class RLWSimilarity
 					LodCacheRelation lodCacheRelation = findOnLocalLodCacheRelation(term1, term2);
 					if(lodCacheRelation == null) {
 						lodCacheRelation = new LodCacheRelation(term1, term2);
-						lodCacheRelation.setDirectLinks(sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource));
-						lodCacheRelation.setIndirectLinks(sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource));
+						if(sparqlWalk.isRedirect(term1Resource, term2Resource)) {
+							lodCacheRelation.setDirectLinks((int) totalTermDirect);
+							lodCacheRelation.setIndirectLinks((int) totalTermIndirect);
+						} else {
+							lodCacheRelation.setDirectLinks(sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource));
+							lodCacheRelation.setIndirectLinks(sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource));	
+						}
 						lodCacheService.saveResourceRelation(lodCacheRelation);
 						localLodCacheRelation.add(lodCacheRelation);
-						if(LOGGER.isDebugEnabled()) {
-							LOGGER.debug(lodCacheRelation);
+						if(LOGGER.isTraceEnabled()) {
+							LOGGER.trace(lodCacheRelation);
 						}
 					}
 					totalDirect = lodCacheRelation.getDirectLinks();
@@ -147,8 +155,25 @@ public class RLWSimilarity
 			} else if(sparqlWalk.isResource(term1Resource) && sparqlWalk.isResource(term2Resource)) {
 				totalTermDirect = sparqlWalk.countDirectLinksFromResource(term1Resource) + sparqlWalk.countDirectLinksFromResource(term2Resource);
 				totalTermIndirect = sparqlWalk.countIndirectLinksFromResource(term1Resource) + sparqlWalk.countIndirectLinksFromResource(term2Resource);
-				totalDirect = sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource);
-				totalIndirect = sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource);
+				if(sparqlWalk.isRedirect(term1Resource, term2Resource)) {
+					totalDirect = totalTermDirect;
+					totalIndirect = totalTermIndirect;
+				} else {
+					totalDirect = sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource);
+					totalIndirect = sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource);	
+				}
+			}
+			
+			if(totalDirect < totalTermDirect) {
+				totalTermDirect = Math.log(totalTermDirect);
+			} else {
+				totalDirect = totalTermDirect;
+			}
+			
+			if(totalIndirect < totalTermIndirect) {
+				totalTermIndirect = Math.log(totalTermIndirect);
+			} else {
+				totalIndirect = totalTermIndirect;
 			}
 			
 			double sDirect = totalDirect / (1 + Math.log(totalTermDirect)) * directWeight;
@@ -165,21 +190,22 @@ public class RLWSimilarity
 		localLodCacheRelation.clear();
 	}
 	
+	public void updateNotResource()
+	{
+		notResource.clear();
+		notResource.addAll(lodCacheService.getAllNotResource());
+	}
+	
 	public void clearNotResource()
 	{
 		notResource.clear();
-	}
-	
-	private List<String> uniqueValues(List<String> listValues)
-	{
-		return new ArrayList<String>(new TreeSet<String>(listValues));
 	}
 	
 	private void updateLocalCache(List<String> terms1, List<String> terms2)
 	{
 		List<String> allTerms = new ArrayList<String>(terms1);
 		allTerms.addAll(terms2);
-		localLodCache = new HashSet<LodCache>(lodCacheService.getResourceList(uniqueValues(allTerms)));
+		localLodCache = new HashSet<LodCache>(lodCacheService.getResourceList(TFIDFCalculator.uniqueValues(allTerms)));
 		List<LodRelationId> lodRelationIds = new ArrayList<LodRelationId>();
 		for (String term1 : terms1) {
 			for (String term2 : terms2) {
@@ -189,8 +215,8 @@ public class RLWSimilarity
 			}
 		}
 		localLodCacheRelation = new HashSet<LodCacheRelation>(lodCacheService.getResourceRelationList(lodRelationIds));
-		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Search size " + lodRelationIds.size() + ", Local Lod Cache Size " + localLodCache.size() + ", Local Lod Cache Relation " + localLodCacheRelation.size());
+		if(LOGGER.isTraceEnabled()) {
+			LOGGER.trace("Search size " + lodRelationIds.size() + ", Local Lod Cache Size " + localLodCache.size() + ", Local Lod Cache Relation " + localLodCacheRelation.size());
 		}
 	}
 	
@@ -218,8 +244,13 @@ public class RLWSimilarity
 	
 	private boolean isResource(String term)
 	{
-		if(findOnLocalLodCache(term) == null && (notResource.contains(term) || ! sparqlWalk.isResource(Sparql.wrapStringAsResource(term)))) {
-			notResource.add(term);
+		NotResource nr = new NotResource(term);
+		boolean isNotResource = notResource.contains(nr);
+		if(! localLodCache.contains(new LodCache(term)) && (isNotResource || ! sparqlWalk.isResource(Sparql.wrapStringAsResource(term)))) {
+			if(! isNotResource) {
+				notResource.add(nr);
+				lodCacheService.saveNotResource(nr);
+			}
 			return false;
 		}	
 		return true;

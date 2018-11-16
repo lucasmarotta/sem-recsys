@@ -24,6 +24,12 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarity
 	
 	private static final Logger LOGGER = LogManager.getLogger(UserMovieRLWSimilarityService.class);
 
+	@Override
+	public void init() 
+	{
+		rlwSimilarity.updateNotResource();
+	}
+	
 	public void setDirectWeight(double directWeight) 
 	{
 		rlwSimilarity.setDirectWeight(directWeight);
@@ -65,11 +71,13 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarity
 	@Override
 	public double getSimilarity(List<String> queryTokens, List<String> docTokens) 
 	{
-		return rlwSimilarity.getSimilarity(queryTokens, docTokens, useCache);
+		double s = rlwSimilarity.getSimilarity(queryTokens, docTokens, useCache);
+		rlwSimilarity.clearLocalCache();
+		return s;
 	}
 	
-	public void clearRLWCache()
+	public void updateNotResource()
 	{
-		rlwSimilarity.clearLocalCache();
+		rlwSimilarity.updateNotResource();
 	}
 }

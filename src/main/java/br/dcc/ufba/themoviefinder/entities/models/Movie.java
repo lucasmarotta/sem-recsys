@@ -1,7 +1,6 @@
 package br.dcc.ufba.themoviefinder.entities.models;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -128,7 +127,14 @@ public class Movie
 	private List<String> stringToList(String str)
 	{
 		if(str != null) {
-			return new ArrayList<String>(Arrays.asList(str.split(",")));
+			List<String> list = new ArrayList<String>();
+			String[] splitArr = str.split(",");
+			for (String string : splitArr) {
+				if(! string.isEmpty()) {
+					list.add(string);
+				}
+			}
+			return list;
 		}
 		return new ArrayList<String>();
 	}
@@ -168,7 +174,6 @@ public class Movie
 	@Override
 	public String toString() 
 	{
-		return "Movie [id=" + id + ", title=" + title + ", description=" + description + ", tokens=" + tokens
-				+ ", imdbRating=" + imdbRating + ", imdbId=" + imdbId + ", tmdbId=" + tmdbId + "]";
+		return "Movie [id=" + id + ", title=" + title + "]";
 	}
 }

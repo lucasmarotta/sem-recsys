@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import br.dcc.ufba.themoviefinder.entities.models.LodCache;
 import br.dcc.ufba.themoviefinder.entities.models.LodCacheRelation;
 import br.dcc.ufba.themoviefinder.entities.models.LodRelationId;
+import br.dcc.ufba.themoviefinder.entities.models.NotResource;
 import br.dcc.ufba.themoviefinder.entities.repositories.LodCacheRepository;
 import br.dcc.ufba.themoviefinder.entities.repositories.LodRelationRepository;
+import br.dcc.ufba.themoviefinder.entities.repositories.NotResourceRepository;
 
 @Service
 public class LodCacheService 
@@ -22,6 +24,9 @@ public class LodCacheService
 	
 	@Autowired
 	private LodRelationRepository lodRelationRepo;
+	
+	@Autowired
+	private NotResourceRepository notResourceRepo;
 	
 	public LodCache getResource(String resource)
 	{
@@ -37,9 +42,29 @@ public class LodCacheService
 		return lodCacheRepo.findByResourceIn(resources);
 	}
 	
+	public List<NotResource> getAllNotResource()
+	{
+		return notResourceRepo.findAll();
+	}
+	
+	public boolean isNotResource(LodCache lodCache)
+	{
+		return notResourceRepo.findById(lodCache.getResource()) != null;
+	}
+	
+	public boolean isNotResource(String resource)
+	{
+		return notResourceRepo.findById(resource) != null;
+	}
+	
 	public LodCache saveResource(LodCache resource)
 	{
 		return lodCacheRepo.save(resource);
+	}
+	
+	public NotResource saveNotResource(NotResource notResource)
+	{
+		return notResourceRepo.save(notResource);
 	}
 	
 	public LodCacheRelation getResourceRelation(String resource1, String resource2)

@@ -1,8 +1,8 @@
 package br.dcc.ufba.themoviefinder.entities.models;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -13,6 +13,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+
+import br.dcc.ufba.themoviefinder.utils.ItemValue;
+import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 
 @Entity
 public class User 
@@ -35,7 +38,7 @@ public class User
 		joinColumns = {@JoinColumn(name = "user_id")},
 		inverseJoinColumns = {@JoinColumn(name = "movie_id")}
 	)
-	private Set<Movie> movies;
+	private List<Movie> movies;
     
 	@ManyToMany(
 		fetch = FetchType.LAZY,
@@ -46,7 +49,7 @@ public class User
 		joinColumns = {@JoinColumn(name = "user_id")},
 		inverseJoinColumns = {@JoinColumn(name = "movie_id")}
 	)
-	private Set<Movie> recomendedMovies;
+	private List<Movie> recomendedMovies;
 	
 	private String pass;
 	
@@ -68,14 +71,13 @@ public class User
 	
 	public User() 
 	{
-		movies = new HashSet<Movie>();
-		recomendedMovies = new HashSet<Movie>();
+		movies = new ArrayList<Movie>();
+		recomendedMovies = new ArrayList<Movie>();
 	}
 	
 	public User(int id)
 	{
-		movies = new HashSet<Movie>();
-		recomendedMovies = new HashSet<Movie>();
+		this();
 		this.id = id;
 	}
 
@@ -169,14 +171,56 @@ public class User
 		return updatedAt;
 	}
 
-	public Set<Movie> getMovies() 
+	public List<Movie> getMovies() 
 	{
 		return movies;
 	}
 	
-	public Set<Movie> getRecomendedMovies() 
+	public List<Movie> getRecomendedMovies() 
 	{
 		return recomendedMovies;
+	}
+	
+	public List<String> getUserBestTerms(int qtTerms)
+	{
+		List<List<String>> listOfDocs = new ArrayList<List<String>>();
+		List<String> uniqueValues = new ArrayList<String>();
+	
+		for(Movie movie : movies) {
+			listOfDocs.add(movie.getTokensList());
+			uniqueValues.addAll(movie.getTokensList());
+		}
+		uniqueValues = TFIDFCalculator.uniqueValues(uniqueValues);
+		
+		List<ItemValue<String>> termValueList = new ArrayList<ItemValue<String>>();
+		for(String term : uniqueValues) {
+			for (Movie movie : movies) {
+				termValueList.add(new ItemValue<String>(term, TFIDFCalculator.tfIdf(movie.getTokensList(), listOfDocs, term)));
+			}
+		}
+		
+		termValueList.sort((ItemValue<String> a, ItemValue<String> b) -> a.compareTo(b));
+		int max = 0;
+		if(qtTerms >= 0) {
+			max = Math.min(qtTerms, termValueList.size());
+		}
+		termValueList = termValueList.subList(0, max);
+		uniqueValues = new ArrayList<String>();
+		for (ItemValue<String> termValue : termValueList) {
+			if(! uniqueValues.contains(termValue.item)) {
+				uniqueValues.add(termValue.item);	
+			}
+		}
+		return uniqueValues;
+	}
+	
+	public List<String> getUserMovieTokens()
+	{
+		List<String> userTokens = new ArrayList<String>();
+		for(Movie userMovie : movies) {
+			userTokens.addAll(userMovie.getTokensList());
+		}
+		return userTokens;
 	}
 	
     @Override

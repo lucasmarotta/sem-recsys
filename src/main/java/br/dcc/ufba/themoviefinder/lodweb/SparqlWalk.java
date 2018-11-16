@@ -66,6 +66,22 @@ public class SparqlWalk
 		return (execCountQuery(queryString)) > 0 ? true : false;
 	}
 	
+	public boolean isRedirect(String uri1, String uri2) 
+	{
+		String queryString = Sparql.addService(usingGraph, serviceUri)
+				+ "SELECT (count (distinct ?p1) as ?x) WHERE { "
+				
+				//resources reached by indirect outgoing links
+				+ "{values (?r1 ?r2) {(<" + uri1+ ">  <" + uri2+ ">)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) . " + Sparql.addFilter(null, null, "r2") + "} UNION "
+				
+				//resources reached by direct outgoing links
+				+ "{values (?r1 ?r2) {(<" + uri2+ ">  <" + uri1+ ">)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) . " + Sparql.addFilter(null, null, "r2") + "} "+
+				
+				//Filter for wikiPageRedirects
+				"FILTER(?p1 = dbo:wikiPageRedirects)} " + Sparql.addServiceClosing(usingGraph);
+		return (execCountQuery(queryString)) > 0 ? true : false;	
+	}
+	
 	/**
 	 * Count the number of direct links reached to the given resource
 	 * @param uri
@@ -118,7 +134,7 @@ public class SparqlWalk
 				//resources reached by direct outgoing links
 				+ "{values (?r1 ?r2) {(<" + uri2+ ">  <" + uri1+ ">)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) . " + Sparql.addFilter(null, null, "r2") + "}}"
 				+ Sparql.addServiceClosing(usingGraph);
-			return execCountQuery(queryString);
+		return execCountQuery(queryString);
 	}
 	
 	/**
@@ -143,7 +159,9 @@ public class SparqlWalk
 		int finding = 0;
 		Query query = QueryFactory.create(Sparql.addPrefix() + queryString);
 		if(logQuery) {
-			LOGGER.info(query);
+			if(LOGGER.isInfoEnabled()) {
+				LOGGER.info(query);	
+			}
 		}
 		QueryExecution qexec = QueryExecutionFactory.create(query, model);
 		try {

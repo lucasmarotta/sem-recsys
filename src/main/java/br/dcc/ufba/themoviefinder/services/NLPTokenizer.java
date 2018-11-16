@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.CaseFormat;
+
 import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.namefind.TokenNameFinderModel;
 import opennlp.tools.postag.POSModel;
@@ -22,7 +24,7 @@ public class NLPTokenizer
 	private POSTaggerME speechTagger;
 	private List<TokenNameFinderModel> entityModels;
 	private static final List<String> SPEECH_TAGS = Arrays.asList("NN", "NNS", "JJ", "JJR", "JJS", "FW", "VB");
-	private static final List<String> ESCAPE_CHARS = Arrays.asList("'", "\"", ".", "-");
+	private static final List<String> ESCAPE_CHARS = Arrays.asList("'", "\"", ".", "-", ",", "_");
 	
 	public NLPTokenizer() throws Exception
 	{
@@ -59,7 +61,7 @@ public class NLPTokenizer
 	    for (int i = 0; i < tags.length; i++){
 	    	String token = tokens[i].toLowerCase();
 	    	token = token.substring(0, 1).toUpperCase() + token.substring(1);
-	    	token = token.trim();
+	    	token = token.replace(",", "").trim();
 	    	if(SPEECH_TAGS.contains(tags[i]) && token.length() > 1) {
 	    		speechTokens.add((token.substring(0, 1).toUpperCase() + token.substring(1)).trim());
 	    	}
@@ -84,7 +86,7 @@ public class NLPTokenizer
 			Span nameSpans[] = nameFinder.find(tokens);
 			for (Span span : nameSpans) {
 				String entity = "";
-	            for(int index = span.getStart(); index < span.getEnd(); index++){
+	            for(int index = span.getStart(); index < span.getEnd(); index++) {
 	            	if(!ESCAPE_CHARS.contains(tokens[index])) {
 		            	entity += tokens[index];
 		            	if(index + 1 < span.getEnd()) entity += "_";
@@ -95,7 +97,11 @@ public class NLPTokenizer
 		            if(entity.charAt(entity.length() - 1) == '_') entity = entity.substring(0, entity.length() - 1);
 		            entity = entity.replaceAll("\\?+", "").trim();
 		            if(entity.length() > 1) {
-			            entityTokens.add(entity);
+		            	if(entity.contains("_")) {
+		            		entityTokens.add(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_UNDERSCORE, entity.toLowerCase()));
+		            	} else {
+		            		entityTokens.add(entity.substring(0, 1).toUpperCase() + entity.substring(1));
+		            	}
 		            }
 	            }
 			}

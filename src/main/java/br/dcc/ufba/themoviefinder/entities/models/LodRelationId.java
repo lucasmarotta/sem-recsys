@@ -70,10 +70,17 @@ public class LodRelationId implements Serializable
         if (this == o) return true;
         if (!(o instanceof LodRelationId)) return false;
         LodRelationId that = (LodRelationId) o;
-        return (Objects.equals(getResource1(), that.getResource1()) &&
-                Objects.equals(getResource2(), that.getResource2())) ||
-        		(Objects.equals(getResource1(), that.getResource2()) &&
-        		Objects.equals(getResource2(), that.getResource1()));
+        if(ObjectUtils.allNotNull(resource1, resource2)) {
+            return (resource1.equalsIgnoreCase(that.getResource1()) &&
+            		resource2.equalsIgnoreCase(that.getResource2())) ||
+            		(resource1.equalsIgnoreCase(that.getResource2()) &&
+            		resource2.equalsIgnoreCase(that.getResource1()));	
+        } else {
+            return (Objects.equals(getResource1(), that.getResource1()) &&
+                    Objects.equals(getResource2(), that.getResource2())) ||
+            		(Objects.equals(getResource1(), that.getResource2()) &&
+            		Objects.equals(getResource2(), that.getResource1()));
+        }
     }
  
     @Override

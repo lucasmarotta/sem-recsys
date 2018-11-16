@@ -23,6 +23,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long>
 	@Query("SELECT m FROM Movie m WHERE m.title LIKE %:title%")
 	List<Movie> findAllByLikeTitle(@Param("title") String title);
 	
-	List<Movie> findByIdNotInOrderByTitleAsc(List<Integer> movieIds);
+	List<Movie> findByIdNotIn(List<Integer> movieIds);
 	List<Movie> findTop30ByOrderByIdAsc();
 }

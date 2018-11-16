@@ -76,7 +76,10 @@ public class LodCache
         if (this == o) return true;
         if (!(o instanceof LodCache)) return false;
         LodCache that = (LodCache) o;
-        return (Objects.equals(that.getResource(), this.getResource()));
+        if(resource != null) {
+            return resource.equalsIgnoreCase(that.getResource());	
+        }
+        return Objects.equals(resource, that.getResource());
     }
  
     @Override

@@ -17,6 +17,11 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarity
 {
 	@Autowired
 	private TfIdfService tfIdfService;
+	
+	public void init()
+	{
+		
+	}
 
 	public double getSimilarityFromMovie(Movie movie1, Movie movie2)
 	{

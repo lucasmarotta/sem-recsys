@@ -13,8 +13,8 @@ import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.MovieService;
 import br.dcc.ufba.themoviefinder.entities.services.UserService;
 import br.dcc.ufba.themoviefinder.services.RecomendationService;
-import br.dcc.ufba.themoviefinder.services.similarity.MovieSimilarity;
 import br.dcc.ufba.themoviefinder.services.similarity.UserMovieRLWSimilarityService;
+import br.dcc.ufba.themoviefinder.utils.ItemValue;
 import net.codecrafting.springfx.context.ViewStage;
 import net.codecrafting.springfx.core.SpringFXApplication;
 import net.codecrafting.springfx.core.SpringFXLauncher;
@@ -52,14 +52,17 @@ public class App extends SpringFXApplication
 		User user = userService.findByName("Lucas");
 		for (Movie movie : user.getMovies()) {
 			System.out.println(movie.getTitle());
+			System.out.println(movie.getTokensList());
 		}
+		System.out.println("User best terms");
+		System.out.println(user.getUserBestTerms(15));
 		recomendationService.setUserMovieSimilarity(rlwSimilarityService);
-		System.out.println("\nRecomendations with RLW Similarity");
-		List<MovieSimilarity> recomendations = recomendationService.getRecomendationsByUserBestTerms(user, 20, 15);
-		for (MovieSimilarity movieSimilarity : recomendations) {
-			System.out.println(movieSimilarity.movie.getTitle() + " " + movieSimilarity.similarity);
+		
+		LOGGER.info("Recomendations with RLW Similarity");
+		List<ItemValue<Movie>> recomendations = recomendationService.getRecomendationsByUserBestTerms(user, 15, 15);
+		for (ItemValue<Movie> movieSimilarity : recomendations) {
+			System.out.println(movieSimilarity.item.getTitle() + " - " + movieSimilarity.value);
 		}
 		SpringFXLauncher.exit();
-		
 	}
 }

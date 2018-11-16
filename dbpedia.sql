@@ -38,8 +38,8 @@ WHERE {
 --TOTAL NUMBER OF DIRECT LINKS BETWEEN TWO RESOURCES
 SELECT (count(distinct ?p1) as ?x)
 WHERE {
-	{values (?r1 ?r2) {(<http://dbpedia.org/resource/Plant> <http://dbpedia.org/resource/Coconut>)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) . FILTER (!isLiteral(?r2)) } UNION
-	{values (?r1 ?r2) {(<http://dbpedia.org/resource/Coconut> <http://dbpedia.org/resource/Plant>)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) . FILTER (!isLiteral(?r2)) }
+	{values (?r1 ?r2) {(<http://dbpedia.org/resource/France> <http://dbpedia.org/resource/Paris>)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) . FILTER (!isLiteral(?r2)) } UNION
+	{values (?r1 ?r2) {(<http://dbpedia.org/resource/Paris> <http://dbpedia.org/resource/France>)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) . FILTER (!isLiteral(?r2)) }
 }
 
 --TOTAL NUMBER OF INDIRECT OUTGOING LINKS
@@ -51,7 +51,31 @@ WHERE {
 --TOTAL NUMBER OF INDIRECT OUTGOING LINKS
 SELECT (count (distinct ?p1) as ?x)
 WHERE {
-	{values (?r1 ?r3) {(<http://dbpedia.org/resource/Plant> <http://dbpedia.org/resource/Coconut>)} ?r2 ?p1 ?r1 . ?r2 ?p1 ?r3 . FILTER (?r1 != ?r3) . FILTER (!isLiteral(?r2) )}
+	{values (?r1 ?r3) {(<http://dbpedia.org/resource/Paris> <http://dbpedia.org/resource/France>)} ?r2 ?p1 ?r1 . ?r2 ?p1 ?r3 . FILTER (?r1 != ?r3) . FILTER (!isLiteral(?r2) )}
 }
 
-movie 2276, 3626
+PREFIX dbo: <http://dbpedia.org/ontology/>
+SELECT  (count (distinct ?p1) as ?x)
+WHERE {
+	{values (?r1 ?r2) {(<http://dbpedia.org/resource/Car> <http://dbpedia.org/resource/Automobile>)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) . FILTER (!isLiteral(?r2)) } UNION
+	{values (?r1 ?r2) {(<http://dbpedia.org/resource/Automobile> <http://dbpedia.org/resource/Car>)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) . FILTER (!isLiteral(?r2)) }
+	FILTER(?p1 = dbo:wikiPageRedirects)
+}
+
+SELECT 1 - (SUM(CASE WHEN direct_links > 0 THEN 1 ELSE 0 END) / SUM(direct_links + indirect_links)) wd,
+1 -(SUM(CASE WHEN indirect_links > 0 THEN 1 ELSE 0 END) / SUM(direct_links + indirect_links)) wi
+FROM lod_cache_relation
+
+SELECT 1 - IFNULL(AVG(CASE WHEN direct_links > 0 THEN 1 ELSE 0 END) / NULLIF(AVG(direct_links + indirect_links), 0), 0) wd,
+1 - IFNULL(AVG(CASE WHEN indirect_links > 0 THEN 1 ELSE 0 END) / NULLIF(AVG(direct_links + indirect_links), 0), 0) wi
+FROM lod_cache_relation
+
+
+PREFIX dbo: <http://dbpedia.org/ontology/>
+SELECT DISTINCT * WHERE {
+	SELECT (count (distinct ?p1) as ?x) WHERE {
+		{values (?r1 ?r2) {(<http://dbpedia.org/resource/Andy>  <http://dbpedia.org/resource/Chã>)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) .  FILTER(!isLiteral(?r2))} UNION
+		{values (?r1 ?r2) {(<http://dbpedia.org/resource/Chã>  <http://dbpedia.org/resource/Andy>)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) .  FILTER(!isLiteral(?r2))}
+	}
+	FILTER(?p1 = dbo:wikiPageRedirects)
+}
