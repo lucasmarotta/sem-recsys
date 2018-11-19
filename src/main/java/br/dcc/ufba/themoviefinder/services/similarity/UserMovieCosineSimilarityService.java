@@ -13,7 +13,7 @@ import br.dcc.ufba.themoviefinder.utils.CosineSimilarity;
 import br.dcc.ufba.themoviefinder.utils.DocVector;
 
 @Service
-public class UserMovieCosineSimilarityService implements UserMovieSimilarity
+public class UserMovieCosineSimilarityService implements UserMovieSimilarityService
 {
 	@Autowired
 	private TfIdfService tfIdfService;
@@ -23,6 +23,12 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarity
 		
 	}
 
+	@Override
+	public void reset()
+	{
+		
+	}	
+	
 	public double getSimilarityFromMovie(Movie movie1, Movie movie2)
 	{
 		return getSimilarity(movie1.getTokensList(), movie2.getTokensList());

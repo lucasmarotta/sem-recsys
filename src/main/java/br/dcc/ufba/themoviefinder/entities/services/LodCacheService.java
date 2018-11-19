@@ -1,8 +1,10 @@
 package br.dcc.ufba.themoviefinder.entities.services;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,13 @@ public class LodCacheService
 	@Autowired
 	private NotResourceRepository notResourceRepo;
 	
+	private Set<NotResource> notResourceCache;
+	
+	public LodCacheService()
+	{
+		notResourceCache = new HashSet<NotResource>();
+	}
+	
 	public LodCache getResource(String resource)
 	{
 		LodCache lc = lodCacheRepo.findByResource(resource);
@@ -40,6 +49,16 @@ public class LodCacheService
 	public List<LodCache> getResourceList(List<String> resources)
 	{
 		return lodCacheRepo.findByResourceIn(resources);
+	}
+	
+	public Set<NotResource> getNotResourceCache()
+	{
+		return notResourceCache;
+	}
+	
+	public void updateNotResourceCache()
+	{
+		notResourceCache.addAll(notResourceRepo.findAll());
 	}
 	
 	public List<NotResource> getAllNotResource()
