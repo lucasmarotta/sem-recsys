@@ -21,8 +21,8 @@ public class DBPediaService
 	@Value("${app.dbpedia-service-uri}") 
 	public String url;
 	
-	@Value("${app.dbpedia-service-timeout}") 
-	public String timeout;
+	//@Value("${app.dbpedia-service-timeout}") 
+	public String timeout = "6000";
 	
 	@Value("${app.dbpedia-service-log-queries: false}")
 	public boolean logQuery;
@@ -75,6 +75,7 @@ public class DBPediaService
 		QueryEngineHTTP qExec = null;
 		try {
 			qExec = new QueryEngineHTTP(url, query);
+			System.out.println(qExec.getQueryString());
 			qExec.addParam("timeout", timeout);
 	        ResultSet rs = qExec.execSelect();
 	        return ResultSetFormatter.toList(rs);

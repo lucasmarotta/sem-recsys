@@ -25,40 +25,40 @@ public class RLWSimilarity
 	@Autowired
 	private SparqlWalk sparqlWalk;
 	private LocalLodCacheService localCache;
-	private double directWeight = 0.8;
-	private double indirectWeight = 0.2;
+	private double directWeight = 0.1;
+	private double indirectWeight = 0.9;
 	private static final Logger LOGGER = LogManager.getLogger(RLWSimilarity.class);
-	
-	public LocalLodCacheService getLocalCache() 
+
+	public LocalLodCacheService getLocalCache()
 	{
 		return localCache;
 	}
 
-	public void setLocalCache(LocalLodCacheService localCache) 
+	public void setLocalCache(LocalLodCacheService localCache)
 	{
 		this.localCache = localCache;
 	}
 
-	public double getDirectWeight() 
+	public double getDirectWeight()
 	{
 		return directWeight;
 	}
 
-	public void setDirectWeight(double directWeight) 
+	public void setDirectWeight(double directWeight)
 	{
 		this.directWeight = directWeight;
 	}
 
-	public double getIndirectWeight() 
+	public double getIndirectWeight()
 	{
 		return indirectWeight;
 	}
 
-	public void setIndirectWeight(double indirectWeight) 
+	public void setIndirectWeight(double indirectWeight)
 	{
 		this.indirectWeight = indirectWeight;
 	}
-	
+
 	public double getSimilarity(List<String> terms1, List<String> terms2)
 	{
 		if(ObjectUtils.allNotNull(terms1, terms2)) {
@@ -86,7 +86,7 @@ public class RLWSimilarity
 					}
 				}
 			}
-			
+
 			//Average similarity
 			if(combinations > 0) {
 				return similarity / combinations;
@@ -96,14 +96,14 @@ public class RLWSimilarity
 			throw new NullPointerException("terms1 and terms2 must not be null");
 		}
 	}
-	
+
 	public double getSimilarityBetween2Terms(String term1, String term2) throws ResourceNotFoundException
 	{
 		if(ObjectUtils.allNotNull(term1, term2)) {
 			if(term1.equalsIgnoreCase(term2)) {
 				return 1;
 			}
-			double totalTermDirect = 0, totalTermIndirect = 0, totalDirect = 0, totalIndirect = 0;
+			double totalDirect = 0, totalIndirect = 0, totalBetweenDirect = 0, totalBetweenIndirect = 0;
 			String term1Resource = Sparql.wrapStringAsResource(term1);
 			String term2Resource = Sparql.wrapStringAsResource(term2);
 			if(localCache != null) {
@@ -112,7 +112,7 @@ public class RLWSimilarity
 				if((lodCache1 != null && lodCache2 != null) || (isResource(term2) && isResource(term1))) {
 					if(lodCache1 == null) {
 						lodCache1 = new LodCache(term1);
-						lodCache1.setDirectLinks(sparqlWalk.countDirectLinksFromResource(term1Resource)); 
+						lodCache1.setDirectLinks(sparqlWalk.countDirectLinksFromResource(term1Resource));
 						lodCache1.setIndirectLinks(sparqlWalk.countIndirectLinksFromResource(term1Resource));
 						localCache.saveLodCache(lodCache1);
 					}
@@ -122,56 +122,55 @@ public class RLWSimilarity
 						lodCache2.setIndirectLinks(sparqlWalk.countIndirectLinksFromResource(term2Resource));
 						localCache.saveLodCache(lodCache2);
 					}
-					totalTermDirect = lodCache1.getDirectLinks() + lodCache2.getDirectLinks();
-					totalTermIndirect = lodCache1.getIndirectLinks() + lodCache2.getIndirectLinks();
+					totalDirect = lodCache1.getDirectLinks() + lodCache2.getDirectLinks();
+					totalIndirect = lodCache1.getIndirectLinks() + lodCache2.getIndirectLinks();
 					LodCacheRelation lodCacheRelation = localCache.findOnLocalLodCacheRelation(term1, term2);
 					if(lodCacheRelation == null) {
 						lodCacheRelation = new LodCacheRelation(term1, term2);
 						if(sparqlWalk.isRedirect(term1Resource, term2Resource)) {
-							lodCacheRelation.setDirectLinks((int) totalTermDirect);
-							lodCacheRelation.setIndirectLinks((int) totalTermIndirect);
+							lodCacheRelation.setDirectLinks((int) totalDirect);
+							lodCacheRelation.setIndirectLinks((int) totalIndirect);
 						} else {
 							lodCacheRelation.setDirectLinks(sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource));
-							lodCacheRelation.setIndirectLinks(sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource));	
+							lodCacheRelation.setIndirectLinks(sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource));
 						}
 						localCache.saveLodRelationCache(lodCacheRelation);
 						if(LOGGER.isTraceEnabled()) {
 							LOGGER.trace(lodCacheRelation);
 						}
 					}
-					totalDirect = lodCacheRelation.getDirectLinks();
-					totalIndirect = lodCacheRelation.getIndirectLinks();	
+					totalBetweenDirect = lodCacheRelation.getDirectLinks();
+					totalBetweenIndirect = lodCacheRelation.getIndirectLinks();
 				} else {
 					throw new ResourceNotFoundException(String.format("%s and/or %s not found on dbpedia", term1, term2));
 				}
 			} else if(sparqlWalk.isResource(term1Resource) && sparqlWalk.isResource(term2Resource)) {
-				totalTermDirect = sparqlWalk.countDirectLinksFromResource(term1Resource) + sparqlWalk.countDirectLinksFromResource(term2Resource);
-				totalTermIndirect = sparqlWalk.countIndirectLinksFromResource(term1Resource) + sparqlWalk.countIndirectLinksFromResource(term2Resource);
 				if(sparqlWalk.isRedirect(term1Resource, term2Resource)) {
-					totalDirect = totalTermDirect;
-					totalIndirect = totalTermIndirect;
+					return 1;
 				} else {
-					totalDirect = sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource);
-					totalIndirect = sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource);	
+					totalDirect = sparqlWalk.countDirectLinksFromResource(term1Resource) + sparqlWalk.countDirectLinksFromResource(term2Resource);
+					totalIndirect = sparqlWalk.countIndirectLinksFromResource(term1Resource) + sparqlWalk.countIndirectLinksFromResource(term2Resource);
+					totalBetweenDirect = sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource);
+					totalBetweenIndirect = sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource);
 				}
 			}
-			
-			if(totalDirect < totalTermDirect) {
-				totalTermDirect = Math.log(totalTermDirect);
+
+			if(totalBetweenDirect < totalDirect) {
+				totalBetweenDirect++;
 			} else {
-				totalDirect = totalTermDirect;
+				totalBetweenDirect = totalDirect;
 			}
-			
-			if(totalIndirect < totalTermIndirect) {
-				totalTermIndirect = Math.log(totalTermIndirect);
+
+			if(totalBetweenIndirect < totalIndirect) {
+				totalBetweenIndirect++;
 			} else {
-				totalIndirect = totalTermIndirect;
+				totalBetweenIndirect = totalIndirect;
 			}
-			
-			double sDirect = totalDirect / (1 + totalTermDirect) * directWeight;
-			double sIndirect = totalIndirect / (1 + totalTermIndirect) * indirectWeight;
+
+			double pDirect = Math.log(totalBetweenDirect) / Math.log(totalDirect) * directWeight;
+			double pIndirect = Math.log(totalBetweenIndirect) / Math.log(totalIndirect) * indirectWeight;
 			if(directWeight + indirectWeight > 0) {
-				return 1 - 1 / (1 + (sDirect + sIndirect) / (directWeight + indirectWeight));	
+				return (pDirect + pIndirect) / (directWeight + indirectWeight);
 			} else {
 				return 0;
 			}
@@ -179,7 +178,7 @@ public class RLWSimilarity
 			throw new NullPointerException("terms1 and terms2 must not be null");
 		}
 	}
-	
+
 	private boolean isResource(String term)
 	{
 		if(localCache != null) {
@@ -190,8 +189,8 @@ public class RLWSimilarity
 					localCache.saveNotResource(nr);
 				}
 				return false;
-			}	
-			return true;	
+			}
+			return true;
 		}
 		return sparqlWalk.isResource(Sparql.wrapStringAsResource(term));
 	}

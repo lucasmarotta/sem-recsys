@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 buildscript {
 	ext {
-		springBootVersion = "2.0.3.RELEASE"
+		springBootVersion = "2.1.1.RELEASE"
 	}
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
@@ -17,10 +17,13 @@ apply plugin: "java"
 apply plugin: "java-library"
 apply plugin: "eclipse"
 apply plugin: "org.springframework.boot"
+/*
 bootJar {
     baseName = 'the-movie-finder'
     version =  '0.1.0'
 }
+*/
+
 
 group = "br.dcc.ufba"
 version = "0.1.0"
@@ -34,15 +37,14 @@ repositories {
 
 dependencies {
 	api "mysql:mysql-connector-java:6.0.6"
-	implementation "com.google.guava:guava:27.0-jre"
-	implementation "net.codecrafting:springfx-core:0.1.0-BETA3"
-	implementation "org.apache.commons:commons-lang3:3.7"
+	implementation "com.google.guava:guava:27.0.1-jre"
+	implementation "net.codecrafting:springfx-core:0.1.0-BETA5"
+	implementation "org.apache.commons:commons-lang3:3.8.1"
 	implementation "org.apache.commons:commons-math3:3.6.1"
-	implementation "org.apache.jena:apache-jena-libs:3.8.0"
-	implementation "org.apache.lucene:lucene-core:7.4.0"
-	implementation "org.apache.lucene:lucene-memory:7.4.0"
-	implementation "org.apache.opennlp:opennlp-tools:1.9.0"
-	//implementation "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
+	implementation "org.apache.jena:apache-jena-libs:3.10.0"
+	implementation "org.apache.lucene:lucene-core:7.6.0"
+	implementation "org.apache.lucene:lucene-memory:7.6.0"
+	implementation "org.apache.opennlp:opennlp-tools:1.9.1"
     implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-log4j2:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-thymeleaf:${springBootVersion}"

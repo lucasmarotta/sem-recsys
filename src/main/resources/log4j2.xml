@@ -37,6 +37,10 @@
             <AppenderRef ref="Console" />
             <AppenderRef ref="FileConsole"/>    		
     	</Logger>
+    	<Logger name="net.codecrafting" level="INFO" additivity="false">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="FileConsole"/>    		
+    	</Logger>    	
     	<Logger name="br.dcc.ufba.themoviefinder" level="INFO" additivity="false">
     	   	<AppenderRef ref="Console" />
     	   	<AppenderRef ref="FileConsole"/>

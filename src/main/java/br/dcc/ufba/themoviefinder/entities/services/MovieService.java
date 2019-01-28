@@ -3,8 +3,6 @@ package br.dcc.ufba.themoviefinder.entities.services;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -21,8 +19,6 @@ public class MovieService
 	
 	@Autowired
 	private NLPTokenizer nlpTokenizer;
-	
-	private static final Logger LOGGER = LogManager.getLogger(MovieService.class);
 	
 	public Movie getMovieById(Integer id)
 	{

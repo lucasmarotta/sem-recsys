@@ -16,8 +16,8 @@ import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.MovieService;
 import br.dcc.ufba.themoviefinder.services.similarity.UserMovieSimilarityService;
-import br.dcc.ufba.themoviefinder.utils.AsyncUtils;
 import br.dcc.ufba.themoviefinder.utils.ItemValue;
+import net.codecrafting.springfx.util.AsyncUtils;
 
 @Service
 public class RecomendationService 

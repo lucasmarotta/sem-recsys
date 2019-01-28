@@ -23,7 +23,7 @@ import java.util.Set;
 public class Sparql {
 
 	public static char quotes = '"';
-	
+
 	public static String wrapStringAsResource(String value)
 	{
 		if(value != null) {
@@ -45,7 +45,7 @@ public class Sparql {
 	 * @param uris
 	 * @return
 	 */
-	public static String getStringUnionDirectInBothWaysForCheckingCount(String uri1, Set<String> uris) 
+	public static String getStringUnionDirectInBothWaysForCheckingCount(String uri1, Set<String> uris)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		for (String stringUri : uris) {
@@ -62,7 +62,7 @@ public class Sparql {
 	 * @param uris
 	 * @return
 	 */
-	public static String getStringQueryValuesUnionIndirectIncoming(String uri1, Set<String> uris) 
+	public static String getStringQueryValuesUnionIndirectIncoming(String uri1, Set<String> uris)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		for (String stringUri : uris) {
@@ -79,7 +79,7 @@ public class Sparql {
 	 * @param uris
 	 * @return
 	 */
-	public static String getStringQueryValuesUnionIndirectOutgoing(String uri1, Set<String> uris) 
+	public static String getStringQueryValuesUnionIndirectOutgoing(String uri1, Set<String> uris)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		for (String stringUri : uris) {
@@ -96,7 +96,7 @@ public class Sparql {
 	 * @param uris
 	 * @return
 	 */
-	public static String getStringQueryValuesUnionDirectOneWay(String uri1, Set<String> uris) 
+	public static String getStringQueryValuesUnionDirectOneWay(String uri1, Set<String> uris)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		for (String stringUri : uris) {
@@ -113,7 +113,7 @@ public class Sparql {
 	 * @param uris
 	 * @return
 	 */
-	public static String getStringQueryValuesUnionDirectBothWays(String uri1, Set<String> uris) 
+	public static String getStringQueryValuesUnionDirectBothWays(String uri1, Set<String> uris)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 
@@ -127,10 +127,10 @@ public class Sparql {
 		// Lodica.print(ss);
 		return ss;
 	}
-	
-	
+
+
 	//fred
-	public static String getStringQueryValuesUnionDirectBothWaysForNodes(String uri1, Set<Node> nodes) 
+	public static String getStringQueryValuesUnionDirectBothWaysForNodes(String uri1, Set<Node> nodes)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		for (Node node : nodes) {
@@ -140,14 +140,14 @@ public class Sparql {
 		String ss = stringBuilder.toString().replaceFirst("UNION", "");
 		// Lodica.print(ss);
 		return ss;
-	}	
+	}
 
 	/**
 	 * @param uri1
 	 * @param uris
 	 * @return
 	 */
-	public static String getStringQueryValuesUnionIncomingAndOutgoing(String uri1, Set<String> uris) 
+	public static String getStringQueryValuesUnionIncomingAndOutgoing(String uri1, Set<String> uris)
 	{
 		String incoming = getStringQueryValuesUnionIndirectIncoming(uri1, uris);
 		String outgoing = getStringQueryValuesUnionIndirectIncoming(uri1, uris);
@@ -159,7 +159,7 @@ public class Sparql {
 		} else if (!incoming.trim().isEmpty() && outgoing.trim().isEmpty()) {
 			finalString.append(incoming);
 		} else {
-			finalString.append(outgoing);			
+			finalString.append(outgoing);
 		}
 		return finalString.toString();
 	}
@@ -169,7 +169,7 @@ public class Sparql {
 	 * @param uris
 	 * @return
 	 */
-	public static String addFilterURIs(String var, Set<String> uris) 
+	public static String addFilterURIs(String var, Set<String> uris)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		for (String stringUri : uris) {
@@ -180,10 +180,10 @@ public class Sparql {
 		return ss;
 	}
 
-	public static String addPrefix() 
+	public static String addPrefix()
 	{
-		StringBuilder prefix = new StringBuilder(); 
-		prefix.append(""); 
+		StringBuilder prefix = new StringBuilder();
+		prefix.append("");
 		prefix.append("PREFIX owl: <http://www.w3.org/2002/07/owl#> ");
 		prefix.append("PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> ");
 		prefix.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ");
@@ -203,9 +203,9 @@ public class Sparql {
 		return prefix.toString();
 
 	}
-	
 
-	public static String addLangFilter(String subject, String property, String object) 
+
+	public static String addLangFilter(String subject, String property, String object)
 	{
 		String subject1 = " ";
 		String property2 = " ";
@@ -226,7 +226,7 @@ public class Sparql {
 		return filter;
 	}
 
-	public static String addService(boolean usingGraph, String serviceURI) 
+	public static String addService(boolean usingGraph, String serviceURI)
 	{
 		if (!usingGraph) {
 			return "SELECT DISTINCT * WHERE { SERVICE <" + serviceURI + "> {";
@@ -235,7 +235,7 @@ public class Sparql {
 		}
 	}
 
-	public static String addServiceClosing(boolean usingGraph) 
+	public static String addServiceClosing(boolean usingGraph)
 	{
 		if (!usingGraph) {
 			return "}}";
@@ -244,7 +244,7 @@ public class Sparql {
 		}
 	}
 
-	public static String checkLimitNull(Object object) 
+	public static String checkLimitNull(Object object)
 	{
 		if (object == null) {
 			return " ";
@@ -256,7 +256,7 @@ public class Sparql {
 	/**
 	 * @return
 	 */
-	public static String addFilterDomain2(String subject, String object) 
+	public static String addFilterDomain2(String subject, String object)
 	{
 		String subject1 = " ";
 		String object3 = " ";
@@ -284,7 +284,7 @@ public class Sparql {
 	/**
 	 * @return
 	 */
-	public static String addFilterDomain(String subject, String object) 
+	public static String addFilterDomain(String subject, String object)
 	{
 		String subject1 = " ";
 		String object3 = " ";
@@ -302,7 +302,7 @@ public class Sparql {
 		return filter;
 
 	}
-	
+
 	/**
 	 * @author Gabriela
 	 * @param uris
@@ -311,16 +311,16 @@ public class Sparql {
 	public static String getStringQueryValuesUnionDirectOneWay(Set<String> uris)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
-		
+
 		for (String stringUri : uris) {
-			
+
 			stringBuilder.append( " "
 					+ " UNION "
 					+ " { values (?r1){( <" + stringUri.trim()+">)}  ?r1 ?p1 ?r2 . } " );
 		}
 		String ss = stringBuilder.toString().replaceFirst("UNION","");
 		//Lodica.print(ss);
-		
+
 		return ss;
 	}
 
@@ -328,16 +328,19 @@ public class Sparql {
 	/**
 	 * @return
 	 */
-	public static String addFilter(String subject, String property, String object) 
+	public static String addFilter(String property, String object)
 	{
-		StringBuilder property2 = new StringBuilder();;
-		StringBuilder object3 = new StringBuilder();;
+		String property2 = "";
+		String object2 = "";
 		if (property != null) {
-			property2.append(" FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageID>) . FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageRevisionID>) . FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageWikiLink>). FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageRedirects>) .  FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageDisambiguates>) . ");
+			property2 += " FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageID>) . FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageRevisionID>) . FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageRedirects>) . FILTER(?"+ property + " != <http://dbpedia.org/ontology/wikiPageExternalLink>)";
 		}
 		if (object != null) {
-			object3.append(" FILTER(!isLiteral(?" + object + "))");
+			object2 += " FILTER(!isLiteral(?" + object + "))";
 		}
-		return property2.toString() + object3.toString();
+		if(! object2.isEmpty()) {
+			return property2 + " . " + object2;
+		}
+		return property2 + object2;
 	}
 }
