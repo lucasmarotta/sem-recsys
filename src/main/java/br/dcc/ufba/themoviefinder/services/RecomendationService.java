@@ -22,6 +22,8 @@ import net.codecrafting.springfx.util.AsyncUtils;
 @Service
 public class RecomendationService 
 {
+	public static int counter = 0;
+	
 	private UserMovieSimilarityService similarityService;
 	
 	@Value("${app.recomendation-batch-size: 5}")
@@ -67,7 +69,6 @@ public class RecomendationService
 		if(similarityService != null) {
 			List<ItemValue<Movie>> simList = new ArrayList<ItemValue<Movie>>();
 			if(! (tokens.isEmpty() || movies.isEmpty())) {
-				similarityService.init();
 				List<List<Movie>> batchList = createBatchs(movies, batchSize);
 				for (List<Movie> batchMovieList : batchList) {
 					CompletableFuture<Boolean> completable = new CompletableFuture<Boolean>();
@@ -75,6 +76,9 @@ public class RecomendationService
 					AtomicInteger batchCounter = new AtomicInteger(1);
 					for (int i = 0; i < batchMovieSize; i++) {
 						final Movie movie = batchMovieList.get(i);
+						if(LOGGER.isDebugEnabled()) {
+							LOGGER.debug(movie.getTitle());
+						}
 						AsyncUtils.async(() -> {
 							ItemValue<Movie> mv = null;
 							try {
@@ -86,6 +90,7 @@ public class RecomendationService
 							
 							int v = batchCounter.getAndIncrement();	
 							if(LOGGER.isDebugEnabled()) {
+								LOGGER.debug(movie.getTokensList());
 								LOGGER.debug(v + " " + mv);
 							}
 							if(v == batchMovieSize) {
@@ -101,12 +106,12 @@ public class RecomendationService
 							LOGGER.error(e.getCause().getMessage(), e);
 						}
 					}
+					similarityService.reset();
 					
 					if(LOGGER.isDebugEnabled()) {
 						LOGGER.debug(simList.size() + " - " + simList.size() / ((double) movies.size()) * 100 + "%");
 					}
 				}
-				similarityService.reset();
 				simList.sort((ItemValue<Movie> a, ItemValue<Movie> b) -> a.compareTo(b));
 			}
 			int max = simList.size();

@@ -86,6 +86,8 @@ public class LodRelationId implements Serializable
     @Override
     public int hashCode() 
     {
-        return Objects.hash(getResource1(), getResource2());
+        int hash1 = Objects.hash(getResource1().toLowerCase(), getResource2().toLowerCase());
+        int hash2 = Objects.hash(getResource2().toLowerCase(), getResource1().toLowerCase());
+        return (hash1 < hash2) ? hash1 : hash2;
     }
 }

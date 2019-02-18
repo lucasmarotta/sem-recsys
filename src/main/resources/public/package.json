@@ -1,0 +1,22 @@
+{
+  "name": "the-movie-finder",
+  "version": "0.1.0",
+  "description": "The Movie Finder: A Semantic Recomendation System",
+  "main": "js/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasmarotta/sem-recsys.git"
+  },
+  "author": "Lucas Marotta",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lucasmarotta/sem-recsys/issues"
+  },
+  "homepage": "https://github.com/lucasmarotta/sem-recsys#readme",
+  "dependencies": {
+    "jquery": "^3.3.1"
+  }
+}

@@ -18,17 +18,6 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarityServ
 	@Autowired
 	private TfIdfService tfIdfService;
 	
-	public void init()
-	{
-		
-	}
-
-	@Override
-	public void reset()
-	{
-		
-	}	
-	
 	public double getSimilarityFromMovie(Movie movie1, Movie movie2)
 	{
 		return getSimilarity(movie1.getTokensList(), movie2.getTokensList());
@@ -60,5 +49,11 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarityServ
 			docVector.setVectorValue(uniqueTerms[i], docTfIdfList.get(i));
 		}
 		return CosineSimilarity.getSimilarity(queryVector, docVector);
+	}
+	
+	@Override
+	public void reset()
+	{
+		
 	}
 }

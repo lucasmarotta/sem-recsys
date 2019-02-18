@@ -1,13 +1,16 @@
 package br.dcc.ufba.themoviefinder.entities.models;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 @Entity
-public class LodCache 
+public class LodCache implements Serializable
 {
+	private static final long serialVersionUID = -7524844533429083649L;
+	
 	@Id
 	private String resource;
 	private Integer directLinks;
@@ -85,6 +88,6 @@ public class LodCache
     @Override
     public int hashCode() 
     {
-        return Objects.hash(resource);
+        return Objects.hash(resource.toLowerCase());
     }	
 }

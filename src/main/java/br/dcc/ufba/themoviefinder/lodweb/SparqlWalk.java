@@ -9,15 +9,17 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.shared.Lock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
+@Scope("prototype")
 public class SparqlWalk 
 {
-	@Value("${app.dbpedia-service-uri}") 
 	public String serviceUri;
 	
 	@Value("${app.dbpedia-service-log-queries: false}")
@@ -25,15 +27,13 @@ public class SparqlWalk
 	
 	@Value("${app.dbpedia-using-graph: false}")
 	public boolean usingGraph = false;
-	
+	private Model model;
 	public static final String BASE_COUNT_QUERY = "SELECT (count (distinct ?p1) as ?x) WHERE {%s}";
-	
 	private static final Logger LOGGER = LogManager.getLogger(SparqlWalk.class);
 	
-	Model model;
-	
-	public SparqlWalk()
+	public SparqlWalk(@Value("${app.dbpedia-service-uri}") String serviceUri)
 	{
+		this.serviceUri = serviceUri;
 		model = ModelFactory.createDefaultModel();
 	}
 	
@@ -187,14 +187,16 @@ public class SparqlWalk
 			}
 		}
 		QueryExecution qexec = QueryExecutionFactory.create(query, model);
+		model.enterCriticalSection(Lock.READ);
 		try {
 			ResultSet rs = qexec.execSelect();
 			for (; rs.hasNext();) {
 				QuerySolution rb = rs.nextSolution();
-				RDFNode x = rb.get("x");
+				RDFNode x = rb.get("x"); 
 				finding = (int) x.asLiteral().getValue();
 			}
 		} finally {
+			model.leaveCriticalSection();
 			qexec.close();
 		}
 		return finding;

@@ -1,10 +1,9 @@
 package br.dcc.ufba.themoviefinder.entities.services;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +12,8 @@ import org.springframework.stereotype.Service;
 import br.dcc.ufba.themoviefinder.entities.models.LodCache;
 import br.dcc.ufba.themoviefinder.entities.models.LodCacheRelation;
 import br.dcc.ufba.themoviefinder.entities.models.LodRelationId;
-import br.dcc.ufba.themoviefinder.entities.models.NotResource;
 import br.dcc.ufba.themoviefinder.entities.repositories.LodCacheRepository;
 import br.dcc.ufba.themoviefinder.entities.repositories.LodRelationRepository;
-import br.dcc.ufba.themoviefinder.entities.repositories.NotResourceRepository;
 
 @Service
 public class LodCacheService 
@@ -26,16 +23,6 @@ public class LodCacheService
 	
 	@Autowired
 	private LodRelationRepository lodRelationRepo;
-	
-	@Autowired
-	private NotResourceRepository notResourceRepo;
-	
-	private Set<NotResource> notResourceCache;
-	
-	public LodCacheService()
-	{
-		notResourceCache = new HashSet<NotResource>();
-	}
 	
 	public LodCache getResource(String resource)
 	{
@@ -51,39 +38,21 @@ public class LodCacheService
 		return lodCacheRepo.findByResourceIn(resources);
 	}
 	
-	public Set<NotResource> getNotResourceCache()
-	{
-		return notResourceCache;
-	}
-	
-	public void updateNotResourceCache()
-	{
-		notResourceCache.addAll(notResourceRepo.findAll());
-	}
-	
-	public List<NotResource> getAllNotResource()
-	{
-		return notResourceRepo.findAll();
-	}
-	
-	public boolean isNotResource(LodCache lodCache)
-	{
-		return notResourceRepo.findById(lodCache.getResource()) != null;
-	}
-	
-	public boolean isNotResource(String resource)
-	{
-		return notResourceRepo.findById(resource) != null;
-	}
-	
 	public LodCache saveResource(LodCache resource)
 	{
 		return lodCacheRepo.save(resource);
 	}
 	
-	public NotResource saveNotResource(NotResource notResource)
+	public List<LodCache> saveAllResources(List<LodCache> lodCaches)
 	{
-		return notResourceRepo.save(notResource);
+		lodCaches.removeAll(lodCacheRepo.findByResourceIn(lodCaches.stream().map(lodCache -> {
+			return lodCache.getResource();
+		}).collect(Collectors.toList())));
+		
+		if(! lodCaches.isEmpty()) {
+			return lodCacheRepo.saveAll(lodCaches);	
+		}
+		return lodCaches;
 	}
 	
 	public LodCacheRelation getResourceRelation(String resource1, String resource2)
@@ -127,16 +96,32 @@ public class LodCacheService
 	public List<LodCacheRelation> getResourceRelationList(List<LodRelationId> ids)
 	{
 		List<LodRelationId> expandedIds = new ArrayList<LodRelationId>();
-		for (LodRelationId lodRelationId : ids) {
+		ids.forEach(lodRelationId -> {
 			expandedIds.add(lodRelationId);
 			expandedIds.add(new LodRelationId(lodRelationId.getResource2(), lodRelationId.getResource1()));
-		}
-		return lodRelationRepo.findByIdIn(expandedIds);
+		});
+		return lodRelationRepo.findByIdResource1InAndIdResource2In(expandedIds.stream().map(lodId -> {
+			return lodId.getResource1();
+		}).distinct().collect(Collectors.toList()), expandedIds.stream().map(lodId -> {
+			return lodId.getResource2();
+		}).distinct().collect(Collectors.toList()));
 	}
 	
-	public void saveResourceRelation(LodCacheRelation lodRelation) 
+	public List<LodCacheRelation> saveAllResourceRelations(List<LodCacheRelation> lodCacheRelations)
 	{
-		lodRelationRepo.save(lodRelation);
+		lodCacheRelations.removeAll(getResourceRelationList(lodCacheRelations.stream().map(lodCacheRelation -> {
+			return lodCacheRelation.getId();
+		}).collect(Collectors.toList())));
+		
+		if(! lodCacheRelations.isEmpty()) {
+			return lodRelationRepo.saveAll(lodCacheRelations); 
+		}
+		return lodCacheRelations;
+	}
+	
+	public LodCacheRelation saveResourceRelation(LodCacheRelation lodRelation) 
+	{
+		return lodRelationRepo.save(lodRelation);
 	}
 	
 	public LodCacheRelation saveResourceRelation(String resource1, String resource2) 

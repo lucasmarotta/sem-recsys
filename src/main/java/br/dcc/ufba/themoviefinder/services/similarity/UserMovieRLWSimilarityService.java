@@ -1,6 +1,7 @@
 package br.dcc.ufba.themoviefinder.services.similarity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.exception.ResourceNotFoundException;
-import br.dcc.ufba.themoviefinder.services.LocalLodCacheService;
+import br.dcc.ufba.themoviefinder.services.cache.LocalCacheService;
 
 @Service
 public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
@@ -22,30 +23,18 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	public boolean useCache;
 	
 	@Autowired
-	private LocalLodCacheService localCache;
-	
-	@Autowired
 	private ConfigurableApplicationContext springContext;
 	
-	@Value("${app.rlw-direct-weight: 0.8}")
+	@Autowired
+	private LocalCacheService localCache;
+	
+	@Value("${app.rlw-direct-weight: 0.1}")
 	private double directWeight;
 	
-	@Value("${app.rlw-indirect-weight: 0.2}")
+	@Value("${app.rlw-indirect-weight: 0.9}")
 	private double indirectWeight;
 	
 	private static final Logger LOGGER = LogManager.getLogger(UserMovieRLWSimilarityService.class);
-
-	@Override
-	public void init() 
-	{
-		localCache.updateNotResourceCache();
-	}
-	
-	@Override
-	public void reset() 
-	{
-		localCache.clear();
-	}
 	
 	public void setDirectWeight(double directWeight) 
 	{
@@ -76,7 +65,11 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	public double getSimilarityBetween2Terms(String term1, String term2)
 	{
 		try {
-			return getRLWSimilarity().getSimilarityBetween2Terms(term1, term2);
+			RLWSimilarity rlwSimilarity = getRLWSimilarity();
+			if(useCache) {
+				localCache.updateLocalCache(Arrays.asList(term1), Arrays.asList(term2));
+			}
+			return rlwSimilarity.getSimilarityBetween2Terms(term1, term2);
 		} catch (ResourceNotFoundException e) {
 			if(LOGGER.isDebugEnabled()) {
 				LOGGER.debug(e.getMessage(), e);
@@ -88,7 +81,9 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	@Override
 	public double getSimilarity(List<String> queryTokens, List<String> docTokens) 
 	{
-		return getRLWSimilarity().getSimilarity(queryTokens, docTokens);
+		RLWSimilarity rlwSimilarity = getRLWSimilarity();
+		return rlwSimilarity.getSimilarity(queryTokens, docTokens);
+		
 	}
 	
 	private RLWSimilarity getRLWSimilarity()
@@ -96,9 +91,17 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 		RLWSimilarity rlwSimilarity = springContext.getBean(RLWSimilarity.class);
 		rlwSimilarity.setDirectWeight(directWeight);
 		rlwSimilarity.setIndirectWeight(indirectWeight);
-		if(useCache) {
-			rlwSimilarity.setLocalCache(springContext.getBean(LocalLodCacheService.class));	
+		if(! useCache) {
+			rlwSimilarity.setLocalCache(null);
 		}
 		return rlwSimilarity;
+	}
+	
+	@Override
+	public void reset()
+	{
+		if(useCache) {
+			localCache.clear();
+		}
 	}
 }
