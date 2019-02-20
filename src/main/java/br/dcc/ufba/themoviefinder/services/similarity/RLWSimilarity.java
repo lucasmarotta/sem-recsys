@@ -59,7 +59,7 @@ public class RLWSimilarity
 		this.indirectWeight = indirectWeight;
 	}
 
-	public double getSimilarity(List<String> terms1, List<String> terms2)
+	public double getSimilarity(List<String> terms1, List<String> terms2) throws Exception
 	{
 		if(ObjectUtils.allNotNull(terms1, terms2)) {
 			if(terms1.equals(terms2)) {
@@ -145,10 +145,11 @@ public class RLWSimilarity
 		return true;
 	}
 	
-	private double calculateSimilarity(List<String> terms1, List<String> terms2)
+	private double calculateSimilarity(List<String> terms1, List<String> terms2) throws Exception
 	{
-		double similarity = 0;
 		int combinations = 0;
+		int similarity = 0;
+		
 		for (String term1 : terms1) {
 			double bestSimilarity = -1;
 			for (String term2 : terms2) {

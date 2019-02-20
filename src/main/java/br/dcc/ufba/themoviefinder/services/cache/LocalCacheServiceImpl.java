@@ -15,11 +15,15 @@ import br.dcc.ufba.themoviefinder.entities.models.LodCache;
 import br.dcc.ufba.themoviefinder.entities.models.LodCacheRelation;
 import br.dcc.ufba.themoviefinder.entities.models.LodRelationId;
 import br.dcc.ufba.themoviefinder.entities.services.LodCacheService;
+import br.dcc.ufba.themoviefinder.utils.BatchWorkLoad;
 import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 
 @Service
 public class LocalCacheServiceImpl implements LocalCacheService
 {
+	
+	public int batchSize = 5;
+	
 	@Autowired
 	private LodCacheService lodCacheService;
 	
@@ -32,9 +36,21 @@ public class LocalCacheServiceImpl implements LocalCacheService
 	private static final Logger LOGGER = LogManager.getLogger(LocalCacheServiceImpl.class);
 	
 	@Override
+	public void setBatchSize(int batchSize) 
+	{
+		this.batchSize = batchSize;
+	}
+
+	@Override
+	public int getBatchSize() 
+	{
+		return batchSize;
+	}
+
+	@Override
 	public LodCache findLodCache(String resource) 
 	{
-		return localCacheRepo.getLodCache(new LodCache(resource));
+		return localCacheRepo.getAndSaveLodCache(new LodCache(resource));
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -49,15 +65,9 @@ public class LocalCacheServiceImpl implements LocalCacheService
 	}
 
 	@Override
-	public LodCache saveLodCache(LodCache lodCache) 
-	{
-		return lodCacheService.saveResource(lodCache);
-	}
-
-	@Override
 	public LodCacheRelation findLodCacheRelation(String resource1, String resource2) 
 	{
-		return localCacheRepo.getLodCacheRelation(new LodRelationId(resource1, resource2));
+		return localCacheRepo.getAndSaveLodCacheRelation(new LodRelationId(resource1, resource2));
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -72,25 +82,30 @@ public class LocalCacheServiceImpl implements LocalCacheService
 	}
 
 	@Override
-	public LodCacheRelation saveLodCacheRelation(LodCacheRelation lodCacheRelation) 
-	{
-		return lodCacheService.saveResourceRelation(lodCacheRelation);
-	}
-
-	@Override
-	public void updateLocalCache(List<String> terms1, List<String> terms2)
+	public void updateLocalCache(List<String> terms1, List<String> terms2) throws Exception
 	{
 		List<String> allTerms = new ArrayList<String>(terms1);
 		allTerms.addAll(terms2);
-		
-		allTerms.removeAll(findAllLodCache().stream().map(lodCache -> {
-			return lodCache.getResource();
-		}).collect(Collectors.toList()));
-		
+		allTerms = TFIDFCalculator.uniqueValues(allTerms);
+
+		/**
+		 * Find all lodCaches on DB and then get those that were not found submit to localCacheRepo
+		 */
 		List<LodCache> lodCaches = lodCacheService.getResourceList(allTerms);
 		lodCaches.forEach(lodCache -> {
-			cacheManager.getCache("lodCache").putIfAbsent(lodCache, lodCache);
+			cacheManager.getCache("lodCache").put(lodCache, lodCache);
 		});
+		List<LodCache> lodCacheNotFound = allTerms.stream().map(term -> {
+			return new LodCache(term);
+		}).filter(lodCache -> ! lodCaches.contains(lodCache)).collect(Collectors.toList());
+		(new BatchWorkLoad<LodCache>(batchSize, lodCacheNotFound)).run(lodCache -> {
+			localCacheRepo.getAndSaveLodCache(lodCache);
+			return null;
+		});
+
+		/**
+		 * Find all lodCacheRelations on DB and then get those that were not found submit to localCacheRepo
+		 */
 		List<LodRelationId> lodRelationIds = new ArrayList<LodRelationId>();
 		for (String term1 : terms1) {
 			for (String term2 : terms2) {
@@ -99,15 +114,18 @@ public class LocalCacheServiceImpl implements LocalCacheService
 				}
 			}
 		}
-		
-		lodRelationIds.removeAll(findAllLodCacheRelation().stream().map(lodCacheRelation -> {
-			return lodCacheRelation.getId();
-		}).collect(Collectors.toList()));
-		
 		List<LodCacheRelation> lodCacheRelations = lodCacheService.getResourceRelationList(lodRelationIds);
 		lodCacheRelations.forEach(lodCacheRelation -> {
-			cacheManager.getCache("lodCacheRelation").putIfAbsent(lodCacheRelation.getId(), lodCacheRelation);
+			cacheManager.getCache("lodCacheRelation").put(lodCacheRelation.getId(), lodCacheRelation);
 		});
+		List<LodRelationId> lodRelationIdNotFound = lodRelationIds.stream().filter(
+				lodId -> ! lodCacheRelations.contains(new LodCacheRelation(lodId))
+		).collect(Collectors.toList());		
+		(new BatchWorkLoad<LodRelationId>(batchSize, lodRelationIdNotFound)).run(lodId -> {
+			localCacheRepo.getAndSaveLodCacheRelation(lodId);
+			return null;
+		});
+		
 		if(LOGGER.isTraceEnabled()) {
 			LOGGER.trace(String.format("%d/%d found", lodRelationIds.size(), TFIDFCalculator.uniqueValues(allTerms).size()));
 			LOGGER.trace(String.format("%d/%d found", lodCacheRelations.size(), lodRelationIds.size()));
@@ -117,13 +135,6 @@ public class LocalCacheServiceImpl implements LocalCacheService
 	@Override
 	public void clear()
 	{
-		if(LOGGER.isTraceEnabled()) {
-			LOGGER.trace(String.format("Save %d lodCache", lodCacheService.saveAllResources(findAllLodCache()).size()));
-			LOGGER.trace(String.format("Save %d lodCacheRelation", lodCacheService.saveAllResourceRelations(findAllLodCacheRelation())));
-		} else {
-			lodCacheService.saveAllResources(findAllLodCache());
-			lodCacheService.saveAllResourceRelations(findAllLodCacheRelation());
-		}
 		for (String cacheName : cacheManager.getCacheNames()) {
 			cacheManager.getCache(cacheName).clear();
 		}

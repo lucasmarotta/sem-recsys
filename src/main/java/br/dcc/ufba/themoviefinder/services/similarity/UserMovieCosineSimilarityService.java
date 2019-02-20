@@ -52,6 +52,12 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarityServ
 	}
 	
 	@Override
+	public void init() 
+	{
+		// TODO Auto-generated method stub
+	}
+
+	@Override
 	public void reset()
 	{
 		

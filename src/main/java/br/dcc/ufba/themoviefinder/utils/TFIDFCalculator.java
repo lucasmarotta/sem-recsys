@@ -1,6 +1,7 @@
 package br.dcc.ufba.themoviefinder.utils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -61,6 +62,13 @@ public class TFIDFCalculator
      */
 	public static List<String> uniqueValues(List<String> listValues)
 	{
-		return new ArrayList<String>(new TreeSet<String>(listValues));
+		TreeSet<String> treeSet = new TreeSet<String>(new Comparator<String>() {
+			@Override
+			public int compare(String o1, String o2) {
+				return o1.compareToIgnoreCase(o2);
+			}
+		});
+		treeSet.addAll(listValues);
+		return new ArrayList<String>(treeSet);
 	}
 }

@@ -54,7 +54,7 @@ public class App extends SpringFXApplication
 	public void start(ViewStage viewStage) throws Exception 
 	{	
 		DBPediaService s = springContext.getBean(DBPediaService.class);
-		SparqlWalk sparqlWalk = springContext.getBean(SparqlWalk.class);
+		SparqlWalk sparqlWalk = springContext.getBean(SparqlWalk.class);	
 		
 		/*
 		LodRelationRepository lodRepo = springContext.getBean(LodRelationRepository.class);

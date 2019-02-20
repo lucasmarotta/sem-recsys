@@ -1,14 +1,12 @@
 package br.dcc.ufba.themoviefinder.services.similarity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
@@ -22,11 +20,14 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	@Value("${app.rlw-use-cache: true}")
 	public boolean useCache;
 	
-	@Autowired
-	private ConfigurableApplicationContext springContext;
+	@Value("${app.recomendation-batch-size: 5}")
+	public int batchSize;
 	
 	@Autowired
 	private LocalCacheService localCache;
+	
+	@Autowired
+	private RLWSimilarity rlwSimilarity;
 	
 	@Value("${app.rlw-direct-weight: 0.1}")
 	private double directWeight;
@@ -35,6 +36,16 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	private double indirectWeight;
 	
 	private static final Logger LOGGER = LogManager.getLogger(UserMovieRLWSimilarityService.class);
+	
+	public void init()
+	{
+		localCache.setBatchSize(batchSize);
+		rlwSimilarity.setDirectWeight(directWeight);
+		rlwSimilarity.setIndirectWeight(indirectWeight);
+		if(! useCache) {
+			rlwSimilarity.setLocalCache(null);
+		}		
+	}
 	
 	public void setDirectWeight(double directWeight) 
 	{
@@ -47,13 +58,13 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	}
 
 	@Override
-	public double getSimilarityFromMovie(Movie movie1, Movie movie2) 
+	public double getSimilarityFromMovie(Movie movie1, Movie movie2) throws Exception 
 	{
 		return getSimilarity(movie1.getTokensList(), movie2.getTokensList());
 	}
 
 	@Override
-	public double getSimilarityFromUser(User user, Movie movie) 
+	public double getSimilarityFromUser(User user, Movie movie) throws Exception 
 	{
 		List<String> userTokens = new ArrayList<String>();
 		for(Movie userMovie : user.getMovies()) {
@@ -65,10 +76,6 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	public double getSimilarityBetween2Terms(String term1, String term2)
 	{
 		try {
-			RLWSimilarity rlwSimilarity = getRLWSimilarity();
-			if(useCache) {
-				localCache.updateLocalCache(Arrays.asList(term1), Arrays.asList(term2));
-			}
 			return rlwSimilarity.getSimilarityBetween2Terms(term1, term2);
 		} catch (ResourceNotFoundException e) {
 			if(LOGGER.isDebugEnabled()) {
@@ -79,22 +86,9 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	}
 
 	@Override
-	public double getSimilarity(List<String> queryTokens, List<String> docTokens) 
+	public double getSimilarity(List<String> queryTokens, List<String> docTokens) throws Exception 
 	{
-		RLWSimilarity rlwSimilarity = getRLWSimilarity();
 		return rlwSimilarity.getSimilarity(queryTokens, docTokens);
-		
-	}
-	
-	private RLWSimilarity getRLWSimilarity()
-	{
-		RLWSimilarity rlwSimilarity = springContext.getBean(RLWSimilarity.class);
-		rlwSimilarity.setDirectWeight(directWeight);
-		rlwSimilarity.setIndirectWeight(indirectWeight);
-		if(! useCache) {
-			rlwSimilarity.setLocalCache(null);
-		}
-		return rlwSimilarity;
 	}
 	
 	@Override
