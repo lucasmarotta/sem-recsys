@@ -32,6 +32,9 @@ public class RecomendationService
 	@Value("${app.recomendation-batch-size: 5}")
 	public int batchSize;
 	
+	@Value("${app.recomendation-batch-movie-size: 500}")
+	public int batchMovieSize;
+	
 	@Autowired
 	private MovieService movieService;
 	
@@ -50,6 +53,16 @@ public class RecomendationService
 	public void setBatchSize(int batchSize) 
 	{
 		this.batchSize = batchSize;
+	}
+	
+	public int getBatchMovieSize() 
+	{
+		return batchMovieSize;
+	}
+
+	public void setBatchMovieSize(int batchMovieSize) 
+	{
+		this.batchMovieSize = batchMovieSize;
 	}
 
 	public List<ItemValue<Movie>> getRecomendationsByMovie(Movie movie, int qtMovies)
@@ -80,7 +93,7 @@ public class RecomendationService
 			List<Integer> movieIds = movies.stream().map(movie -> {
 				return movie.getId();
 			}).collect(Collectors.toList());
-			Pageable pageRequest = PageRequest.of(0, 500);
+			Pageable pageRequest = PageRequest.of(0, batchMovieSize);
 			try {
 				Page<Movie> moviesPage = movieService.pageMoviesExcept(movieIds, pageRequest);
 				int qtPages = moviesPage.getTotalPages();
