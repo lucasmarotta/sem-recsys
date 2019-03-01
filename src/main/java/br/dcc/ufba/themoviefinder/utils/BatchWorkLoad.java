@@ -17,6 +17,9 @@ public class BatchWorkLoad<T>
 	private int batchSize;
 	private List<List<T>> workLoadList;
 	private List<T> srcList;
+	private Callback<Integer, Void> onBatchStart;
+	private Callback<Integer, Void> onBatchEnd;
+	
 	private static final Logger LOGGER = LogManager.getLogger(BatchWorkLoad.class);
 	
 	public BatchWorkLoad(int batchSize, List<T> srcList)
@@ -54,14 +57,29 @@ public class BatchWorkLoad<T>
 		this.srcList = srcList;
 	}
 	
+	public void setOnBatchStart(Callback<Integer, Void> onBatchStart) 
+	{
+		this.onBatchStart = onBatchStart;
+	}
+
+	public void setOnBatchEnd(Callback<Integer, Void> onBatchEnd) 
+	{
+		this.onBatchEnd = onBatchEnd;
+	}
+
 	public void run(Callback<T, Void> callback) throws Exception
 	{
-		for(List<T> batchList : workLoadList) {
+		int workLoadSize = workLoadList.size();
+		for (int i = 0; i < workLoadSize; i++) {
+			List<T> batchList = workLoadList.get(i);
 			int batchListSize = batchList.size();
 			CompletableFuture<Boolean> completable = new CompletableFuture<Boolean>();
 			AtomicInteger batchCounter = new AtomicInteger(1);
-			for (int i = 0; i < batchListSize; i++) {
-				final T load = batchList.get(i);
+			if(onBatchStart != null) {
+				onBatchStart.call(i);
+			}
+			for (int j = 0; j < batchListSize; j++) {
+				final T load = batchList.get(j);
 				AsyncUtils.async(() -> {
 					try {
 						callback.call(load);	
@@ -76,6 +94,9 @@ public class BatchWorkLoad<T>
 				});
 			}
 			completable.get();
+			if(onBatchEnd != null) {
+				onBatchEnd.call(i);
+			}
 		};
 	}
 

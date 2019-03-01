@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
@@ -49,6 +51,11 @@ public class MovieService
 			movieIds.add(movie.getId());
 		}
 		return movieRepo.findByIdNotIn(movieIds);
+	}
+	
+	public Page<Movie> pageMoviesExcept(List<Integer> movieIds, Pageable pageble)
+	{
+		return movieRepo.findByIdNotIn(movieIds, pageble);
 	}
 	
 	public Movie findFirstByTitle(String title)

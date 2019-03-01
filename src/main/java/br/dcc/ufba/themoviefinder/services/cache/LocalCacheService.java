@@ -4,6 +4,7 @@ import java.util.List;
 
 import br.dcc.ufba.themoviefinder.entities.models.LodCache;
 import br.dcc.ufba.themoviefinder.entities.models.LodCacheRelation;
+import br.dcc.ufba.themoviefinder.entities.models.LodRelationId;
 
 public interface LocalCacheService 
 {
@@ -12,7 +13,7 @@ public interface LocalCacheService
 	public LodCacheRelation findLodCacheRelation(String resource1, String resource2);
 	public List<LodCacheRelation> findAllLodCacheRelation();
 	public void updateLocalCache(List<String> terms1, List<String> terms2) throws Exception;
-	public void setBatchSize(int batchSize);
-	public int getBatchSize();
+	public boolean isLodCacheCached(LodCache lodCache);
+	public boolean isLodCacheRelationCached(LodRelationId lodRelationId);
 	public void clear();
 }

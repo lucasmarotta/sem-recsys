@@ -15,6 +15,7 @@ import br.dcc.ufba.themoviefinder.entities.models.Movie;
 public interface MovieRepository extends JpaRepository<Movie, Long>
 {
 	Movie findById(Integer id);
+	
 	Movie findFirstByTitle(String title);
 	
 	@Query("SELECT m FROM Movie m WHERE m.title LIKE %:title%")
@@ -24,5 +25,8 @@ public interface MovieRepository extends JpaRepository<Movie, Long>
 	List<Movie> findAllByLikeTitle(@Param("title") String title);
 	
 	List<Movie> findByIdNotIn(List<Integer> movieIds);
+	
+	Page<Movie> findByIdNotIn(List<Integer> movieIds, Pageable pageble);
+	
 	List<Movie> findTop30ByOrderByIdAsc();
 }

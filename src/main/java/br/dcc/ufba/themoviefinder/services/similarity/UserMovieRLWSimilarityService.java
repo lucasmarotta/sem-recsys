@@ -20,9 +20,6 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	@Value("${app.rlw-use-cache: true}")
 	public boolean useCache;
 	
-	@Value("${app.recomendation-batch-size: 5}")
-	public int batchSize;
-	
 	@Autowired
 	private LocalCacheService localCache;
 	
@@ -39,7 +36,6 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	
 	public void init()
 	{
-		localCache.setBatchSize(batchSize);
 		rlwSimilarity.setDirectWeight(directWeight);
 		rlwSimilarity.setIndirectWeight(indirectWeight);
 		if(! useCache) {

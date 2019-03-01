@@ -18,8 +18,10 @@ public class AppConfig
     {
         SimpleCacheManager cacheManager = new SimpleCacheManager();
         cacheManager.setCaches(Arrays.asList(
-          new ConcurrentMapCache("lodCache"), 
-          new ConcurrentMapCache("lodCacheRelation")));
+          new ConcurrentMapCache("lodCache"),
+          new ConcurrentMapCache("lodCacheSaveLater"),
+          new ConcurrentMapCache("lodCacheRelation"),
+          new ConcurrentMapCache("lodCacheRelationSaveLater")));
         return cacheManager;
     }
 }

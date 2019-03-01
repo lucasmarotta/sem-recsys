@@ -35,7 +35,10 @@ public class LodCacheService
 	
 	public List<LodCache> getResourceList(List<String> resources)
 	{
-		return lodCacheRepo.findByResourceIn(resources);
+		if(! resources.isEmpty()) {
+			return lodCacheRepo.findByResourceIn(resources);	
+		}
+		return new ArrayList<LodCache>();
 	}
 	
 	public LodCache saveResource(LodCache resource)
@@ -45,12 +48,17 @@ public class LodCacheService
 	
 	public List<LodCache> saveAllResources(List<LodCache> lodCaches)
 	{
-		lodCaches.removeAll(lodCacheRepo.findByResourceIn(lodCaches.stream().map(lodCache -> {
-			return lodCache.getResource();
-		}).collect(Collectors.toList())));
-		
 		if(! lodCaches.isEmpty()) {
-			return lodCacheRepo.saveAll(lodCaches);	
+			
+			/*
+			lodCaches.removeAll(lodCacheRepo.findByResourceIn(lodCaches.stream().map(lodCache -> {
+				return lodCache.getResource();
+			}).collect(Collectors.toList())));
+			*/
+			
+			if(! lodCaches.isEmpty()) {
+				return lodCacheRepo.saveAll(lodCaches);	
+			}
 		}
 		return lodCaches;
 	}
@@ -95,26 +103,34 @@ public class LodCacheService
 
 	public List<LodCacheRelation> getResourceRelationList(List<LodRelationId> ids)
 	{
-		List<LodRelationId> expandedIds = new ArrayList<LodRelationId>();
-		ids.forEach(lodRelationId -> {
-			expandedIds.add(lodRelationId);
-			expandedIds.add(new LodRelationId(lodRelationId.getResource2(), lodRelationId.getResource1()));
-		});
-		return lodRelationRepo.findByIdResource1InAndIdResource2In(expandedIds.stream().map(lodId -> {
-			return lodId.getResource1();
-		}).distinct().collect(Collectors.toList()), expandedIds.stream().map(lodId -> {
-			return lodId.getResource2();
-		}).distinct().collect(Collectors.toList()));
+		if(! ids.isEmpty()) {
+			List<LodRelationId> expandedIds = new ArrayList<LodRelationId>();
+			ids.forEach(lodRelationId -> {
+				expandedIds.add(lodRelationId);
+				expandedIds.add(new LodRelationId(lodRelationId.getResource2(), lodRelationId.getResource1()));
+			});
+			return lodRelationRepo.findByIdResource1InAndIdResource2In(expandedIds.stream().map(lodId -> {
+				return lodId.getResource1();
+			}).distinct().collect(Collectors.toList()), expandedIds.stream().map(lodId -> {
+				return lodId.getResource2();
+			}).distinct().collect(Collectors.toList()));
+		}
+		return new ArrayList<LodCacheRelation>();
 	}
 	
 	public List<LodCacheRelation> saveAllResourceRelations(List<LodCacheRelation> lodCacheRelations)
 	{
-		lodCacheRelations.removeAll(getResourceRelationList(lodCacheRelations.stream().map(lodCacheRelation -> {
-			return lodCacheRelation.getId();
-		}).collect(Collectors.toList())));
-		
 		if(! lodCacheRelations.isEmpty()) {
-			return lodRelationRepo.saveAll(lodCacheRelations); 
+			
+			/*
+			lodCacheRelations.removeAll(getResourceRelationList(lodCacheRelations.stream().map(lodCacheRelation -> {
+				return lodCacheRelation.getId();
+			}).collect(Collectors.toList())));
+			*/
+			
+			if(! lodCacheRelations.isEmpty()) {
+				return lodRelationRepo.saveAll(lodCacheRelations); 
+			}	
 		}
 		return lodCacheRelations;
 	}

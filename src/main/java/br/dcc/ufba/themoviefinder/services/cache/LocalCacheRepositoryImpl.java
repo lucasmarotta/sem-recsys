@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import br.dcc.ufba.themoviefinder.entities.models.LodCache;
 import br.dcc.ufba.themoviefinder.entities.models.LodCacheRelation;
 import br.dcc.ufba.themoviefinder.entities.models.LodRelationId;
-import br.dcc.ufba.themoviefinder.entities.services.LodCacheService;
 import br.dcc.ufba.themoviefinder.lodweb.Sparql;
 import br.dcc.ufba.themoviefinder.lodweb.SparqlWalk;
 
@@ -19,14 +18,11 @@ public class LocalCacheRepositoryImpl implements LocalCacheRepository
 	@Autowired
 	private SparqlWalk sparqlWalk;
 	
-	@Autowired
-	private LodCacheService lodCacheService;
-	
 	private static final Logger LOGGER = LogManager.getLogger(LocalCacheRepositoryImpl.class);
 	
 	@Override
-	@Cacheable("lodCache")
-	public LodCache getAndSaveLodCache(LodCache lodCache) 
+	@Cacheable({"lodCache", "lodCacheSaveLater"})
+	public LodCache getLodCache(LodCache lodCache) 
 	{
 		lodCache.setDirectLinks(sparqlWalk.countDirectLinksFromResource(Sparql.wrapStringAsResource(lodCache.getResource())));
 		if(lodCache.getDirectLinks() == 0) {
@@ -37,12 +33,12 @@ public class LocalCacheRepositoryImpl implements LocalCacheRepository
 		if(LOGGER.isTraceEnabled()) {
 			LOGGER.trace("Save to Cache: " + lodCache);
 		}
-		return lodCacheService.saveResource(lodCache);
+		return lodCache;
 	}
 
 	@Override
-	@Cacheable("lodCacheRelation")
-	public LodCacheRelation getAndSaveLodCacheRelation(LodRelationId lodRelationId) 
+	@Cacheable({"lodCacheRelation", "lodCacheRelationSaveLater"})
+	public LodCacheRelation getLodCacheRelation(LodRelationId lodRelationId) 
 	{
 		String resource1 = Sparql.wrapStringAsResource(lodRelationId.getResource1());
 		String resource2 = Sparql.wrapStringAsResource(lodRelationId.getResource2());
@@ -57,6 +53,19 @@ public class LocalCacheRepositoryImpl implements LocalCacheRepository
 		if(LOGGER.isTraceEnabled()) {
 			LOGGER.trace("Save to Cache: " + lodCacheRelation);
 		}
-		return lodCacheService.saveResourceRelation(lodCacheRelation);
+		return lodCacheRelation;
 	}
+	
+	@Cacheable(value="lodCache", key="#lodCache", unless="#result == null")
+	public LodCache findLodCache(LodCache lodCache)
+	{
+		return null;
+	}
+	
+	@Cacheable(value="lodCacheRelation", key="#lodRelationId", unless="#result == null")
+	public LodCacheRelation findLodCacheRelation(LodRelationId lodRelationId)
+	{
+		return null;
+	}
+	
 }

@@ -13,8 +13,6 @@ import br.dcc.ufba.themoviefinder.controllers.launcher.LauncherContext;
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.UserService;
-import br.dcc.ufba.themoviefinder.lodweb.SparqlWalk;
-import br.dcc.ufba.themoviefinder.services.DBPediaService;
 import br.dcc.ufba.themoviefinder.services.RecomendationService;
 import br.dcc.ufba.themoviefinder.services.similarity.RLWSimilarity;
 import br.dcc.ufba.themoviefinder.services.similarity.UserMovieRLWSimilarityService;
@@ -53,10 +51,10 @@ public class App extends SpringFXApplication
 	@Override
 	public void start(ViewStage viewStage) throws Exception 
 	{	
+		/*
 		DBPediaService s = springContext.getBean(DBPediaService.class);
 		SparqlWalk sparqlWalk = springContext.getBean(SparqlWalk.class);	
 		
-		/*
 		LodRelationRepository lodRepo = springContext.getBean(LodRelationRepository.class);
 		LocalLodCacheServiceImpl localCache = springContext.getBean(LocalLodCacheServiceImpl.class);
 		List<LodRelationId> lodIds = Arrays.asList(new LodRelationId("France", "Paris"), 

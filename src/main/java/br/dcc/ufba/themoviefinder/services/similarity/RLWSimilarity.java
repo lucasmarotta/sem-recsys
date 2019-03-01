@@ -147,9 +147,8 @@ public class RLWSimilarity
 	
 	private double calculateSimilarity(List<String> terms1, List<String> terms2) throws Exception
 	{
-		int combinations = 0;
-		int similarity = 0;
-		
+		double combinations = 0;
+		double similarity = 0;
 		for (String term1 : terms1) {
 			double bestSimilarity = -1;
 			for (String term2 : terms2) {

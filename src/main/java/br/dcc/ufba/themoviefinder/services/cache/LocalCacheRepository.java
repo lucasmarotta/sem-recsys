@@ -6,6 +6,8 @@ import br.dcc.ufba.themoviefinder.entities.models.LodRelationId;
 
 public interface LocalCacheRepository 
 {
-	public LodCache getAndSaveLodCache(LodCache lodCache);
-	public LodCacheRelation getAndSaveLodCacheRelation(LodRelationId lodRelationId);
+	public LodCache getLodCache(LodCache lodCache);
+	public LodCacheRelation getLodCacheRelation(LodRelationId lodRelationId);
+	public LodCache findLodCache(LodCache lodCache);
+	public LodCacheRelation findLodCacheRelation(LodRelationId lodRelationId);
 }
