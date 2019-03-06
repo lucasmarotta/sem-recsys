@@ -52,8 +52,8 @@ public class App extends SpringFXApplication
 	public void start(ViewStage viewStage) throws Exception 
 	{	
 		/*
+		SparqlWalk sparqlWalk = springContext.getBean(SparqlWalk.class);
 		DBPediaService s = springContext.getBean(DBPediaService.class);
-		SparqlWalk sparqlWalk = springContext.getBean(SparqlWalk.class);	
 		
 		LodRelationRepository lodRepo = springContext.getBean(LodRelationRepository.class);
 		LocalLodCacheServiceImpl localCache = springContext.getBean(LocalLodCacheServiceImpl.class);
@@ -109,6 +109,7 @@ public class App extends SpringFXApplication
 		});
 		*/
 		StopWatch watch = new StopWatch();
+
 		User user = userService.findByName("Lucas");
 		for (Movie movie : user.getMovies()) {
 			System.out.println(movie.getTitle());

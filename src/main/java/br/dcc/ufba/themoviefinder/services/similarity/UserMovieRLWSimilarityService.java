@@ -26,10 +26,10 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	@Autowired
 	private RLWSimilarity rlwSimilarity;
 	
-	@Value("${app.rlw-direct-weight: 0.1}")
+	@Value("${app.rlw-direct-weight: 0.7}")
 	private double directWeight;
 	
-	@Value("${app.rlw-indirect-weight: 0.9}")
+	@Value("${app.rlw-indirect-weight: 0.3}")
 	private double indirectWeight;
 	
 	private static final Logger LOGGER = LogManager.getLogger(UserMovieRLWSimilarityService.class);
