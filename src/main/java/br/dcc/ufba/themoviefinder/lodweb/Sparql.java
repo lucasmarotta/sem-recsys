@@ -18,20 +18,45 @@
 
 package br.dcc.ufba.themoviefinder.lodweb;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Sparql {
 
 	public static char quotes = '"';
-
+	@SuppressWarnings("serial")
+	private static final Map<String, String> GLOBAL_PREFIXES = new HashMap<String, String>() {{
+		put(":", "<http://dbpedia.org/resource/>");
+		put("d:", "<http://learningsparql.com/ns/data#>");
+		put("owl:", "<http://www.w3.org/2002/07/owl#>");
+		put("e:", "<http://learningsparql.com/ns/expenses#>");
+		put("xsd:", "<http://www.w3.org/2001/XMLSchema#>");
+		put("skos:", "<http://www.w3.org/2004/02/skos/core#>");
+		put("rdfs:", "<http://www.w3.org/2000/01/rdf-schema#>");
+		put("dbpedia:", "<http://dbpedia.org/>");
+		put("dbo:", "<http://dbpedia.org/ontology/>");
+		put("geo:", "<http://www.w3.org/2003/01/geo/wgs84_pos#>");
+		put("dct:", "<http://www.w3.org/2000/01/rdf-schema#>");
+		put("rdf:", "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>");
+		put("dbpedia2:", "<http://dbpedia.org/property/>");
+		put("foaf:", "<http://xmlns.com/foaf/0.1/>");
+		put("bif:", "<bif:>");
+		put("dc:", "<http://purl.org/dc/elements/1.1/>");
+    }};
+    
 	public static String wrapStringAsResource(String value)
 	{
 		if(value != null) {
 			value = value.trim().replaceAll("\\s", "_").replaceAll("\\_+", "_");
-            if(value.charAt(value.length() - 1) == '_') value = value.substring(0, value.length() - 1);
+            if(value.charAt(value.length() - 1) == '_') {
+            	value = value.substring(0, value.length() - 1);
+            }
             value = value.replaceAll("\\?+", "").trim();
             if(value.length() > 1) {
-            	return new StringBuilder("http://dbpedia.org/resource/").append(value).toString();
+            	return "http://dbpedia.org/resource/" + (value).toString();
             }
 		} else {
 			throw new NullPointerException("value must not be null");
@@ -180,30 +205,22 @@ public class Sparql {
 		return ss;
 	}
 
-	public static String addPrefix()
+	public static String getPrefixes()
 	{
-		StringBuilder prefix = new StringBuilder();
-		prefix.append("");
-		prefix.append("PREFIX owl: <http://www.w3.org/2002/07/owl#> ");
-		prefix.append("PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> ");
-		prefix.append("PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ");
-		prefix.append("PREFIX dbo: <http://dbpedia.org/ontology/> ");
-		prefix.append("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> ");
-		prefix.append("PREFIX foaf: <http://xmlns.com/foaf/0.1/> ");
-		prefix.append("PREFIX dct: <http://www.w3.org/2000/01/rdf-schema#> ");
-		prefix.append("PREFIX dc: <http://purl.org/dc/elements/1.1/> ");
-		prefix.append("PREFIX bif: <bif:> ");
-		prefix.append("PREFIX : <http://dbpedia.org/resource/> ");
-		prefix.append("PREFIX dbpedia2: <http://dbpedia.org/property/> ");
-		prefix.append("PREFIX dbpedia: <http://dbpedia.org/> ");
-		prefix.append("PREFIX skos: <http://www.w3.org/2004/02/skos/core#> ");
-		prefix.append("PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> ");
-		prefix.append("PREFIX e: <http://learningsparql.com/ns/expenses#> ");
-		prefix.append("PREFIX d: <http://learningsparql.com/ns/data#> ");
-		return prefix.toString();
-
+		return GLOBAL_PREFIXES.entrySet()
+				.stream()
+				.map(entry -> "PREFIX " + entry.getKey() + " " + entry.getValue())
+				.collect(Collectors.joining(" "));
 	}
-
+	
+	public static String getPrefixes(List<String> prefixKeys)
+	{
+		return GLOBAL_PREFIXES.entrySet()
+				.stream()
+				.filter(entry -> prefixKeys.contains(entry.getKey()))
+				.map(entry -> "PREFIX " + entry.getKey() + " " + entry.getValue())
+				.collect(Collectors.joining(" "));
+	}
 
 	public static String addLangFilter(String subject, String property, String object)
 	{

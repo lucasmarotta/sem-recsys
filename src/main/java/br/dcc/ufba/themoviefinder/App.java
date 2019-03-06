@@ -108,7 +108,7 @@ public class App extends SpringFXApplication
 			System.out.println(String.format("%s/%s\t%f\t%f", lodId.getResource1(), lodId.getResource2(), indirect1 + indirect2, indirectRelation));
 		});
 		*/
-		
+		StopWatch watch = new StopWatch();
 		User user = userService.findByName("Lucas");
 		for (Movie movie : user.getMovies()) {
 			System.out.println(movie.getTitle());
@@ -118,7 +118,7 @@ public class App extends SpringFXApplication
 		recomendationService.setUserMovieSimilarity(springContext.getBean(UserMovieRLWSimilarityService.class));
 		
 		System.out.println("Recomendations with RLW Similarity\n");
-		StopWatch watch = new StopWatch();
+		
 		watch.start();
 		List<ItemValue<Movie>> recomendations = recomendationService.getRecomendationsByUserBestTerms(user, 20, 15);
 		watch.stop();

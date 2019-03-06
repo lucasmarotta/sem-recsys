@@ -12,7 +12,7 @@ public interface LocalCacheService
 	public List<LodCache> findAllLodCache();
 	public LodCacheRelation findLodCacheRelation(String resource1, String resource2);
 	public List<LodCacheRelation> findAllLodCacheRelation();
-	public void updateLocalCache(List<String> terms1, List<String> terms2) throws Exception;
+	public void updateLocalCache(List<String> terms1, List<String> terms2);
 	public boolean isLodCacheCached(LodCache lodCache);
 	public boolean isLodCacheRelationCached(LodRelationId lodRelationId);
 	public void clear();

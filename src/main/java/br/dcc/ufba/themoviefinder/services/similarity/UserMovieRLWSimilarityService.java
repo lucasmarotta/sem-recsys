@@ -82,7 +82,7 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	}
 
 	@Override
-	public double getSimilarity(List<String> queryTokens, List<String> docTokens) throws Exception 
+	public double getSimilarity(List<String> queryTokens, List<String> docTokens)
 	{
 		return rlwSimilarity.getSimilarity(queryTokens, docTokens);
 	}

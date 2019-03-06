@@ -85,7 +85,7 @@ public class LocalCacheServiceImpl implements LocalCacheService
 	}
 
 	@Override
-	public void updateLocalCache(List<String> terms1, List<String> terms2) throws Exception
+	public void updateLocalCache(List<String> terms1, List<String> terms2)
 	{
 		List<String> allTerms = new ArrayList<String>(terms1);
 		allTerms.addAll(terms2);

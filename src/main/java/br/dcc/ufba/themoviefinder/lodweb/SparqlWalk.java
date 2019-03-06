@@ -1,5 +1,8 @@
 package br.dcc.ufba.themoviefinder.lodweb;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -30,6 +33,7 @@ public class SparqlWalk
 	private Model model;
 	public static final String BASE_COUNT_QUERY = "SELECT (count (distinct ?p1) as ?x) WHERE {%s}";
 	private static final Logger LOGGER = LogManager.getLogger(SparqlWalk.class);
+	private static final List<String> PREFIXES = Arrays.asList(":", "dbo:");
 	
 	public SparqlWalk(@Value("${app.dbpedia-service-uri}") String serviceUri)
 	{
@@ -87,11 +91,7 @@ public class SparqlWalk
 	{
 		String queryString = Sparql.addService(usingGraph, serviceUri)
 				+ "SELECT (count (distinct ?r2) as ?x) WHERE { "
-				
-				//resources reached by indirect outgoing links
 				+ "{values (?r1 ?r2) {(<" + uri1+ ">  <" + uri2+ ">)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2)} UNION "
-				
-				//resources reached by direct outgoing links
 				+ "{values (?r1 ?r2) {(<" + uri2+ ">  <" + uri1+ ">)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2)} "+
 				
 				//Filter for wikiPageRedirects
@@ -180,11 +180,9 @@ public class SparqlWalk
 	private int execCountQuery(String queryString)
 	{
 		int finding = 0;
-		Query query = QueryFactory.create(Sparql.addPrefix() + queryString);
-		if(logQuery) {
-			if(LOGGER.isInfoEnabled()) {
-				LOGGER.info(query);	
-			}
+		Query query = QueryFactory.create(Sparql.getPrefixes(PREFIXES) + " " + queryString);
+		if(logQuery || LOGGER.isTraceEnabled()) {
+			LOGGER.trace(query);
 		}
 		QueryExecution qexec = QueryExecutionFactory.create(query, model);
 		model.enterCriticalSection(Lock.READ);
@@ -195,6 +193,9 @@ public class SparqlWalk
 				RDFNode x = rb.get("x"); 
 				finding = (int) x.asLiteral().getValue();
 			}
+		} catch(Exception e) {
+			LOGGER.error(query);
+			throw e;
 		} finally {
 			model.leaveCriticalSection();
 			qexec.close();

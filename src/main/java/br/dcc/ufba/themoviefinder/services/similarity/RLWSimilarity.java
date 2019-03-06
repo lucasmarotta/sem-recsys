@@ -59,7 +59,7 @@ public class RLWSimilarity
 		this.indirectWeight = indirectWeight;
 	}
 
-	public double getSimilarity(List<String> terms1, List<String> terms2) throws Exception
+	public double getSimilarity(List<String> terms1, List<String> terms2)
 	{
 		if(ObjectUtils.allNotNull(terms1, terms2)) {
 			if(terms1.equals(terms2)) {
@@ -67,10 +67,6 @@ public class RLWSimilarity
 			}
 			terms1 = TFIDFCalculator.uniqueValues(terms1);
 			terms2 = TFIDFCalculator.uniqueValues(terms2);
-			if(LOGGER.isTraceEnabled()) {
-				LOGGER.trace(terms1);
-				LOGGER.trace(terms2);
-			}
 			if(localCache != null) {
 				localCache.updateLocalCache(terms1, terms2);
 			}
@@ -95,8 +91,11 @@ public class RLWSimilarity
 			String term2Resource = Sparql.wrapStringAsResource(term2);
 			if(localCache != null) {
 				LodCache lodCache1 = localCache.findLodCache(term1);
+				if(! isLodCacheResource(lodCache1)) {
+					throw new ResourceNotFoundException(String.format("%s not found on dbpedia", term1));
+				}
 				LodCache lodCache2 = localCache.findLodCache(term2);
-				if(isLodCacheResource(lodCache1) && isLodCacheResource(lodCache2)) {
+				if(isLodCacheResource(lodCache2)) {
 					totalDirect = lodCache1.getDirectLinks() + lodCache2.getDirectLinks();
 					totalIndirect = lodCache1.getIndirectLinks() + lodCache2.getIndirectLinks();
 					LodCacheRelation lodCacheRelation = localCache.findLodCacheRelation(term1, term2);
@@ -109,10 +108,23 @@ public class RLWSimilarity
 					throw new ResourceNotFoundException(String.format("%s and/or %s not found on dbpedia", term1, term2));
 				}
 			} else {
-				totalDirect = sparqlWalk.countDirectLinksFromResource(term1Resource) + sparqlWalk.countDirectLinksFromResource(term2Resource);
-				totalIndirect = sparqlWalk.countIndirectLinksFromResource(term1Resource) + sparqlWalk.countIndirectLinksFromResource(term2Resource);
-				totalBetweenDirect = sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource);
-				totalBetweenIndirect = sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource);				
+				totalDirect = sparqlWalk.countDirectLinksFromResource(term1Resource);
+				if(totalDirect == 0) {
+					throw new ResourceNotFoundException(String.format("%s not found on dbpedia", term1));
+				} else {
+					totalDirect += sparqlWalk.countDirectLinksFromResource(term2Resource);
+					if(totalDirect == 0) {
+						throw new ResourceNotFoundException(String.format("%s and/or %s not found on dbpedia", term1, term2));
+					} else {
+						totalIndirect = sparqlWalk.countIndirectLinksFromResource(term1Resource) + sparqlWalk.countIndirectLinksFromResource(term2Resource);
+					}
+				}
+				if(sparqlWalk.isRedirect(term1Resource, term2Resource)) {
+					totalBetweenDirect = totalBetweenIndirect = 1;
+				} else {
+					totalBetweenDirect = sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource);
+					totalBetweenIndirect = sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource);	
+				}
 			}
 			
 			if(totalBetweenDirect < totalDirect) {
@@ -145,7 +157,7 @@ public class RLWSimilarity
 		return true;
 	}
 	
-	private double calculateSimilarity(List<String> terms1, List<String> terms2) throws Exception
+	private double calculateSimilarity(List<String> terms1, List<String> terms2)
 	{
 		double combinations = 0;
 		double similarity = 0;

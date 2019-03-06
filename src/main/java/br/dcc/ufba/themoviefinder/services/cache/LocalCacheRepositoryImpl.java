@@ -28,7 +28,7 @@ public class LocalCacheRepositoryImpl implements LocalCacheRepository
 		if(lodCache.getDirectLinks() == 0) {
 			lodCache.setIndirectLinks(0);
 		} else {
-			lodCache.setIndirectLinks(sparqlWalk.countIndirectLinksFromResource(Sparql.wrapStringAsResource(lodCache.getResource())));	
+			lodCache.setIndirectLinks(sparqlWalk.countIndirectLinksFromResource(Sparql.wrapStringAsResource(lodCache.getResource())));
 		}
 		if(LOGGER.isTraceEnabled()) {
 			LOGGER.trace("Save to Cache: " + lodCache);

@@ -132,8 +132,8 @@ public class BatchWorkLoad<T>
 	        }
 	        fitBatchSize = Math.max(fitBatchSize, 4);
 		}
-        if(LOGGER.isTraceEnabled()) {
-        	LOGGER.trace(String.format("oSrcSize: %d, srcSize: %d, batchSize: %d, bestFitBatchSize: %d", oSrcSize, srcSize, batchSize, fitBatchSize));
+        if(LOGGER.isDebugEnabled()) {
+        	LOGGER.debug(String.format("oSrcSize: %d, srcSize: %d, batchSize: %d, bestFitBatchSize: %d", oSrcSize, srcSize, batchSize, fitBatchSize));
         }
 		batchSize = fitBatchSize;
 	}
