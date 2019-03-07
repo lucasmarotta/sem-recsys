@@ -1,6 +1,7 @@
 package br.dcc.ufba.themoviefinder.services.similarity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -26,10 +27,10 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	@Autowired
 	private RLWSimilarity rlwSimilarity;
 	
-	@Value("${app.rlw-direct-weight: 0.7}")
+	@Value("${app.rlw-direct-weight: 0.8}")
 	private double directWeight;
 	
-	@Value("${app.rlw-indirect-weight: 0.3}")
+	@Value("${app.rlw-indirect-weight: 0.2}")
 	private double indirectWeight;
 	
 	private static final Logger LOGGER = LogManager.getLogger(UserMovieRLWSimilarityService.class);
@@ -38,6 +39,9 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	{
 		rlwSimilarity.setDirectWeight(directWeight);
 		rlwSimilarity.setIndirectWeight(indirectWeight);
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("direct weight: " + directWeight + " indirect weight: " + indirectWeight);
+		}
 		if(! useCache) {
 			rlwSimilarity.setLocalCache(null);
 		}		
@@ -72,10 +76,13 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	public double getSimilarityBetween2Terms(String term1, String term2)
 	{
 		try {
+			if(useCache) {
+				localCache.updateLocalCache(Arrays.asList(term1), Arrays.asList(term2));
+			}
 			return rlwSimilarity.getSimilarityBetween2Terms(term1, term2);
 		} catch (ResourceNotFoundException e) {
-			if(LOGGER.isDebugEnabled()) {
-				LOGGER.debug(e.getMessage(), e);
+			if(LOGGER.isTraceEnabled()) {
+				LOGGER.trace(e.getMessage(), e);
 			}
 		}
 		return 0;

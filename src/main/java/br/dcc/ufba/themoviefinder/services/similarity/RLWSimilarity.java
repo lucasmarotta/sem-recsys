@@ -25,8 +25,8 @@ public class RLWSimilarity
 	@Autowired
 	private SparqlWalk sparqlWalk;
 	
-	private double directWeight = 0.1;
-	private double indirectWeight = 0.9;
+	private double directWeight = 0.8;
+	private double indirectWeight = 0.2;
 	private static final Logger LOGGER = LogManager.getLogger(RLWSimilarity.class);
 
 	public LocalCacheService getLocalCache()
@@ -102,8 +102,8 @@ public class RLWSimilarity
 					if(LOGGER.isTraceEnabled()) {
 						LOGGER.trace(lodCacheRelation);
 					}
-					totalBetweenDirect = lodCacheRelation.getDirectLinks();
-					totalBetweenIndirect = lodCacheRelation.getIndirectLinks();
+					totalBetweenDirect = (lodCacheRelation.getDirectLinks() >= 0) ? lodCacheRelation.getDirectLinks() : totalDirect;
+					totalBetweenIndirect = (lodCacheRelation.getIndirectLinks() >= 0) ? lodCacheRelation.getIndirectLinks() : totalIndirect;
 				} else {
 					throw new ResourceNotFoundException(String.format("%s and/or %s not found on dbpedia", term1, term2));
 				}
@@ -127,23 +127,41 @@ public class RLWSimilarity
 				}
 			}
 			
-			if(totalBetweenDirect < totalDirect) {
-				totalBetweenDirect++;
+			if(totalBetweenDirect == totalDirect && totalBetweenIndirect == totalIndirect) {
+				return 1;
 			} else {
-				totalBetweenDirect = totalDirect;
+				if(totalBetweenDirect > totalDirect) {
+					totalBetweenDirect = totalDirect;
+				}
+				if(totalBetweenIndirect > totalIndirect) {
+					totalBetweenIndirect = totalIndirect;
+				}
+				double pDirect = 0;
+				double pIndirect = 0;
+				
+				//LDSD Like formula
+				if(totalDirect > 0) {
+					pDirect = 1 - 1 / (1 + totalBetweenDirect / (1 + Math.log(totalDirect)));
+				}
+				if (totalIndirect > 0){
+					pIndirect = 1 - 1 / (1 + totalBetweenIndirect / (1 + Math.log(totalIndirect)));
+				}
+				
+				/*
+				//Dirstribution formula
+				if(totalDirect > 0) {
+					pDirect = Math.pow(totalBetweenDirect, 1/3d) / Math.pow(totalDirect, 1/3d);
+				}
+				if (totalIndirect > 0){
+					pIndirect = Math.pow(totalBetweenIndirect, 1/3d) / Math.pow(totalIndirect, 1/3d);
+				}
+				*/
+				
+				if(directWeight + indirectWeight > 0) {
+					return (pDirect * directWeight + pIndirect * indirectWeight) / (directWeight + indirectWeight);
+				}
+				return 0;
 			}
-			if(totalBetweenIndirect < totalIndirect) {
-				totalBetweenIndirect++;
-			} else {
-				totalBetweenIndirect = totalIndirect;
-			}
-
-			double pDirect = Math.log(totalBetweenDirect) / Math.log(totalDirect) * directWeight;
-			double pIndirect = Math.log(totalBetweenIndirect) / Math.log(totalIndirect) * indirectWeight;
-			if(directWeight + indirectWeight > 0) {
-				return (pDirect + pIndirect) / (directWeight + indirectWeight);
-			}
-			return 0;
 		} else {
 			throw new NullPointerException("terms1 and terms2 must not be null");
 		}

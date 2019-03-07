@@ -14,10 +14,8 @@ import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.UserService;
 import br.dcc.ufba.themoviefinder.services.RecomendationService;
-import br.dcc.ufba.themoviefinder.services.similarity.RLWSimilarity;
 import br.dcc.ufba.themoviefinder.services.similarity.UserMovieRLWSimilarityService;
 import br.dcc.ufba.themoviefinder.utils.ItemValue;
-import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 import net.codecrafting.springfx.context.ViewStage;
 import net.codecrafting.springfx.core.SpringFXApplication;
 import net.codecrafting.springfx.core.SpringFXLauncher;
@@ -32,7 +30,7 @@ public class App extends SpringFXApplication
 	private RecomendationService recomendationService;
 	
 	@Autowired
-	private RLWSimilarity rlwSimilarity;
+	private UserMovieRLWSimilarityService similarityService;
 	
 	@Autowired
 	private ConfigurableApplicationContext springContext;
@@ -51,12 +49,10 @@ public class App extends SpringFXApplication
 	@Override
 	public void start(ViewStage viewStage) throws Exception 
 	{	
-		/*
-		SparqlWalk sparqlWalk = springContext.getBean(SparqlWalk.class);
-		DBPediaService s = springContext.getBean(DBPediaService.class);
+		StopWatch watch = new StopWatch();
 		
-		LodRelationRepository lodRepo = springContext.getBean(LodRelationRepository.class);
-		LocalLodCacheServiceImpl localCache = springContext.getBean(LocalLodCacheServiceImpl.class);
+		/*
+		similarityService.init();
 		List<LodRelationId> lodIds = Arrays.asList(new LodRelationId("France", "Paris"), 
 				new LodRelationId("Brazil", "Brasilia"),
 				new LodRelationId("Car", "Automobile"),
@@ -66,30 +62,27 @@ public class App extends SpringFXApplication
 				new LodRelationId("Ariana_Grande", "Selena_Gomez"),
 				new LodRelationId("Selena_Gomez", "Elon_Musk"),
 				new LodRelationId("United_States", "Africa"),
-				new LodRelationId("Car", "Automobile"),
 				new LodRelationId("Coconut", "Plant"),
 				new LodRelationId("Tom_Cruise", "Lady_Gaga"),
 				new LodRelationId("Melon", "Mars"),
 				new LodRelationId("Star", "Galaxy"),
 				new LodRelationId("Book", "Movie"),
 				new LodRelationId("Book", "woifgjwigfjwjgigj"),
-				new LodRelationId("iwjiwjgiwj", "gwgvwesvwegh"));
-	
-		List<String> terms1 = lodIds.stream().map(lodId -> {
-			return lodId.getResource2(); 
-		}).collect(Collectors.toList());
+				new LodRelationId("Johnny_Cash", "June_Carter_Cash"),
+				new LodRelationId("Johnny_Cash", "Al_Green"),
+				new LodRelationId("Johnny_Cash", "Elvis_Presley"),
+				new LodRelationId("Johnny_Cash", "Kris_Kristofferson"),
+				new LodRelationId("Johnny_Cash", "Carlene_Carter"));
 		
-		List<String> terms2 = lodIds.stream().map(lodId -> {
-			return lodId.getResource1(); 
-		}).collect(Collectors.toList());
-		
-		rlwSimilarity.setLocalCache(localCache);
 		lodIds.forEach(lodId -> {
-			System.out.println(rlwSimilarity.getSimilarity(terms1, terms2));
+			System.out.println("\n" + lodId);
+			System.out.println(similarityService.getSimilarityBetween2Terms(lodId.getResource1(), lodId.getResource2()));
 		});
+		similarityService.reset();
 		*/
 		
 		/*
+		DBPediaService s = springContext.getBean(DBPediaService.class);
 		lodIds.forEach((lodId) -> {
 			String term1 = Sparql.wrapStringAsResource(lodId.getResource1());
 			String term2 = Sparql.wrapStringAsResource(lodId.getResource2());
@@ -108,7 +101,6 @@ public class App extends SpringFXApplication
 			System.out.println(String.format("%s/%s\t%f\t%f", lodId.getResource1(), lodId.getResource2(), indirect1 + indirect2, indirectRelation));
 		});
 		*/
-		StopWatch watch = new StopWatch();
 
 		User user = userService.findByName("Lucas");
 		for (Movie movie : user.getMovies()) {
@@ -116,7 +108,7 @@ public class App extends SpringFXApplication
 			System.out.println(movie.getTokensList());
 		}
 		List<String> userTokens = user.getUserBestTerms(15);
-		recomendationService.setUserMovieSimilarity(springContext.getBean(UserMovieRLWSimilarityService.class));
+		recomendationService.setUserMovieSimilarity(similarityService);
 		
 		System.out.println("Recomendations with RLW Similarity\n");
 		
@@ -126,10 +118,10 @@ public class App extends SpringFXApplication
 		System.out.println("Time Elapsed: " + (watch.getTime() / 1000) + "s");
 		
 		for (ItemValue<Movie> movieSimilarity : recomendations) {
-			System.out.println(movieSimilarity.item.getTitle() + " - " + movieSimilarity.value);
-			System.out.println(TFIDFCalculator.uniqueValues(movieSimilarity.item.getTokensList()));
-			System.out.println(userTokens);
-			System.out.println();
+			System.out.println(movieSimilarity.item.getTitle());// + " - " + movieSimilarity.value);
+			//System.out.println(TFIDFCalculator.uniqueValues(movieSimilarity.item.getTokensList()));
+			//System.out.println(userTokens);
+			//System.out.println();
 		}
 		SpringFXLauncher.exit();
 	}

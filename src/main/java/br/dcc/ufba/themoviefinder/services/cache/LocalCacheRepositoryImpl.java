@@ -44,8 +44,8 @@ public class LocalCacheRepositoryImpl implements LocalCacheRepository
 		String resource2 = Sparql.wrapStringAsResource(lodRelationId.getResource2());
 		LodCacheRelation lodCacheRelation = new LodCacheRelation(lodRelationId);
 		if(sparqlWalk.isRedirect(resource1, resource2)) {
-			lodCacheRelation.setDirectLinks(1);
-			lodCacheRelation.setIndirectLinks(1);
+			lodCacheRelation.setDirectLinks(-1);
+			lodCacheRelation.setIndirectLinks(-1);
 		} else {
 			lodCacheRelation.setDirectLinks(sparqlWalk.countDirectLinksBetween2Resources(resource1, resource2));
 			lodCacheRelation.setIndirectLinks(sparqlWalk.countIndirectLinksBetween2Resources(resource1, resource2));	
