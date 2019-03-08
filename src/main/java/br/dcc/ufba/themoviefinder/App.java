@@ -16,6 +16,7 @@ import br.dcc.ufba.themoviefinder.entities.services.UserService;
 import br.dcc.ufba.themoviefinder.services.RecomendationService;
 import br.dcc.ufba.themoviefinder.services.similarity.UserMovieRLWSimilarityService;
 import br.dcc.ufba.themoviefinder.utils.ItemValue;
+import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 import net.codecrafting.springfx.context.ViewStage;
 import net.codecrafting.springfx.core.SpringFXApplication;
 import net.codecrafting.springfx.core.SpringFXLauncher;
@@ -101,28 +102,28 @@ public class App extends SpringFXApplication
 			System.out.println(String.format("%s/%s\t%f\t%f", lodId.getResource1(), lodId.getResource2(), indirect1 + indirect2, indirectRelation));
 		});
 		*/
-
+		
 		User user = userService.findByName("Lucas");
 		for (Movie movie : user.getMovies()) {
+			System.out.println();
 			System.out.println(movie.getTitle());
 			System.out.println(movie.getTokensList());
 		}
-		List<String> userTokens = user.getUserBestTerms(15);
+		
+		List<String> userTokens = user.getUserBestTerms(-1);
 		recomendationService.setUserMovieSimilarity(similarityService);
-		
 		System.out.println("Recomendations with RLW Similarity\n");
-		
 		watch.start();
-		List<ItemValue<Movie>> recomendations = recomendationService.getRecomendationsByUserBestTerms(user, 20, 15);
+		List<ItemValue<Movie>> recomendations = recomendationService.getRecomendationsByUserBestTerms(user, 20);
 		watch.stop();
 		System.out.println("Time Elapsed: " + (watch.getTime() / 1000) + "s");
-		
 		for (ItemValue<Movie> movieSimilarity : recomendations) {
-			System.out.println(movieSimilarity.item.getTitle());// + " - " + movieSimilarity.value);
-			//System.out.println(TFIDFCalculator.uniqueValues(movieSimilarity.item.getTokensList()));
-			//System.out.println(userTokens);
-			//System.out.println();
+			System.out.println(movieSimilarity.item.getTitle() + " - " + movieSimilarity.value);
+			System.out.println(TFIDFCalculator.uniqueValues(movieSimilarity.item.getTokensList()));
+			System.out.println(userTokens);
+			System.out.println();
 		}
+		
 		SpringFXLauncher.exit();
 	}
 }

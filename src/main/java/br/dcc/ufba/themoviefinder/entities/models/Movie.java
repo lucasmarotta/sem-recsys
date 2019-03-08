@@ -91,6 +91,7 @@ public class Movie
 	
 	public void setTokens(List<String> tokens)
 	{
+		tokensList = tokens;
 		this.tokens = listToString(tokens);
 	}
 

@@ -75,9 +75,9 @@ public class RecomendationService
 		return pageAllRecomendations(user.getUserMovieTokens(), user.getMovies(), qtMovies);
 	}
 	
-	public List<ItemValue<Movie>> getRecomendationsByUserBestTerms(User user, int qtMovies, int qtTerms)
+	public List<ItemValue<Movie>> getRecomendationsByUserBestTerms(User user, int qtMovies)
 	{
-		return pageAllRecomendations(user.getUserBestTerms(qtTerms), user.getMovies(), qtMovies);
+		return pageAllRecomendations(user.getUserBestTerms(-1), user.getMovies(), qtMovies);
 	}
 	
 	public void updateRecomendations(User user, int qtdMovies)

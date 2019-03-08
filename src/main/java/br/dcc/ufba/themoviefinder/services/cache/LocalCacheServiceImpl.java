@@ -145,6 +145,7 @@ public class LocalCacheServiceImpl implements LocalCacheService
 		for (String cacheName : cacheManager.getCacheNames()) {
 			cacheManager.getCache(cacheName).clear();
 		}
+		System.gc();
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })

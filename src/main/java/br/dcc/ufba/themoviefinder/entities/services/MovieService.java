@@ -3,7 +3,10 @@ package br.dcc.ufba.themoviefinder.entities.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +24,11 @@ public class MovieService
 	
 	@Autowired
 	private NLPTokenizer nlpTokenizer;
+	
+	@Value("${app.recomendation-batch-movie-size: 500}")
+	private int batchMovieSize;
+	
+	private static final Logger LOGGER = LogManager.getLogger(MovieService.class);
 	
 	public Movie getMovieById(Integer id)
 	{
@@ -58,6 +66,11 @@ public class MovieService
 		return movieRepo.findByIdNotIn(movieIds, pageble);
 	}
 	
+	public Page<Movie> pageMovies(Pageable pageble)
+	{
+		return movieRepo.findAll(pageble);
+	}
+	
 	public Movie findFirstByTitle(String title)
 	{
 		return movieRepo.findFirstByTitle(title);
@@ -89,31 +102,44 @@ public class MovieService
 	
 	public void updateMovieTokens()
 	{
-		updateMovieTokens(getAllMovies());
-	}
-	
-	public void updateMovieTokens(List<Movie> movies)
-	{
-		if(movies != null) {
-			for (Movie movie : movies) 
-			{
-				List<String> tokens = generateMovieTokens(movie);
-				if(!tokens.isEmpty()) {
-					movieRepo.save(movie);
-				}
-			}	
-		}		
+		Pageable pageRequest = PageRequest.of(0, batchMovieSize);
+		Page<Movie> page = movieRepo.findAll(pageRequest);
+		int qtPages = page.getTotalPages();
+		updateMovieTokens(page.getContent());
+		for (int i = 1; i < qtPages; i++) {
+			updateMovieTokens(movieRepo.findAll(page.nextPageable()).getContent());
+		}
+		nlpTokenizer.unloadModels();
 	}
 	
 	public List<String> generateMovieTokens(Movie movie)
 	{
-		if(movie.getTokens() == null) {
-			List<String> tokens = new ArrayList<String>();
-			if(movie != null && movie.getDescription() != null) {
+		List<String> tokens = new ArrayList<String>();
+		if(movie != null && movie.getDescription() != null) {
+			if(! nlpTokenizer.isModelsLoaded()) {
+				try {
+					nlpTokenizer.loadModels();
+				} catch (Exception e) {
+					LOGGER.error(e.getMessage(), e);
+				}
+			}
+			if(nlpTokenizer.isModelsLoaded()) {
 				return nlpTokenizer.tokenize(movie.getDescription());
 			}
-			return tokens;	
 		}
-		return movie.getTokensList();
+		return tokens;	
+	}
+	
+	private void updateMovieTokens(List<Movie> movies)
+	{
+		if(movies != null) {
+			movies.forEach(movie -> {
+				List<String> tokens = generateMovieTokens(movie);
+				if(! tokens.isEmpty()) {
+					movie.setTokens(tokens);
+					movieRepo.save(movie);
+				}
+			});
+		}		
 	}
 }

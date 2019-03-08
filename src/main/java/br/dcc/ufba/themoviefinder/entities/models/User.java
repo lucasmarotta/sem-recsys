@@ -3,6 +3,7 @@ package br.dcc.ufba.themoviefinder.entities.models;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -181,37 +182,49 @@ public class User
 		return recomendedMovies;
 	}
 	
+	public List<String> getUserBestTerms()
+	{
+		return getUserBestTerms(-1);
+	}
+	
 	public List<String> getUserBestTerms(int qtTerms)
 	{
-		List<List<String>> listOfDocs = new ArrayList<List<String>>();
-		List<String> uniqueValues = new ArrayList<String>();
-	
-		for(Movie movie : movies) {
-			listOfDocs.add(movie.getTokensList());
-			uniqueValues.addAll(movie.getTokensList());
-		}
-		uniqueValues = TFIDFCalculator.uniqueValues(uniqueValues);
-		
-		List<ItemValue<String>> termValueList = new ArrayList<ItemValue<String>>();
-		for(String term : uniqueValues) {
-			for (Movie movie : movies) {
-				termValueList.add(new ItemValue<String>(term, TFIDFCalculator.tfIdf(movie.getTokensList(), listOfDocs, term)));
+		if(! movies.isEmpty()) {
+			List<List<String>> listOfDocs = new ArrayList<List<String>>();
+			List<String> uniqueValues = new ArrayList<String>();
+			
+			for(Movie movie : movies) {
+				listOfDocs.add(movie.getTokensList());
+				uniqueValues.addAll(movie.getTokensList());
 			}
-		}
-		
-		termValueList.sort((ItemValue<String> a, ItemValue<String> b) -> a.compareTo(b));
-		int max = 0;
-		if(qtTerms >= 0) {
-			max = Math.min(qtTerms, termValueList.size());
-		}
-		termValueList = termValueList.subList(0, max);
-		uniqueValues = new ArrayList<String>();
-		for (ItemValue<String> termValue : termValueList) {
-			if(! uniqueValues.contains(termValue.item)) {
-				uniqueValues.add(termValue.item);	
+			
+			if(qtTerms == -1) {
+				qtTerms = listOfDocs.stream().mapToInt(doc -> doc.size()).max().getAsInt();
 			}
-		}
-		return uniqueValues;
+			uniqueValues = TFIDFCalculator.uniqueValues(uniqueValues);
+			
+			List<ItemValue<String>> termValueList = new ArrayList<ItemValue<String>>();
+			for(String term : uniqueValues) {
+				for (Movie movie : movies) {
+					termValueList.add(new ItemValue<String>(term, TFIDFCalculator.tfIdf(movie.getTokensList(), listOfDocs, term)));
+				}
+			}
+			uniqueValues.clear();
+			
+			termValueList.sort((ItemValue<String> a, ItemValue<String> b) -> a.compareTo(b));
+			List<ItemValue<String>> bestTerms = new ArrayList<ItemValue<String>>();
+			for (ItemValue<String> termValue : termValueList) {
+				if(bestTerms.size() < qtTerms) {
+					if(! bestTerms.stream().anyMatch(value -> bestTerms.stream().anyMatch(term -> value.item.equals(termValue.item)))) {
+						bestTerms.add(termValue);	
+					}
+				} else {
+					break;
+				}
+			}
+			return bestTerms.stream().map(term -> term.item).collect(Collectors.toList());	
+		} 
+		return new ArrayList<String>();
 	}
 	
 	public List<String> getUserMovieTokens()

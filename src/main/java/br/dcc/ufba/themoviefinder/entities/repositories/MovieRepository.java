@@ -26,6 +26,10 @@ public interface MovieRepository extends JpaRepository<Movie, Long>
 	
 	List<Movie> findByIdNotIn(List<Integer> movieIds);
 	
+	Page<Movie> findAll(Pageable pageble);
+	
+	List<Movie> findAll();
+	
 	Page<Movie> findByIdNotIn(List<Integer> movieIds, Pageable pageble);
 	
 	List<Movie> findTop30ByOrderByIdAsc();

@@ -2,7 +2,7 @@ apply plugin: 'java'
 
 buildscript {
 	ext {
-		jvmArgs = ["-Xms128M", "-Xmx512M", "-XX:TieredStopAtLevel=1", "-noverify"]
+		jvmArgs = ["-Xms128M", "-Xmx256M", "-XX:TieredStopAtLevel=1", "-noverify"]
 		springBootVersion = "2.1.1.RELEASE"
 	}
     dependencies {
@@ -38,6 +38,7 @@ repositories {
 
 dependencies {
 	implementation "mysql:mysql-connector-java:8.0.14"
+	implementation "commons-codec:commons-codec:1.12"
 	implementation "com.google.guava:guava:27.0.1-jre"
 	implementation "net.codecrafting:springfx-core:0.1.0-BETA5"
 	implementation "org.apache.commons:commons-lang3:3.8.1"
