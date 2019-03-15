@@ -77,7 +77,12 @@ public class RecomendationService
 	
 	public List<ItemValue<Movie>> getRecomendationsByUserBestTerms(User user, int qtMovies)
 	{
-		return pageAllRecomendations(user.getUserBestTerms(-1), user.getMovies(), qtMovies);
+		return getRecomendationsByUserBestTerms(user, qtMovies, -1);
+	}
+	
+	public List<ItemValue<Movie>> getRecomendationsByUserBestTerms(User user, int qtMovies, int qtTerms)
+	{
+		return pageAllRecomendations(user.getUserBestTerms(qtTerms), user.getMovies(), qtMovies);
 	}
 	
 	public void updateRecomendations(User user, int qtdMovies)
@@ -89,7 +94,7 @@ public class RecomendationService
 	{
 		if(similarityService != null) {
 			similarityService.init();
-			List<ItemValue<Movie>> simList = new ArrayList<ItemValue<Movie>>();
+			List<ItemValue<Movie>> simList = Collections.synchronizedList(new ArrayList<ItemValue<Movie>>());
 			List<Integer> movieIds = movies.stream().map(movie -> {
 				return movie.getId();
 			}).collect(Collectors.toList());
@@ -97,14 +102,15 @@ public class RecomendationService
 			try {
 				Page<Movie> moviesPage = movieService.pageMoviesExcept(movieIds, pageRequest);
 				int qtPages = moviesPage.getTotalPages();
+				long totalMovies = moviesPage.getTotalElements();
 				if(LOGGER.isDebugEnabled()) {
 					WATCH.start();
 				}
-				simList.addAll(getRecomendations(tokens, moviesPage.getContent(), qtMovies));
+				addRecomendations(simList, tokens, moviesPage.getContent(), qtMovies, totalMovies);
 				similarityService.reset();
 				for (int i = 1; i < qtPages; i++) {
 					moviesPage = movieService.pageMoviesExcept(movieIds, moviesPage.nextPageable());
-					simList.addAll(getRecomendations(tokens, moviesPage.getContent(), qtMovies));
+					addRecomendations(simList, tokens, moviesPage.getContent(), qtMovies, totalMovies);
 					similarityService.reset();
 				}
 			} catch(Exception e) {
@@ -125,11 +131,10 @@ public class RecomendationService
 		}
 	}
 	
-	private List<ItemValue<Movie>> getRecomendations(List<String> tokens, List<Movie> movies, int qtMovies)
+	private void addRecomendations(List<ItemValue<Movie>> simList, List<String> tokens, List<Movie> movies, int qtMovies, long totalMovies)
 	{
-		List<ItemValue<Movie>> simList = Collections.synchronizedList(new ArrayList<ItemValue<Movie>>());
 		try {
-			BatchWorkLoad<Movie> batchWorkLoad = new BatchWorkLoad<Movie>(batchSize, movies);
+			BatchWorkLoad<Movie> batchWorkLoad = new BatchWorkLoad<Movie>(batchSize, movies, false);
 			batchWorkLoad.run(movie -> {
 				String debug = "";
 				if(LOGGER.isDebugEnabled()) {
@@ -145,7 +150,7 @@ public class RecomendationService
 				}
 				if(LOGGER.isDebugEnabled()) {
 					debug += "\n" + mv;
-					debug += "\n" + String.format("%d - %f%%, %fs", simList.size(), simList.size() / ((double) movies.size()) * 100, ((double) WATCH.getTime() / 1000)) + "\n";
+					debug += "\n" + String.format("%d - %f%%, %fs", simList.size(), simList.size() / ((double) totalMovies) * 100, ((double) WATCH.getTime() / 1000)) + "\n";
 					LOGGER.debug(debug);
 				}
 				return null;
@@ -153,6 +158,5 @@ public class RecomendationService
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(),e);
 		}
-		return simList;
 	}
 }

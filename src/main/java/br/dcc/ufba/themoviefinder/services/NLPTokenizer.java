@@ -28,7 +28,7 @@ public class NLPTokenizer
 	private POSTaggerME speechTagger;
 	private List<TokenNameFinderModel> entityModels;
 	private static final List<String> SPEECH_TAGS = Arrays.asList("NN", "NNP", "NNPS", "NNS", "JJ", "JJR", "JJS", "FW", "VB");
-	private static final List<String> ESCAPE_CHARS = Arrays.asList("'", "‘", "’", "\"", ",", "_", "?", "!", "@", "$", "&", "*", "%", "#");
+	private static final List<String> ESCAPE_CHARS = Arrays.asList("'", "‘", "’", "\"", ",", "_", "?", "!", "@", "$", "&", "*", "%", "#", "(", ")");
 	private static final List<String> ESCAPE_WORDS = Arrays.asList("do", "are", "fu", "go", "be", "get", "de", "or", "but", "the", "and");
 	
 	public NLPTokenizer() throws Exception

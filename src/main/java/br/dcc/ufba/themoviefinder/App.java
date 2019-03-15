@@ -1,7 +1,5 @@
 package br.dcc.ufba.themoviefinder;
 
-import java.util.List;
-
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,13 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import br.dcc.ufba.themoviefinder.controllers.launcher.LauncherContext;
-import br.dcc.ufba.themoviefinder.entities.models.Movie;
-import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.UserService;
 import br.dcc.ufba.themoviefinder.services.RecomendationService;
 import br.dcc.ufba.themoviefinder.services.similarity.UserMovieRLWSimilarityService;
-import br.dcc.ufba.themoviefinder.utils.ItemValue;
-import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 import net.codecrafting.springfx.context.ViewStage;
 import net.codecrafting.springfx.core.SpringFXApplication;
 import net.codecrafting.springfx.core.SpringFXLauncher;
@@ -53,7 +47,6 @@ public class App extends SpringFXApplication
 		StopWatch watch = new StopWatch();
 		
 		/*
-		similarityService.init();
 		List<LodRelationId> lodIds = Arrays.asList(new LodRelationId("France", "Paris"), 
 				new LodRelationId("Brazil", "Brasilia"),
 				new LodRelationId("Car", "Automobile"),
@@ -75,14 +68,21 @@ public class App extends SpringFXApplication
 				new LodRelationId("Johnny_Cash", "Kris_Kristofferson"),
 				new LodRelationId("Johnny_Cash", "Carlene_Carter"));
 		
+		SparqlWalk sparqlWalk = springContext.getBean(SparqlWalk.class);
+		watch.start();
+		(new BatchWorkLoad<String>(4, lodIds.stream().map(lodId -> {
+			return lodId.getResource1();
+		}).distinct().collect(Collectors.toList()), false)).run(resource -> {
+			System.out.println(resource + " " + sparqlWalk.countIndirectLinksFromResource(Sparql.wrapStringAsResource(resource)) + " " + ((double) watch.getTime() / 1000));
+			return null;
+		});
+		
 		lodIds.forEach(lodId -> {
 			System.out.println("\n" + lodId);
 			System.out.println(similarityService.getSimilarityBetween2Terms(lodId.getResource1(), lodId.getResource2()));
 		});
 		similarityService.reset();
-		*/
 		
-		/*
 		DBPediaService s = springContext.getBean(DBPediaService.class);
 		lodIds.forEach((lodId) -> {
 			String term1 = Sparql.wrapStringAsResource(lodId.getResource1());
@@ -103,27 +103,32 @@ public class App extends SpringFXApplication
 		});
 		*/
 		
-		User user = userService.findByName("Lucas");
+		/*
+		User user = userService.findByName("Tereza");
 		for (Movie movie : user.getMovies()) {
 			System.out.println();
 			System.out.println(movie.getTitle());
 			System.out.println(movie.getTokensList());
 		}
 		
-		List<String> userTokens = user.getUserBestTerms(-1);
+		int qtRecomendations = 20;
+		int qtTerms = 15;
+		
+		List<String> userTokens = user.getUserBestTerms(qtTerms);
 		recomendationService.setUserMovieSimilarity(similarityService);
 		System.out.println("Recomendations with RLW Similarity\n");
 		watch.start();
-		List<ItemValue<Movie>> recomendations = recomendationService.getRecomendationsByUserBestTerms(user, 20);
+		List<ItemValue<Movie>> recomendations = recomendationService.getRecomendationsByUserBestTerms(user, qtRecomendations, qtTerms);
 		watch.stop();
 		System.out.println("Time Elapsed: " + (watch.getTime() / 1000) + "s");
 		for (ItemValue<Movie> movieSimilarity : recomendations) {
-			System.out.println(movieSimilarity.item.getTitle() + " - " + movieSimilarity.value);
+			System.out.println(movieSimilarity.item) + " - " + movieSimilarity.value);
 			System.out.println(TFIDFCalculator.uniqueValues(movieSimilarity.item.getTokensList()));
 			System.out.println(userTokens);
 			System.out.println();
 		}
 		
 		SpringFXLauncher.exit();
+		*/
 	}
 }

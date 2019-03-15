@@ -141,19 +141,35 @@ public class RLWSimilarity
 				
 				//LDSD Like formula
 				if(totalDirect > 0) {
-					pDirect = 1 - 1 / (1 + totalBetweenDirect / (1 + Math.log(totalDirect)));
+					if(totalDirect != totalBetweenDirect) {
+						pDirect = 1 - 1 / (1 + totalBetweenDirect / (1 + Math.log(totalDirect)));
+					} else {
+						pDirect = 1;
+					}
 				}
 				if (totalIndirect > 0){
-					pIndirect = 1 - 1 / (1 + totalBetweenIndirect / (1 + Math.log(totalIndirect)));
+					if(totalIndirect != totalBetweenIndirect) {
+						pIndirect = 1 - 1 / (1 + totalBetweenIndirect / (1 + Math.log(totalIndirect)));
+					} else {
+						pIndirect = 1;
+					}
 				}
 				
 				/*
 				//Dirstribution formula
 				if(totalDirect > 0) {
-					pDirect = Math.pow(totalBetweenDirect, 1/3d) / Math.pow(totalDirect, 1/3d);
+					if(totalDirect != totalBetweenDirect) {
+						pDirect = Math.pow(totalBetweenDirect, 1/3d) / Math.pow(totalDirect, 1/3d);
+					} else {
+						pDirect = 1;
+					}
 				}
 				if (totalIndirect > 0){
-					pIndirect = Math.pow(totalBetweenIndirect, 1/3d) / Math.pow(totalIndirect, 1/3d);
+					if(totalIndirect != totalBetweenIndirect) {
+						pIndirect = Math.pow(totalBetweenIndirect, 1/3d) / Math.pow(totalIndirect, 1/3d);
+					} else {
+						pIndirect = 1;
+					}
 				}
 				*/
 				

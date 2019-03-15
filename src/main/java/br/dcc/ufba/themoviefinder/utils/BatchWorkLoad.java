@@ -120,7 +120,7 @@ public class BatchWorkLoad<T>
 	
 	private void fitBatchSize()
 	{
-		int oSrcSize = srcList.size(), srcSize = srcList.size(), fitBatchSize = Math.min(batchSize, 4);
+		int oSrcSize = srcList.size(), srcSize = srcList.size(), fitBatchSize = Math.min(batchSize, 2);
 		if(srcSize > 0 && batchSize > 1) {
 	        if(srcSize > batchSize && Primes.isPrime(srcSize)) {
 	        	srcSize++;
@@ -130,7 +130,7 @@ public class BatchWorkLoad<T>
 	            	fitBatchSize = i;
 	            }
 	        }
-	        fitBatchSize = Math.max(fitBatchSize, 4);
+	        fitBatchSize = Math.max(fitBatchSize, 2);
 		}
         if(LOGGER.isDebugEnabled()) {
         	LOGGER.debug(String.format("oSrcSize: %d, srcSize: %d, batchSize: %d, bestFitBatchSize: %d", oSrcSize, srcSize, batchSize, fitBatchSize));

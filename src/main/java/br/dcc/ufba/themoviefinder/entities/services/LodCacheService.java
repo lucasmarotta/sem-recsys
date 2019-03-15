@@ -49,16 +49,7 @@ public class LodCacheService
 	public List<LodCache> saveAllResources(List<LodCache> lodCaches)
 	{
 		if(! lodCaches.isEmpty()) {
-			
-			/*
-			lodCaches.removeAll(lodCacheRepo.findByResourceIn(lodCaches.stream().map(lodCache -> {
-				return lodCache.getResource();
-			}).collect(Collectors.toList())));
-			*/
-			
-			if(! lodCaches.isEmpty()) {
-				return lodCacheRepo.saveAll(lodCaches);	
-			}
+			return lodCacheRepo.saveAll(lodCaches);	
 		}
 		return lodCaches;
 	}
@@ -121,16 +112,7 @@ public class LodCacheService
 	public List<LodCacheRelation> saveAllResourceRelations(List<LodCacheRelation> lodCacheRelations)
 	{
 		if(! lodCacheRelations.isEmpty()) {
-			
-			/*
-			lodCacheRelations.removeAll(getResourceRelationList(lodCacheRelations.stream().map(lodCacheRelation -> {
-				return lodCacheRelation.getId();
-			}).collect(Collectors.toList())));
-			*/
-			
-			if(! lodCacheRelations.isEmpty()) {
-				return lodRelationRepo.saveAll(lodCacheRelations); 
-			}	
+			return lodRelationRepo.saveAll(lodCacheRelations); 
 		}
 		return lodCacheRelations;
 	}

@@ -134,7 +134,7 @@ public class LocalCacheServiceImpl implements LocalCacheService
 		List<LodCache> lodCaches = findAllLodCacheSaveLater();
 		List<LodCacheRelation> lodCacheRelations = findAllLodCacheRelationSaveLater();
 		
-		if(LOGGER.isDebugEnabled() && ! lodCaches.isEmpty() && ! lodCacheRelations.isEmpty()) {
+		if(LOGGER.isDebugEnabled() && ! (lodCaches.isEmpty() && lodCacheRelations.isEmpty())) {
 			LOGGER.debug("Save later rotine");
 			LOGGER.debug(lodCaches);
 			LOGGER.debug(lodCacheRelations);
