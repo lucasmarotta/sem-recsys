@@ -176,9 +176,19 @@ public class User
 		return recomendations.stream().map(recomendation -> recomendation.getMovie()).collect(Collectors.toList());
 	}
 	
+	public List<Movie> getRecomendedMovies(RecomendationType similarity)
+	{
+		return recomendations.stream().filter(recomendation -> similarity.equals(recomendation.getSimilarity())).map(recomendation -> recomendation.getMovie()).collect(Collectors.toList());
+	}
+	
 	public List<UserRecomendation> getRecomendations()
 	{
 		return recomendations;
+	}
+	
+	public List<UserRecomendation> getRecomendations(RecomendationType similarity) 
+	{
+		return recomendations.stream().filter(recomendation -> similarity.equals(recomendation.getSimilarity())).collect(Collectors.toList());
 	}
 	
 	public void setRecomendations(List<UserRecomendation> recomendations)
