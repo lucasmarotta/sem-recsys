@@ -15,15 +15,11 @@ buildscript {
 }
 
 apply plugin: "java"
-apply plugin: "application"
 apply plugin: "org.springframework.boot"
-/*
 bootJar {
     baseName = 'the-movie-finder'
     version =  '0.1.0'
 }
-*/
-
 
 group = "br.dcc.ufba"
 version = "0.1.0"

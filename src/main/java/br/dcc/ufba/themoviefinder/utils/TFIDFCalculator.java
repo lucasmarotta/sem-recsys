@@ -5,11 +5,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
 
+import org.apache.lucene.search.similarities.ClassicSimilarity;
+import org.apache.lucene.search.similarities.TFIDFSimilarity;
+
 /**
  * @author Mohamed Guendouz
  */
 public class TFIDFCalculator 
 {
+	private static final TFIDFSimilarity TFIDF_SIMILARITY = new ClassicSimilarity();
+	
     /**
      * @param doc  list of strings
      * @param term String represents a term
@@ -17,11 +22,12 @@ public class TFIDFCalculator
      */
     public static double tf(List<String> doc, String term) 
     {
-        double result = 0;
+        float result = 0;
         for (String word : doc) {
             if (term.equalsIgnoreCase(word))
                 result++;
         }
+        //return TFIDF_SIMILARITY.tf(result / doc.size());
         return result / doc.size();
     }
 
@@ -32,7 +38,7 @@ public class TFIDFCalculator
      */
     public static double idf(List<List<String>> docs, String term) 
     {
-        double n = 0;
+        long n = 0;
         for (List<String> doc : docs) {
             for (String word : doc) {
                 if (term.equalsIgnoreCase(word)) {
@@ -41,6 +47,7 @@ public class TFIDFCalculator
                 }
             }
         }
+        //return TFIDF_SIMILARITY.idf(n, docs.size());
         return Math.log(docs.size() / n);
     }
 

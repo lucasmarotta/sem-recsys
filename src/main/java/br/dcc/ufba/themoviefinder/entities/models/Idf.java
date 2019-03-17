@@ -9,19 +9,16 @@ public class Idf
 	@Id
 	private String term;
 	private Float value;
-	private Float extendedValue;
 	
 	public Idf()
 	{
 		value = 0f;
-		extendedValue = 0f;
 	}
 	
-	public Idf(String term, Float value, Float extendedValue)
+	public Idf(String term, Float value)
 	{
 		this.term = term;
 		this.value = value;
-		this.extendedValue = extendedValue;
 	}
 	
 	public String getTerm() 
@@ -43,20 +40,10 @@ public class Idf
 	{
 		this.value = value;
 	}
-	
-	public Float getExtendedValue() 
-	{
-		return extendedValue;
-	}
-	
-	public void setExtendedValue(Float extendedValue) 
-	{
-		this.extendedValue = extendedValue;
-	}
 
 	@Override
 	public String toString() 
 	{
-		return "Idf [term=" + term + ", value=" + value + ", extendedValue=" + extendedValue + "]";
+		return "Idf [term=" + term + ", value=" + value + "]";
 	}
 }

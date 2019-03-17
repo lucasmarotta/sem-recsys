@@ -10,10 +10,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 
 import br.dcc.ufba.themoviefinder.utils.ItemValue;
 import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
@@ -21,7 +23,7 @@ import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 @Entity
 public class User 
 {
-	@Id @GeneratedValue
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
 	@Column(nullable = false)
@@ -41,16 +43,8 @@ public class User
 	)
 	private List<Movie> movies;
     
-	@ManyToMany(
-		fetch = FetchType.LAZY,
-		cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-	)
-	@JoinTable(
-		name = "user_recomendation", 
-		joinColumns = {@JoinColumn(name = "user_id")},
-		inverseJoinColumns = {@JoinColumn(name = "movie_id")}
-	)
-	private List<Movie> recomendedMovies;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+	private List<UserRecomendation> recomendations;
 	
 	private String pass;
 	
@@ -73,7 +67,7 @@ public class User
 	public User() 
 	{
 		movies = new ArrayList<Movie>();
-		recomendedMovies = new ArrayList<Movie>();
+		recomendations = new ArrayList<UserRecomendation>();
 	}
 	
 	public User(int id)
@@ -179,7 +173,17 @@ public class User
 	
 	public List<Movie> getRecomendedMovies() 
 	{
-		return recomendedMovies;
+		return recomendations.stream().map(recomendation -> recomendation.getMovie()).collect(Collectors.toList());
+	}
+	
+	public List<UserRecomendation> getRecomendations()
+	{
+		return recomendations;
+	}
+	
+	public void setRecomendations(List<UserRecomendation> recomendations)
+	{
+		this.recomendations = recomendations;
 	}
 	
 	public List<String> getUserBestTerms()

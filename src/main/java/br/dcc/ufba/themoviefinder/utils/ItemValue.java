@@ -1,5 +1,6 @@
 package br.dcc.ufba.themoviefinder.utils;
 
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -53,10 +54,23 @@ public class ItemValue<T> implements Comparable<ItemValue<T>>
         }
         return false;
     }
+	
+    @Override
+    public int hashCode() 
+    {
+    	if(item != null) {
+        	if(item instanceof String) {
+        		return Objects.hash(item.toString().toLowerCase());
+        	} else {
+        		return Objects.hash(item);
+        	}
+    	}
+        return Objects.hash(this);
+    }
 
 	@Override
 	public String toString() 
 	{
 		return "ItemValue [item=" + item + ", value=" + value + "]";
-	}	
+	}
 }

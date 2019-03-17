@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
+import br.dcc.ufba.themoviefinder.entities.models.RecomendationType;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.exception.ResourceNotFoundException;
 import br.dcc.ufba.themoviefinder.services.cache.LocalCacheService;
@@ -34,6 +35,12 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	private double indirectWeight;
 	
 	private static final Logger LOGGER = LogManager.getLogger(UserMovieRLWSimilarityService.class);
+	
+	@Override
+	public RecomendationType getType() 
+	{
+		return RecomendationType.RLW;
+	}
 	
 	public void init()
 	{
@@ -100,5 +107,10 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 		if(useCache) {
 			localCache.clear();
 		}
+	}
+	
+	public void close() 
+	{
+		
 	}
 }

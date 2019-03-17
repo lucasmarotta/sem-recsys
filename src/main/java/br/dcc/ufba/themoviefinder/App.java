@@ -105,6 +105,13 @@ public class App extends SpringFXApplication
 		
 		/*
 		User user = userService.findByName("Tereza");
+		user.setRecomendations(user.getMovies().stream().map(movie -> {
+			return new UserRecomendation(user, movie, RecomendationType.RLW, 0d);
+		}).collect(Collectors.toList()));
+		userService.save(user);
+		*/
+		
+		/*
 		for (Movie movie : user.getMovies()) {
 			System.out.println();
 			System.out.println(movie.getTitle());
@@ -122,7 +129,7 @@ public class App extends SpringFXApplication
 		watch.stop();
 		System.out.println("Time Elapsed: " + (watch.getTime() / 1000) + "s");
 		for (ItemValue<Movie> movieSimilarity : recomendations) {
-			System.out.println(movieSimilarity.item) + " - " + movieSimilarity.value);
+			System.out.println(movieSimilarity.item + " - " + movieSimilarity.value);
 			System.out.println(TFIDFCalculator.uniqueValues(movieSimilarity.item.getTokensList()));
 			System.out.println(userTokens);
 			System.out.println();

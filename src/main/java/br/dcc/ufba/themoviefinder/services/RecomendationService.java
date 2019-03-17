@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.User;
+import br.dcc.ufba.themoviefinder.entities.models.UserRecomendation;
 import br.dcc.ufba.themoviefinder.entities.services.MovieService;
+import br.dcc.ufba.themoviefinder.entities.services.UserService;
 import br.dcc.ufba.themoviefinder.services.similarity.UserMovieSimilarityService;
 import br.dcc.ufba.themoviefinder.utils.BatchWorkLoad;
 import br.dcc.ufba.themoviefinder.utils.ItemValue;
@@ -32,11 +34,14 @@ public class RecomendationService
 	@Value("${app.recomendation-batch-size: 5}")
 	public int batchSize;
 	
-	@Value("${app.recomendation-batch-movie-size: 500}")
+	@Value("${app.recomendation-batch-movie-size: 250}")
 	public int batchMovieSize;
 	
 	@Autowired
 	private MovieService movieService;
+	
+	@Autowired
+	private UserService userService;
 	
 	private static final Logger LOGGER = LogManager.getLogger(RecomendationService.class);
 	
@@ -85,9 +90,13 @@ public class RecomendationService
 		return pageAllRecomendations(user.getUserBestTerms(qtTerms), user.getMovies(), qtMovies);
 	}
 	
-	public void updateRecomendations(User user, int qtdMovies)
+	public void updateRecomendations(User user, int qtMovies, int qtTerms)
 	{
-		
+		List<ItemValue<Movie>> recomendations = getRecomendationsByUserBestTerms(user, qtMovies, qtTerms);
+		user.setRecomendations(recomendations.stream().map(recomendation -> {
+			return new UserRecomendation(user, recomendation.item, similarityService.getType(), recomendation.value);
+		}).collect(Collectors.toList()));
+		userService.save(user);
 	}
 	
 	private List<ItemValue<Movie>> pageAllRecomendations(List<String> tokens, List<Movie> movies, int qtMovies)
@@ -117,6 +126,7 @@ public class RecomendationService
 				simList.clear();
 				LOGGER.error(e.getMessage(), e);
 			}
+			similarityService.close();
 			if(LOGGER.isDebugEnabled()) {
 				WATCH.stop();
 			}
@@ -156,7 +166,7 @@ public class RecomendationService
 				return null;
 			});
 		} catch (Exception e) {
-			LOGGER.error(e.getMessage(),e);
+			LOGGER.error(e.getMessage(), e);
 		}
 	}
 }

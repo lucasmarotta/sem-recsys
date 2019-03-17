@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
+import br.dcc.ufba.themoviefinder.entities.models.RecomendationType;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.TfIdfService;
 import br.dcc.ufba.themoviefinder.utils.CosineSimilarity;
@@ -52,13 +53,25 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarityServ
 	}
 	
 	@Override
+	public RecomendationType getType() 
+	{
+		return RecomendationType.COSINE;
+	}
+
+	@Override
 	public void init() 
 	{
-		// TODO Auto-generated method stub
+		//tfIdfService.updateIdf();
 	}
 
 	@Override
 	public void reset()
+	{
+		
+	}
+	
+	@Override
+	public void close()
 	{
 		
 	}
