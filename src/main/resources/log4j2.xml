@@ -4,9 +4,9 @@
 	<Properties>
 	  <Property name="logPattern">%d{yyyy-MM-dd hh:mm:ss.SSS} [%p]: %m %n%ex</Property>
 	  <Property name="fileName">logs/atenderbot_${date:yyyyMMdd}.log</Property>
-	  <Property name="fileNamePattern">logs/atenderbot_%d{yyyyMMdd}_$i.log</Property>
+	  <Property name="fileNamePattern">logs/atenderbot_%d{yyyyMMdd}_%i.log</Property>
 	</Properties>
-	
+
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT" follow="true">
             <PatternLayout pattern="${logPattern}" />
@@ -16,35 +16,35 @@
 			<Policies>
 			  <SizeBasedTriggeringPolicy size="5MB"/>
 			</Policies>
-			<DefaultRolloverStrategy max="20"/>            
+			<DefaultRolloverStrategy max="20"/>
         </RollingFile>
 	    <Async name="Async">
 	      <AppenderRef ref="Console"/>
 	      <AppenderRef ref="FileConsole"/>
-	    </Async>        
+	    </Async>
     </Appenders>
-    
+
     <Loggers>
-        <Root level="ERROR">
-            <AppenderRef ref="Console" />
-            <AppenderRef ref="FileConsole"/>
-        </Root>
+		<Root level="ERROR">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="FileConsole"/>
+		</Root>
     	<Logger name="com.mchange.v2" level="WARN" additivity="false">
             <AppenderRef ref="Console" />
-            <AppenderRef ref="FileConsole"/>    		
+            <AppenderRef ref="FileConsole"/>
     	</Logger>
     	<Logger name="org.hibernate" level="WARN" additivity="false">
             <AppenderRef ref="Console" />
-            <AppenderRef ref="FileConsole"/>    		
+            <AppenderRef ref="FileConsole"/>
     	</Logger>
     	<Logger name="net.codecrafting" level="INFO" additivity="false">
             <AppenderRef ref="Console" />
-            <AppenderRef ref="FileConsole"/>    		
-    	</Logger>    	
+            <AppenderRef ref="FileConsole"/>
+    	</Logger>
     	<Logger name="br.dcc.ufba.themoviefinder" level="DEBUG" additivity="false">
     	   	<AppenderRef ref="Console" />
     	   	<AppenderRef ref="FileConsole"/>
     	</Logger>
     </Loggers>
-    
+
 </Configuration>

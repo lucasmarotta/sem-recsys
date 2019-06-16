@@ -1,7 +1,9 @@
 package br.dcc.ufba.themoviefinder.controllers.launcher;
 
+import org.springframework.beans.BeansException;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 
@@ -54,10 +56,20 @@ public class LauncherContext implements SpringFXContext
 			springBuilder = new SpringApplicationBuilder()
 					.sources(appClass)
 					.web(WebApplicationType.SERVLET)
+					.registerShutdownHook(true)
 					.headless(isHeadless());
 		} else {
 			throw new IllegalArgumentException("Application class must not be null");
 		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException 
+	{
+		springContext = (ConfigurableApplicationContext) applicationContext;
 	}
 	
 	/**

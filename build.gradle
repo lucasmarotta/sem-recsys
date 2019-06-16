@@ -1,42 +1,48 @@
-apply plugin: 'java'
-
 buildscript {
 	ext {
 		jvmArgs = ["-Xms128M", "-Xmx448M", "-XX:TieredStopAtLevel=1", "-noverify"]
-		springBootVersion = "2.1.1.RELEASE"
+		springBootVersion = "2.1.5.RELEASE"
 	}
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
     }
     repositories {
         mavenLocal()
-        mavenCentral()    
+        mavenCentral()
     }
 }
 
 apply plugin: "java"
 apply plugin: "org.springframework.boot"
 bootJar {
-    baseName = 'the-movie-finder'
-    version =  '0.1.0'
+    baseName 	= 'the-movie-finder'
+    version  	= '0.1.0'
+    jvmArgs  	= project.jvmArgs
 }
 
 group = "br.dcc.ufba"
 version = "0.1.0"
 sourceCompatibility = 1.8
 compileJava.options.encoding = 'UTF-8'
-applicationDefaultJvmArgs = project.jvmArgs
 
 repositories {
+	mavenLocal()
     mavenCentral()
     jcenter()
+}
+
+configurations {
+	developmentOnly
+	runtimeClasspath {
+		extendsFrom developmentOnly
+	}
 }
 
 dependencies {
 	implementation "mysql:mysql-connector-java:8.0.14"
 	implementation "commons-codec:commons-codec:1.12"
 	implementation "com.google.guava:guava:27.0.1-jre"
-	implementation "net.codecrafting:springfx-core:0.1.0-BETA5"
+	implementation "net.codecrafting:springfx-core:0.1.0-BETA6"
 	implementation "org.apache.commons:commons-lang3:3.8.1"
 	implementation "org.apache.commons:commons-math3:3.6.1"
 	implementation "org.apache.jena:apache-jena-libs:3.10.0"
@@ -48,6 +54,8 @@ dependencies {
     implementation "org.springframework.boot:spring-boot-starter-log4j2:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-thymeleaf:${springBootVersion}"
     implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+
+    //developmentOnly("org.springframework.boot:spring-boot-devtools:${springBootVersion}")
     testImplementation "junit:junit:4.12"
 }
 

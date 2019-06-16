@@ -112,15 +112,17 @@ public class RLWSimilarity
 				if(totalDirect == 0) {
 					throw new ResourceNotFoundException(String.format("%s not found on dbpedia", term1));
 				} else {
-					totalDirect += sparqlWalk.countDirectLinksFromResource(term2Resource);
-					if(totalDirect == 0) {
+					double t2 = sparqlWalk.countDirectLinksFromResource(term2Resource);
+					if(t2 == 0) {
 						throw new ResourceNotFoundException(String.format("%s and/or %s not found on dbpedia", term1, term2));
 					} else {
+						totalDirect += t2;
 						totalIndirect = sparqlWalk.countIndirectLinksFromResource(term1Resource) + sparqlWalk.countIndirectLinksFromResource(term2Resource);
 					}
 				}
 				if(sparqlWalk.isRedirect(term1Resource, term2Resource)) {
-					totalBetweenDirect = totalBetweenIndirect = 1;
+					totalBetweenDirect = totalDirect;
+					totalBetweenIndirect = totalIndirect;
 				} else {
 					totalBetweenDirect = sparqlWalk.countDirectLinksBetween2Resources(term1Resource, term2Resource);
 					totalBetweenIndirect = sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource);	

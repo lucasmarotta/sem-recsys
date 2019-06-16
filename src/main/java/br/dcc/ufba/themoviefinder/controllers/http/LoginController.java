@@ -11,7 +11,8 @@ public class LoginController
 	public ModelAndView login()
 	{
 		ModelAndView mv = new ModelAndView();
-		mv.setViewName("login");
+		mv.setViewName("index");
+		mv.addObject("content", "login");
 		return mv;
 	}
 }

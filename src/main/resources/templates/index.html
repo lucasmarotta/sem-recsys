@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header"></head>
+<body>
+    <main th:insert="@{'views/' + ${content}} :: ${content}"></main>
+    <footer th:replace="fragments/footer :: footer"> </footer>
+</body>
+</html>

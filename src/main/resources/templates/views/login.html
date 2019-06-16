@@ -1,0 +1,37 @@
+<section class="container-fluid login" th:fragment="login">
+    <div class="login-content">
+        <div class="login-box">
+            <p class='login-title'>Don’t know what to watch next?<br>Find it here!</p>
+
+            <div class="social-login">
+                <button class="btn btn-lg btn-block btn-primary" style="background:#3A5A99;" type="submit">Continue with Facebook</button>
+            </div>
+            <div class="login-splitter">
+                <hr><span>OR</span><hr>
+            </div>
+
+            <form class="site-login form-group site-form" action="@{/login}" method="POST">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text vue-mail"></span>
+                    </div>
+                    <input type="text" name="email" class="form-control" placeholder="e-mail" aria-label="e-mail">
+                </div>
+
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text vue-key"></span>
+                    </div>
+                    <input type="password" name="pass" class="form-control" placeholder="password" aria-label="pass">
+                </div>
+
+                <button type="submit" class="btn btn-block btn-lg">SIGN IN</button>
+            </form>
+            <p class="login-info">Need a account? Press Facebook button <br> or <a href="" class="link">sign up with email</a></p>
+        </div>
+    </div>
+    <div class="login-brand">
+        <img th:src="@{/img/purple-logo.png}" width="120" alt="The Movie Finder">
+        <p>A Semantic<br>Recomendation<br>System</p>
+    </div>
+</section>
