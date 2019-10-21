@@ -171,11 +171,11 @@ public class Movie
         	tmp = (title).hashCode();
         }
         return tmp;
-    }    
+    }
 
 	@Override
 	public String toString() 
 	{
-		return "Movie [id=" + id + ", title=" + title + "]";
+		return "Movie [id=" + id + ", title=" + title + ", imdbId=" + imdbId + ", tmdbId=" + tmdbId + "]";
 	}
 }

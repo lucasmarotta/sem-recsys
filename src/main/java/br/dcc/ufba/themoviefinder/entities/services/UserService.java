@@ -14,11 +14,12 @@ public class UserService
 	@Autowired
 	private UserRepository userRepo;
 	
-	public void save(User user)
+	public User save(User user)
 	{
 		if(user != null) {
-			userRepo.save(user);
+			return userRepo.save(user);
 		}
+		return user;
 	}
 	
 	public void removeById(int id)
@@ -45,6 +46,26 @@ public class UserService
 			return userRepo.findByEmail(email);
 		}
 		return null;
+	}
+	
+	public List<User> getOnlineUsers()
+	{
+		return userRepo.findTop50ByOnline(true);
+	}
+	
+	public List<User> getOfflineUsers()
+	{
+		return userRepo.findTop50ByOnline(false);
+	}
+	
+	public List<User> getOfflineUsersToRecomendation() 
+	{
+		return userRepo.findTop50ToRecomendation(false);
+	}
+	
+	public List<User> getOnlineUsersToRecomendation() 
+	{
+		return userRepo.findTop50ToRecomendation(true);
 	}
 	
 	public List<User> findAll()

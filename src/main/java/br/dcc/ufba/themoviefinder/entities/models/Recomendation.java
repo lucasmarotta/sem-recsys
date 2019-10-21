@@ -1,5 +1,6 @@
 package br.dcc.ufba.themoviefinder.entities.models;
 
+import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,11 +10,13 @@ import javax.persistence.MapsId;
 
 import org.apache.commons.lang3.ObjectUtils;
 
+import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
+
 @Entity
-public class UserRecomendation 
+public class Recomendation 
 {
 	@EmbeddedId
-	private UserRecomendationId id;
+	private RecomendationId id;
 	
 	@ManyToOne(fetch=FetchType.EAGER)
     @MapsId("user_id")
@@ -25,31 +28,32 @@ public class UserRecomendation
     @JoinColumn(name = "movie_id")
 	private Movie movie;
     
+    @Column(nullable = false)
 	private Double score;
 	
-	public UserRecomendation()
+	public Recomendation()
 	{
-		this(null, null, RecomendationType.RLW, null);
+		this(null, null, RecomendationType.RLWS, null);
 	}
 	
-	public UserRecomendation(User user, Movie movie, RecomendationType similarity, Double score)
+	public Recomendation(User user, Movie movie, RecomendationType similarity, Double score)
 	{
 		if(ObjectUtils.allNotNull(user, movie)) {
-			id = new UserRecomendationId(user.getId(), movie.getId(), similarity);	
+			id = new RecomendationId(user.getId(), movie.getId(), similarity);	
 		} else {
-			id = new UserRecomendationId(null, null, similarity);
+			id = new RecomendationId(null, null, similarity);
 		}
 		this.user = user;
 		this.movie = movie;
 		this.score = score;
 	}
 
-	public UserRecomendationId getId() 
+	public RecomendationId getId() 
 	{
 		return id;
 	}
 
-	public void setId(UserRecomendationId id) 
+	public void setId(RecomendationId id) 
 	{
 		this.id = id;
 	}
@@ -95,7 +99,9 @@ public class UserRecomendation
 	}
 
 	@Override
-	public String toString() {
-		return "UserRecomendation [user=" + user + ", movie=" + movie + ", similarity=" + id.similarity + ", score=" + score + "]";
+	public String toString() 
+	{
+		return "Recomendation [User=" + user.getEmail() + ", similarity = " + id.similarity + "]"
+				+ "\n[" + movie + ", score=" + score + "]\n" + TFIDFCalculator.uniqueValues(movie.getTokensList());
 	}
 }

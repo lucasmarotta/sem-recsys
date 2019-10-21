@@ -9,6 +9,7 @@ public class ItemValue<T> implements Comparable<ItemValue<T>>
 	public T item;
 	public double value;
 	public boolean randomEqualCompareTo;
+	private double randomValue;
 	
 	public ItemValue(T item, double value)
 	{
@@ -21,19 +22,19 @@ public class ItemValue<T> implements Comparable<ItemValue<T>>
 			this.item = item;
 			this.value = value;
 			this.randomEqualCompareTo = randomEqualComparison;
+			if(randomEqualComparison) {
+				Random random = ThreadLocalRandom.current();
+				randomValue = random.nextDouble();
+			}
 		}		
 	}
 
 	@Override
 	public int compareTo(ItemValue<T> toCompare) 
 	{
-		int c = -Double.compare(value, toCompare.value);
+		int c = Double.compare(value, toCompare.value);
 		if(c == 0 && randomEqualCompareTo) {
-			Random random = ThreadLocalRandom.current();
-			if(random.nextInt(2) == 0) {
-				return -1;
-			}
-			return 1;
+			return Double.compare(randomValue, toCompare.getRandomValue());
 		}
 		return c;
 	}
@@ -67,6 +68,11 @@ public class ItemValue<T> implements Comparable<ItemValue<T>>
     	}
         return Objects.hash(this);
     }
+    
+	public double getRandomValue() 
+	{
+		return randomValue;
+	}
 
 	@Override
 	public String toString() 

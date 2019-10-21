@@ -31,19 +31,19 @@
 		</Root>
     	<Logger name="com.mchange.v2" level="WARN" additivity="false">
             <AppenderRef ref="Console" />
-            <AppenderRef ref="FileConsole"/>
+            <!-- <AppenderRef ref="FileConsole"/> -->
     	</Logger>
     	<Logger name="org.hibernate" level="WARN" additivity="false">
             <AppenderRef ref="Console" />
-            <AppenderRef ref="FileConsole"/>
+            <!-- <AppenderRef ref="FileConsole"/> -->
     	</Logger>
     	<Logger name="net.codecrafting" level="INFO" additivity="false">
             <AppenderRef ref="Console" />
-            <AppenderRef ref="FileConsole"/>
+            <!-- <AppenderRef ref="FileConsole"/> -->
     	</Logger>
     	<Logger name="br.dcc.ufba.themoviefinder" level="DEBUG" additivity="false">
     	   	<AppenderRef ref="Console" />
-    	   	<AppenderRef ref="FileConsole"/>
+    	   	<!-- <AppenderRef ref="FileConsole"/> -->
     	</Logger>
     </Loggers>
 

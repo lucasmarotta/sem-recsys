@@ -1,9 +1,9 @@
 package br.dcc.ufba.themoviefinder.utils;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.apache.lucene.search.similarities.TFIDFSimilarity;
@@ -27,8 +27,8 @@ public class TFIDFCalculator
             if (term.equalsIgnoreCase(word))
                 result++;
         }
-        //return TFIDF_SIMILARITY.tf(result / doc.size());
-        return result / doc.size();
+        return TFIDF_SIMILARITY.tf(result / doc.size());
+        //return result / doc.size();
     }
 
     /**
@@ -47,8 +47,8 @@ public class TFIDFCalculator
                 }
             }
         }
-        //return TFIDF_SIMILARITY.idf(n, docs.size());
-        return Math.log(docs.size() / n);
+        return TFIDF_SIMILARITY.idf(n, docs.size());
+        //return Math.log(docs.size() / n);
     }
 
     /**
@@ -62,6 +62,22 @@ public class TFIDFCalculator
         return tf(doc, term) * idf(docs, term);
     }
     
+    public static List<ItemValue<String>> bulkTfIdf(List<List<String>> docs)
+    {
+    	return uniqueValues(docs.stream().flatMap(List::stream).collect(Collectors.toList()))
+    			.stream().map(term -> {
+    				ItemValue<String> tfIdf = new ItemValue<String>(term, 0);
+    				double idf = idf(docs , term);
+    	    		docs.forEach(doc -> {
+    	    			double tfIdfValue = tf(doc, term) * idf;
+    	    			if(tfIdfValue > tfIdf.value) {
+    	    				tfIdf.value = tfIdfValue;
+    	    			}
+    	    		});
+    				return tfIdf;
+    			}).collect(Collectors.toList());
+    }
+    
     /**
      * Return a list of unique values
      * @param listValues
@@ -69,12 +85,7 @@ public class TFIDFCalculator
      */
 	public static List<String> uniqueValues(List<String> listValues)
 	{
-		TreeSet<String> treeSet = new TreeSet<String>(new Comparator<String>() {
-			@Override
-			public int compare(String o1, String o2) {
-				return o1.compareToIgnoreCase(o2);
-			}
-		});
+		TreeSet<String> treeSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 		treeSet.addAll(listValues);
 		return new ArrayList<String>(treeSet);
 	}

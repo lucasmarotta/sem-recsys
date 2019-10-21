@@ -17,8 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
+import br.dcc.ufba.themoviefinder.entities.models.Recomendation;
 import br.dcc.ufba.themoviefinder.entities.models.User;
-import br.dcc.ufba.themoviefinder.entities.models.UserRecomendation;
 import br.dcc.ufba.themoviefinder.entities.services.MovieService;
 import br.dcc.ufba.themoviefinder.entities.services.UserService;
 import br.dcc.ufba.themoviefinder.services.similarity.UserMovieSimilarityService;
@@ -43,7 +43,14 @@ public class RecomendationService
 	@Autowired
 	private UserService userService;
 	
+	private RecomendationModel recModel;
+
 	private static final Logger LOGGER = LogManager.getLogger(RecomendationService.class);
+	
+	public RecomendationService()
+	{
+		recModel = new RecomendationModel();
+	}
 	
 	public void setUserMovieSimilarity(UserMovieSimilarityService similarityService)
 	{
@@ -69,37 +76,39 @@ public class RecomendationService
 	{
 		this.batchMovieSize = batchMovieSize;
 	}
+	
+	public RecomendationModel getRecModel() 
+	{
+		return recModel;
+	}
 
-	public List<ItemValue<Movie>> getRecomendationsByMovie(Movie movie, int qtMovies)
+	public void setRecModel(RecomendationModel recModel) 
 	{
-		return pageAllRecomendations(movie.getTokensList(), Arrays.asList(movie), qtMovies);	
+		this.recModel = recModel;
+	}
+
+	public List<ItemValue<Movie>> getRecomendationsByMovie(Movie movie)
+	{
+		return getRecomendations(movie.getTokensList(), Arrays.asList(movie));
 	}
 	
-	public List<ItemValue<Movie>> getRecomendationsByUser(User user, int qtMovies)
+	public List<Recomendation> getRecomendationsByUser(User user)
 	{
-		return pageAllRecomendations(user.getUserMovieTokens(), user.getMovies(), qtMovies);
+		return getRecomendations(user.getMovieTokens(), user.getMoviesRecModel(recModel)).stream().map(recItem -> {
+			return new Recomendation(user, recItem.item, similarityService.getType(), recItem.value);
+		}).collect(Collectors.toList());
 	}
 	
-	public List<ItemValue<Movie>> getRecomendationsByUserBestTerms(User user, int qtMovies)
+	public List<Recomendation> getRecomendationsByUserBestTerms(User user)
 	{
-		return getRecomendationsByUserBestTerms(user, qtMovies, -1);
+		List<String> bestTerms = user.getUserBestTerms(recModel);
+		List<Movie> moviesRecModel =  user.getMoviesRecModel(recModel);
+		return getRecomendations(bestTerms, moviesRecModel).stream().map(recItem -> {
+			return new Recomendation(user, recItem.item, similarityService.getType(), recItem.value);
+		}).collect(Collectors.toList());
 	}
 	
-	public List<ItemValue<Movie>> getRecomendationsByUserBestTerms(User user, int qtMovies, int qtTerms)
-	{
-		return pageAllRecomendations(user.getUserBestTerms(qtTerms), user.getMovies(), qtMovies);
-	}
-	
-	public void updateRecomendations(User user, int qtMovies, int qtTerms)
-	{
-		List<ItemValue<Movie>> recomendations = getRecomendationsByUserBestTerms(user, qtMovies, qtTerms);
-		user.setRecomendations(recomendations.stream().map(recomendation -> {
-			return new UserRecomendation(user, recomendation.item, similarityService.getType(), recomendation.value);
-		}).collect(Collectors.toList()));
-		userService.save(user);
-	}
-	
-	private List<ItemValue<Movie>> pageAllRecomendations(List<String> tokens, List<Movie> movies, int qtMovies)
+	private List<ItemValue<Movie>> getRecomendations(List<String> userTokens, List<Movie> movies)
 	{
 		if(similarityService != null) {
 			similarityService.init();
@@ -115,56 +124,51 @@ public class RecomendationService
 				if(LOGGER.isDebugEnabled()) {
 					WATCH.start();
 				}
-				addRecomendations(simList, tokens, moviesPage.getContent(), qtMovies, totalMovies);
-				similarityService.reset();
+				addRecomendations(simList, userTokens, moviesPage.getContent(), totalMovies);
 				for (int i = 1; i < qtPages; i++) {
 					moviesPage = movieService.pageMoviesExcept(movieIds, moviesPage.nextPageable());
-					addRecomendations(simList, tokens, moviesPage.getContent(), qtMovies, totalMovies);
-					similarityService.reset();
+					addRecomendations(simList, userTokens, moviesPage.getContent(), totalMovies);
+				}
+				if(LOGGER.isDebugEnabled()) {
+					WATCH.stop();
+					WATCH.reset();
 				}
 			} catch(Exception e) {
 				simList.clear();
 				LOGGER.error(e.getMessage(), e);
 			}
 			similarityService.close();
-			if(LOGGER.isDebugEnabled()) {
-				WATCH.stop();
-			}
-			simList.sort((ItemValue<Movie> a, ItemValue<Movie> b) -> a.compareTo(b));
+			Collections.sort(simList, Collections.reverseOrder());
 			int max = simList.size();
-			if(qtMovies > 0) {
-				max = Math.min(qtMovies, max);
+			if(recModel.recomendationSize > 0) {
+				max = Math.min(recModel.recomendationSize, max);
 			}
-			return simList.subList(0, max);	
+			return simList.subList(0, max);
 		} else {
 			throw new IllegalStateException("a userMovieSimilarity service must be setted");
 		}
 	}
 	
-	private void addRecomendations(List<ItemValue<Movie>> simList, List<String> tokens, List<Movie> movies, int qtMovies, long totalMovies)
+	private void addRecomendations(List<ItemValue<Movie>> simList, List<String> userTokens, List<Movie> movies, long totalMovies)
 	{
 		try {
+			//similarityService.updateCache(tokens, movies);
 			BatchWorkLoad<Movie> batchWorkLoad = new BatchWorkLoad<Movie>(batchSize, movies, false);
 			batchWorkLoad.run(movie -> {
-				String debug = "";
-				if(LOGGER.isDebugEnabled()) {
-					debug += "\n" + movie.getTitle();
-					debug += "\n" + movie.getTokensList();
-				}
 				ItemValue<Movie> mv = null;
 				try {
-					mv = new ItemValue<Movie>(movie, similarityService.getSimilarity(tokens, movie.getTokensList()), true);
+					mv = new ItemValue<Movie>(movie, similarityService.getSimilarity(userTokens, movie.getTokensList()), recModel.randomEqualOrder);
 					simList.add(mv);
 				} catch(Exception e) {
 					LOGGER.error(e.getMessage(), e);
 				}
 				if(LOGGER.isDebugEnabled()) {
-					debug += "\n" + mv;
-					debug += "\n" + String.format("%d - %f%%, %fs", simList.size(), simList.size() / ((double) totalMovies) * 100, ((double) WATCH.getTime() / 1000)) + "\n";
-					LOGGER.debug(debug);
+					LOGGER.debug(String.format("\n%s\n%s\n%s\n%d - %f%%, %fs\n", 
+							mv, userTokens, movie.getTokensList(), simList.size(), simList.size() / ((double) totalMovies) * 100, ((double) WATCH.getTime() / 1000)));
 				}
 				return null;
 			});
+			similarityService.resetCache();
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 		}

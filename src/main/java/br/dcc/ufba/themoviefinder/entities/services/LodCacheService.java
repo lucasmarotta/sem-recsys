@@ -36,7 +36,7 @@ public class LodCacheService
 	public List<LodCache> getResourceList(List<String> resources)
 	{
 		if(! resources.isEmpty()) {
-			return lodCacheRepo.findByResourceIn(resources);	
+			return lodCacheRepo.findByResourceIn(resources);
 		}
 		return new ArrayList<LodCache>();
 	}

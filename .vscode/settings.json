@@ -1,3 +1,14 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "sqltools.connections": [
+        {
+            "askForPassword": false,
+            "database": "the_movie_finder",
+            "dialect": "MySQL",
+            "name": "XAMPP",
+            "port": 3306,
+            "server": "localhost",
+            "username": "root"
+        }
+    ]
 }

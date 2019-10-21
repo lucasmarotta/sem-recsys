@@ -2,6 +2,7 @@ package br.dcc.ufba.themoviefinder.entities.models;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,11 +13,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
+import br.dcc.ufba.themoviefinder.services.RecomendationModel;
 import br.dcc.ufba.themoviefinder.utils.ItemValue;
 import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 
@@ -32,28 +31,28 @@ public class User
 	@Column(nullable = false)
 	private String email;
 	
-	@ManyToMany(
+	@OneToMany(
+		mappedBy = "user",
 		fetch = FetchType.LAZY,
 		cascade = {CascadeType.PERSIST, CascadeType.MERGE}
 	)
-	@JoinTable(
-		name = "user_movie", 
-		joinColumns = {@JoinColumn(name = "user_id")},
-		inverseJoinColumns = {@JoinColumn(name = "movie_id")}
-	)
-	private List<Movie> movies;
+	private List<Rating> ratings;
     
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL)
-	private List<UserRecomendation> recomendations;
+	@OneToMany(
+		mappedBy = "user", 
+		fetch = FetchType.LAZY, 
+		cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+	)
+	private List<Recomendation> recomendations;
 	
-	private String pass;
-	
-	@Column(nullable = false)
-	private String salt;
+	private String password;
 	
 	private String profilePicture;
 	
 	private String facebookId;
+	
+	@Column(nullable=false)
+	private boolean online = false;
 	
 	@Column(nullable = false)
 	private Boolean active;
@@ -66,8 +65,8 @@ public class User
 	
 	public User() 
 	{
-		movies = new ArrayList<Movie>();
-		recomendations = new ArrayList<UserRecomendation>();
+		ratings = new ArrayList<Rating>();
+		recomendations = new ArrayList<Recomendation>();
 	}
 	
 	public User(int id)
@@ -106,24 +105,14 @@ public class User
 		this.email = email;
 	}
 
-	public String getPass() 
+	public String getPasseword() 
 	{
-		return pass;
+		return password;
 	}
 
-	public void setPass(String pass) 
+	public void setPasseword(String passeword) 
 	{
-		this.pass = pass;
-	}
-
-	public String getSalt() 
-	{
-		return salt;
-	}
-
-	public void setSalt(String salt) 
-	{
-		this.salt = salt;
+		this.password = passeword;
 	}
 
 	public String getProfilePicture() 
@@ -144,6 +133,16 @@ public class User
 	public void setFacebookId(String facebookId) 
 	{
 		this.facebookId = facebookId;
+	}
+	
+	public boolean isOnline() 
+	{
+		return online;
+	}
+
+	public void setOnline(boolean online) 
+	{
+		this.online = online;
 	}
 
 	public Boolean getActive() 
@@ -166,43 +165,53 @@ public class User
 		return updatedAt;
 	}
 
-	public List<Movie> getMovies() 
+	public List<Rating> getRatings() 
 	{
-		return movies;
+		return ratings;
 	}
 	
-	public List<Movie> getRecomendedMovies() 
+	public List<Movie> getMovies()
 	{
-		return recomendations.stream().map(recomendation -> recomendation.getMovie()).collect(Collectors.toList());
+		return ratings.stream().map(rating -> rating.getMovie()).collect(Collectors.toList());
 	}
 	
-	public List<Movie> getRecomendedMovies(RecomendationType similarity)
+	public List<Movie> getMoviesRecModel(RecomendationModel recModel)
 	{
-		return recomendations.stream().filter(recomendation -> similarity.equals(recomendation.getSimilarity())).map(recomendation -> recomendation.getMovie()).collect(Collectors.toList());
+		List<Movie> movies = ratings.stream().filter(rating -> rating.getRating() >= recModel.relevanceThreshold).map(Rating::getMovie).collect(Collectors.toList());
+		int max = movies.size();
+		if(recModel.userPreferencesSize > 0) {
+			max = Math.min(recModel.userPreferencesSize, max);
+		}
+		return movies.subList(0, max);
 	}
 	
-	public List<UserRecomendation> getRecomendations()
+	public List<Recomendation> getRecomendations()
 	{
 		return recomendations;
 	}
 	
-	public List<UserRecomendation> getRecomendations(RecomendationType similarity) 
+	public List<Recomendation> getRecomendations(RecomendationType similarity) 
 	{
 		return recomendations.stream().filter(recomendation -> similarity.equals(recomendation.getSimilarity())).collect(Collectors.toList());
 	}
 	
-	public void setRecomendations(List<UserRecomendation> recomendations)
+	public void setRecomendations(List<Recomendation> recomendations)
 	{
 		this.recomendations = recomendations;
 	}
 	
-	public List<String> getUserBestTerms()
+	public List<String> getUserBestTerms(RecomendationModel recModel)
 	{
-		return getUserBestTerms(-1);
-	}
-	
-	public List<String> getUserBestTerms(int qtTerms)
-	{
+		List<ItemValue<String>> tfIdfValues = TFIDFCalculator.bulkTfIdf(getMoviesRecModel(recModel).stream().map(Movie::getTokensList).collect(Collectors.toList()));
+		Collections.sort(tfIdfValues, Collections.reverseOrder());
+		int max = tfIdfValues.size();
+		if(recModel.userModelSize > 0) {
+			max = Math.min(recModel.userModelSize, max);
+		}
+		return tfIdfValues.subList(0, max).stream().map(tfIdf -> tfIdf.item).collect(Collectors.toList());
+		
+		/*
+		List<Movie> movies = getMoviesRecModel(recModel);
 		if(! movies.isEmpty()) {
 			List<List<String>> listOfDocs = new ArrayList<List<String>>();
 			List<String> uniqueValues = new ArrayList<String>();
@@ -212,6 +221,7 @@ public class User
 				uniqueValues.addAll(movie.getTokensList());
 			}
 			
+			int qtTerms = recModel.userModelSize;
 			if(qtTerms == -1) {
 				qtTerms = listOfDocs.stream().mapToInt(doc -> doc.size()).max().getAsInt();
 			}
@@ -225,7 +235,7 @@ public class User
 			}
 			uniqueValues.clear();
 			
-			termValueList.sort((ItemValue<String> a, ItemValue<String> b) -> a.compareTo(b));
+			Collections.sort(termValueList, Collections.reverseOrder());
 			List<ItemValue<String>> bestTerms = new ArrayList<ItemValue<String>>();
 			for (ItemValue<String> termValue : termValueList) {
 				if(bestTerms.size() < qtTerms) {
@@ -236,18 +246,16 @@ public class User
 					break;
 				}
 			}
-			return bestTerms.stream().map(term -> term.item).collect(Collectors.toList());	
+			return bestTerms.stream().map(term -> term.item).collect(Collectors.toList());
+
 		} 
 		return new ArrayList<String>();
+		*/
 	}
 	
-	public List<String> getUserMovieTokens()
+	public List<String> getMovieTokens()
 	{
-		List<String> userTokens = new ArrayList<String>();
-		for(Movie userMovie : movies) {
-			userTokens.addAll(userMovie.getTokensList());
-		}
-		return userTokens;
+		return ratings.stream().map(rating -> rating.getMovie().getTokensList()).flatMap(List::stream).collect(Collectors.toList());
 	}
 	
     @Override
@@ -277,8 +285,9 @@ public class User
 	@Override
 	public String toString() 
 	{
-		return "User [id=" + id + ", name=" + name + ", email=" + email + ", movies=" + movies + ", pass=" + pass
-				+ ", salt=" + salt + ", profilePicture=" + profilePicture + ", facebookId=" + facebookId + ", active="
-				+ active + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + "]";
+		return "User [id=" + id + ", name=" + name + ", email=" + email + ", ratings=" + ratings + ", recomendations="
+				+ recomendations + ", password=" + password + ", profilePicture=" + profilePicture + ", facebookId="
+				+ facebookId + ", online=" + online + ", active=" + active + ", createdAt=" + createdAt + ", updatedAt="
+				+ updatedAt + "]";
 	}
 }

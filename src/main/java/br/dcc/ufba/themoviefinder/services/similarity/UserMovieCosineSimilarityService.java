@@ -10,6 +10,7 @@ import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.RecomendationType;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.TfIdfService;
+import br.dcc.ufba.themoviefinder.services.RecomendationModel;
 import br.dcc.ufba.themoviefinder.utils.CosineSimilarity;
 import br.dcc.ufba.themoviefinder.utils.DocVector;
 
@@ -24,10 +25,10 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarityServ
 		return getSimilarity(movie1.getTokensList(), movie2.getTokensList());
 	}
 	
-	public double getSimilarityFromUser(User user, Movie movie)
+	public double getSimilarityFromUser(User user, Movie movie, RecomendationModel recModel)
 	{
 		List<String> userTokens = new ArrayList<String>();
-		for(Movie userMovie : user.getMovies()) {
+		for(Movie userMovie : user.getMoviesRecModel(recModel)) {
 			userTokens.addAll(userMovie.getTokensList());
 		}
 		return getSimilarity(userTokens, movie.getTokensList());
@@ -63,9 +64,15 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarityServ
 	{
 		//tfIdfService.updateIdf();
 	}
+	
+	@Override
+	public void updateCache(List<String> queryTokens, List<Movie> movies)
+	{
+		
+	}
 
 	@Override
-	public void reset()
+	public void resetCache()
 	{
 		
 	}

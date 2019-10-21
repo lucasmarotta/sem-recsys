@@ -14,13 +14,15 @@ import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.RecomendationType;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.exception.ResourceNotFoundException;
+import br.dcc.ufba.themoviefinder.services.RecomendationModel;
 import br.dcc.ufba.themoviefinder.services.cache.LocalCacheService;
+import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 
 @Service
 public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 {
 	@Value("${app.rlw-use-cache: true}")
-	public boolean useCache;
+	private boolean useCache;
 	
 	@Autowired
 	private LocalCacheService localCache;
@@ -39,7 +41,7 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	@Override
 	public RecomendationType getType() 
 	{
-		return RecomendationType.RLW;
+		return RecomendationType.RLWS;
 	}
 	
 	public void init()
@@ -63,6 +65,16 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	{
 		this.indirectWeight = indirectWeight;
 	}
+	
+	public boolean isUseCache() 
+	{
+		return useCache;
+	}
+
+	public void setUseCache(boolean useCache) 
+	{
+		this.useCache = useCache;
+	}
 
 	@Override
 	public double getSimilarityFromMovie(Movie movie1, Movie movie2) throws Exception 
@@ -71,10 +83,10 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	}
 
 	@Override
-	public double getSimilarityFromUser(User user, Movie movie) throws Exception 
+	public double getSimilarityFromUser(User user, Movie movie, RecomendationModel recModel) throws Exception 
 	{
 		List<String> userTokens = new ArrayList<String>();
-		for(Movie userMovie : user.getMovies()) {
+		for(Movie userMovie : user.getMoviesRecModel(recModel)) {
 			userTokens.addAll(userMovie.getTokensList());
 		}
 		return getSimilarity(userTokens, movie.getTokensList());
@@ -102,7 +114,16 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	}
 	
 	@Override
-	public void reset()
+	public void updateCache(List<String> queryTokens, List<Movie> movies)
+	{
+		queryTokens = TFIDFCalculator.uniqueValues(queryTokens);
+		for (Movie movie : movies) {
+			localCache.updateLocalCache(queryTokens, TFIDFCalculator.uniqueValues(movie.getTokensList()));
+		}
+	}
+	
+	@Override
+	public void resetCache()
 	{
 		if(useCache) {
 			localCache.clear();
