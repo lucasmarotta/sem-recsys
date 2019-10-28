@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
+import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.repositories.MovieRepository;
 import br.dcc.ufba.themoviefinder.services.NLPTokenizer;
 
@@ -52,18 +53,19 @@ public class MovieService
 		return (movies != null) ? movies : new ArrayList<Movie>();
 	}
 	
-	public List<Movie> getAllMoviesExcept(List<Movie> movies)
+	public List<Movie> getAllMoviesExcept(List<Integer> movieIds)
 	{
-		List<Integer> movieIds = new ArrayList<Integer>();
-		for (Movie movie : movies) {
-			movieIds.add(movie.getId());
-		}
 		return movieRepo.findByIdNotIn(movieIds);
 	}
 	
 	public Page<Movie> pageMoviesExcept(List<Integer> movieIds, Pageable pageble)
 	{
 		return movieRepo.findByIdNotIn(movieIds, pageble);
+	}
+	
+	public Page<Movie> pageMoviesNotRatedByUser(User user, Pageable pageble)
+	{
+		return movieRepo.findByNotRatedByUser(user.getId(), pageble);
 	}
 	
 	public Page<Movie> pageMovies(Pageable pageble)

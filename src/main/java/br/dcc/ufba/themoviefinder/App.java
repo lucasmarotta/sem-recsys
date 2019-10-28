@@ -12,6 +12,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import br.dcc.ufba.themoviefinder.controllers.launcher.LauncherContext;
 import br.dcc.ufba.themoviefinder.entities.models.Recomendation;
 import br.dcc.ufba.themoviefinder.entities.models.User;
+import br.dcc.ufba.themoviefinder.entities.services.MovieService;
 import br.dcc.ufba.themoviefinder.entities.services.UserService;
 import br.dcc.ufba.themoviefinder.services.RecomendationModel;
 import br.dcc.ufba.themoviefinder.services.RecomendationService;
@@ -25,6 +26,9 @@ public class App extends SpringFXApplication
 {
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private MovieService movieService;
 	
 	@Autowired
 	private RecomendationService recomendationService;
@@ -99,7 +103,7 @@ public class App extends SpringFXApplication
 		*/
 	
 		RecomendationModel recModel = new RecomendationModel();
-		List<User> users = userService.getOnlineUsers();
+		List<User> users = userService.getOfflineUsersToRecomendation();
 		
 		users.forEach(user -> {
 			System.out.println("Recomendations for " + user.getEmail() + "\n");
@@ -115,6 +119,7 @@ public class App extends SpringFXApplication
 			
 			watch.reset();
 			watch.start();
+			recomendationService.getRecomendationsByUserBestTerms(user);
 			List<Recomendation> recomendations = recomendationService.getRecomendationsByUserBestTerms(user);
 			user.setRecomendations(recomendations);
 			watch.stop();

@@ -3,8 +3,8 @@
 
 	<Properties>
 	  <Property name="logPattern">%d{yyyy-MM-dd hh:mm:ss.SSS} [%p]: %m %n%ex</Property>
-	  <Property name="fileName">logs/atenderbot_${date:yyyyMMdd}.log</Property>
-	  <Property name="fileNamePattern">logs/atenderbot_%d{yyyyMMdd}_%i.log</Property>
+	  <Property name="fileName">logs/the_movie_finder_${date:yyyyMMdd}.log</Property>
+	  <Property name="fileNamePattern">logs/the_movie_finder_%d{yyyyMMdd}_%i.log</Property>
 	</Properties>
 
     <Appenders>

@@ -30,7 +30,12 @@ public interface MovieRepository extends JpaRepository<Movie, Long>
 	
 	List<Movie> findAll();
 	
+	Page<Movie> findByIdIn(List<Integer> movieIds, Pageable pageble);
+	
 	Page<Movie> findByIdNotIn(List<Integer> movieIds, Pageable pageble);
+	
+	@Query("SELECT m FROM Movie m WHERE NOT EXISTS (SELECT r FROM Rating r WHERE r.id.userId = :userId AND m.id = r.id.movieId)")
+	Page<Movie> findByNotRatedByUser(@Param("userId") int userId, Pageable pageble);
 	
 	List<Movie> findTop30ByOrderByIdAsc();
 }

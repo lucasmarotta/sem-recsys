@@ -20,7 +20,6 @@ import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.Recomendation;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.MovieService;
-import br.dcc.ufba.themoviefinder.entities.services.UserService;
 import br.dcc.ufba.themoviefinder.services.similarity.UserMovieSimilarityService;
 import br.dcc.ufba.themoviefinder.utils.BatchWorkLoad;
 import br.dcc.ufba.themoviefinder.utils.ItemValue;
@@ -39,9 +38,6 @@ public class RecomendationService
 	
 	@Autowired
 	private MovieService movieService;
-	
-	@Autowired
-	private UserService userService;
 	
 	private RecomendationModel recModel;
 
@@ -94,7 +90,7 @@ public class RecomendationService
 	
 	public List<Recomendation> getRecomendationsByUser(User user)
 	{
-		return getRecomendations(user.getMovieTokens(), user.getMoviesRecModel(recModel)).stream().map(recItem -> {
+		return getRecomendations(user.getMovieTokens(), user.getMovies()).stream().map(recItem -> {
 			return new Recomendation(user, recItem.item, similarityService.getType(), recItem.value);
 		}).collect(Collectors.toList());
 	}
@@ -102,7 +98,7 @@ public class RecomendationService
 	public List<Recomendation> getRecomendationsByUserBestTerms(User user)
 	{
 		List<String> bestTerms = user.getUserBestTerms(recModel);
-		List<Movie> moviesRecModel =  user.getMoviesRecModel(recModel);
+		List<Movie> moviesRecModel =  user.getMovies();
 		return getRecomendations(bestTerms, moviesRecModel).stream().map(recItem -> {
 			return new Recomendation(user, recItem.item, similarityService.getType(), recItem.value);
 		}).collect(Collectors.toList());
@@ -113,9 +109,7 @@ public class RecomendationService
 		if(similarityService != null) {
 			similarityService.init();
 			List<ItemValue<Movie>> simList = Collections.synchronizedList(new ArrayList<ItemValue<Movie>>());
-			List<Integer> movieIds = movies.stream().map(movie -> {
-				return movie.getId();
-			}).collect(Collectors.toList());
+			List<Integer> movieIds = movies.stream().map(movie -> movie.getId()).collect(Collectors.toList());
 			Pageable pageRequest = PageRequest.of(0, batchMovieSize);
 			try {
 				Page<Movie> moviesPage = movieService.pageMoviesExcept(movieIds, pageRequest);
