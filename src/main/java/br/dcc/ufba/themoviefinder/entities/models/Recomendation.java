@@ -16,7 +16,7 @@ import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 public class Recomendation 
 {
 	@EmbeddedId
-	private RecomendationId id;
+	private RecomendationId id;	
 	
 	@ManyToOne(fetch=FetchType.EAGER)
     @MapsId("user_id")
@@ -30,10 +30,12 @@ public class Recomendation
     
     @Column(nullable = false)
 	private Double score;
+    
+    private Double rate;
 	
 	public Recomendation()
 	{
-		this(null, null, RecomendationType.RLWS, null);
+		this(null, null, RecomendationType.RLWS_DIRECT, null);
 	}
 	
 	public Recomendation(User user, Movie movie, RecomendationType similarity, Double score)
@@ -42,10 +44,20 @@ public class Recomendation
 			id = new RecomendationId(user.getId(), movie.getId(), similarity);	
 		} else {
 			id = new RecomendationId(null, null, similarity);
-		}
+		}		
 		this.user = user;
 		this.movie = movie;
 		this.score = score;
+	}
+	
+	public RecomendationId getRecId() 
+	{
+		return id;
+	}
+
+	public void setRecId(RecomendationId recId) 
+	{
+		this.id = recId;
 	}
 
 	public RecomendationId getId() 
@@ -97,9 +109,19 @@ public class Recomendation
 	{
 		this.score = score;
 	}
+	
+	public Double getRate() 
+	{
+		return rate;
+	}
+
+	public void setRate(Double rate) 
+	{
+		this.rate = rate;
+	}
 
 	@Override
-	public String toString() 
+	public String toString()
 	{
 		return "Recomendation [User=" + user.getEmail() + ", similarity = " + id.similarity + "]"
 				+ "\n[" + movie + ", score=" + score + "]\n" + TFIDFCalculator.uniqueValues(movie.getTokensList());

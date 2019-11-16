@@ -11,6 +11,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import br.dcc.ufba.themoviefinder.controllers.launcher.LauncherContext;
 import br.dcc.ufba.themoviefinder.entities.models.Recomendation;
+import br.dcc.ufba.themoviefinder.entities.models.RecomendationType;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.MovieService;
 import br.dcc.ufba.themoviefinder.entities.services.UserService;
@@ -99,11 +100,11 @@ public class App extends SpringFXApplication
 			double indirectRelation = sparqlWalk.countIndirectLinksBetween2Resources(term1, term2);
 			System.out.println(String.format("%s/%s\t%f\t%f", lodId.getResource1(), lodId.getResource2(), indirect1 + indirect2, indirectRelation));
 		});
-		//System.out.println("=HIPERLINK(\"https://www.themoviedb.org/movie/" + movieSimilarity.item.getTmdbId() + "?language=pt-BR\"; \"" + movieSimilarity.item.getTitle() + "\")");
 		*/
 	
+		similarityService.setTypeToIndirect();
 		RecomendationModel recModel = new RecomendationModel();
-		List<User> users = userService.getOfflineUsersToRecomendation();
+		List<User> users = userService.getOnlineUsersToRecomendation(RecomendationType.RLWS_DIRECT);
 		
 		users.forEach(user -> {
 			System.out.println("Recomendations for " + user.getEmail() + "\n");
@@ -119,17 +120,17 @@ public class App extends SpringFXApplication
 			
 			watch.reset();
 			watch.start();
-			recomendationService.getRecomendationsByUserBestTerms(user);
+			//recomendationService.getRecomendationsByUserBestTerms(user);
 			List<Recomendation> recomendations = recomendationService.getRecomendationsByUserBestTerms(user);
-			user.setRecomendations(recomendations);
 			watch.stop();
-			
-			userService.save(user);
+			user.setRecomendations(recomendations);
+			//userService.save(user);
 			
 			System.out.println("Time Elapsed: " + (watch.getTime() / 1000) + "s");
 			recomendations.forEach(rec -> {
 				System.out.println(rec);
 				System.out.println(userTokens + "\n");
+				//System.out.println("=HIPERLINK(\"https://www.themoviedb.org/movie/" + rec.getMovie().getTmdbId() + "?language=pt-BR\"; \"" + rec.getMovie().getTitle() + "\")");
 			});
 		});
 		SpringFXLauncher.exit();

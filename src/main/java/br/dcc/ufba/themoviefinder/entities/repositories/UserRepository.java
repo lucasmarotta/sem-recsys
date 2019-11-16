@@ -15,7 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long>
 	User findById(Integer id);
 	User findByName(String name);
 	User findByEmail(String email);
-	List<User> findTop50ByOnline(boolean online);
+	List<User> findTop30ByOnline(boolean online);
 	
 	@Query(value="SELECT u.*\r\n" + 
 			"FROM User u \r\n" + 
@@ -23,8 +23,8 @@ public interface UserRepository extends JpaRepository<User, Long>
 			"(\r\n" + 
 			"	SELECT r.*\r\n" + 
 			"    FROM Recomendation r\r\n" + 
-			"    WHERE r.user_id = u.id\r\n" + 
+			"    WHERE similarity = :similarity AND r.user_id = u.id\r\n" + 
 			")\r\n" + 
-			"LIMIT 50", nativeQuery=true)
-	List<User> findTop50ToRecomendation(@Param("online") boolean online);
+			"LIMIT 30", nativeQuery=true)
+	List<User> findTop30ToRecomendation(@Param("online") boolean online, @Param("similarity") String similarity);
 }

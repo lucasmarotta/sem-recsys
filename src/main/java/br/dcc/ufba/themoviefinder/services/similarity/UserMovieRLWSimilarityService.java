@@ -36,12 +36,19 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	@Value("${app.rlw-indirect-weight: 0.2}")
 	private double indirectWeight;
 	
+	private RecomendationType type = RecomendationType.RLWS_DIRECT;
+	
 	private static final Logger LOGGER = LogManager.getLogger(UserMovieRLWSimilarityService.class);
 	
 	@Override
 	public RecomendationType getType() 
 	{
-		return RecomendationType.RLWS;
+		return type;
+	}
+	
+	public void setTypeToIndirect()
+	{
+		type = RecomendationType.RLWS_INDIRECT;
 	}
 	
 	public void init()

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.dcc.ufba.themoviefinder.entities.models.RecomendationType;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.repositories.UserRepository;
 
@@ -50,22 +51,22 @@ public class UserService
 	
 	public List<User> getOnlineUsers()
 	{
-		return userRepo.findTop50ByOnline(true);
+		return userRepo.findTop30ByOnline(true);
 	}
 	
 	public List<User> getOfflineUsers()
 	{
-		return userRepo.findTop50ByOnline(false);
+		return userRepo.findTop30ByOnline(false);
 	}
 	
-	public List<User> getOfflineUsersToRecomendation() 
+	public List<User> getOfflineUsersToRecomendation(RecomendationType similarity) 
 	{
-		return userRepo.findTop50ToRecomendation(false);
+		return userRepo.findTop30ToRecomendation(false, similarity.name());
 	}
 	
-	public List<User> getOnlineUsersToRecomendation() 
+	public List<User> getOnlineUsersToRecomendation(RecomendationType similarity) 
 	{
-		return userRepo.findTop50ToRecomendation(true);
+		return userRepo.findTop30ToRecomendation(true, similarity.name());
 	}
 	
 	public List<User> findAll()

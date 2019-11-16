@@ -3,7 +3,6 @@ package br.dcc.ufba.themoviefinder.entities.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import br.dcc.ufba.themoviefinder.entities.models.LodCacheRelation;
 import br.dcc.ufba.themoviefinder.entities.models.LodRelationId;
 import br.dcc.ufba.themoviefinder.entities.repositories.LodCacheRepository;
 import br.dcc.ufba.themoviefinder.entities.repositories.LodRelationRepository;
+import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 
 @Service
 public class LodCacheService 
@@ -95,16 +95,22 @@ public class LodCacheService
 	public List<LodCacheRelation> getResourceRelationList(List<LodRelationId> ids)
 	{
 		if(! ids.isEmpty()) {
-			List<LodRelationId> expandedIds = new ArrayList<LodRelationId>();
-			ids.forEach(lodRelationId -> {
-				expandedIds.add(lodRelationId);
-				expandedIds.add(new LodRelationId(lodRelationId.getResource2(), lodRelationId.getResource1()));
-			});
-			return lodRelationRepo.findByIdResource1InAndIdResource2In(expandedIds.stream().map(lodId -> {
-				return lodId.getResource1();
-			}).distinct().collect(Collectors.toList()), expandedIds.stream().map(lodId -> {
-				return lodId.getResource2();
-			}).distinct().collect(Collectors.toList()));
+			List<String> resources = new ArrayList<String>();
+			for (LodRelationId lodId : ids) {
+				resources.add(lodId.getResource1());
+				resources.add(lodId.getResource2());
+			}
+			resources = TFIDFCalculator.uniqueValues(resources);
+			return lodRelationRepo.findByIdResource1InAndIdResource2In(resources, resources);
+		}
+		return new ArrayList<LodCacheRelation>();
+	}
+	
+	public List<LodCacheRelation> getAllResourceRelationCombinations(List<String> resources)
+	{
+		if(! resources.isEmpty()) {
+			resources = TFIDFCalculator.uniqueValues(resources);
+			return lodRelationRepo.findByIdResource1InAndIdResource2In(resources, resources);
 		}
 		return new ArrayList<LodCacheRelation>();
 	}

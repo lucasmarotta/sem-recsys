@@ -1,7 +1,6 @@
 package br.dcc.ufba.themoviefinder.utils;
 
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ItemValue<T> implements Comparable<ItemValue<T>>
@@ -23,8 +22,7 @@ public class ItemValue<T> implements Comparable<ItemValue<T>>
 			this.value = value;
 			this.randomEqualCompareTo = randomEqualComparison;
 			if(randomEqualComparison) {
-				Random random = ThreadLocalRandom.current();
-				randomValue = random.nextDouble();
+				randomValue = ThreadLocalRandom.current().nextDouble();
 			}
 		}		
 	}

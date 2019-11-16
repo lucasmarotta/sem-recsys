@@ -21,8 +21,8 @@ import br.dcc.ufba.themoviefinder.entities.models.Recomendation;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.MovieService;
 import br.dcc.ufba.themoviefinder.services.similarity.UserMovieSimilarityService;
-import br.dcc.ufba.themoviefinder.utils.BatchWorkLoad;
 import br.dcc.ufba.themoviefinder.utils.ItemValue;
+import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 
 @Service
 public class RecomendationService 
@@ -133,11 +133,7 @@ public class RecomendationService
 			}
 			similarityService.close();
 			Collections.sort(simList, Collections.reverseOrder());
-			int max = simList.size();
-			if(recModel.recomendationSize > 0) {
-				max = Math.min(recModel.recomendationSize, max);
-			}
-			return simList.subList(0, max);
+			return simList.stream().limit(recModel.recomendationSize).collect(Collectors.toList());
 		} else {
 			throw new IllegalStateException("a userMovieSimilarity service must be setted");
 		}
@@ -145,6 +141,7 @@ public class RecomendationService
 	
 	private void addRecomendations(List<ItemValue<Movie>> simList, List<String> userTokens, List<Movie> movies, long totalMovies)
 	{
+		/* 
 		try {
 			//similarityService.updateCache(tokens, movies);
 			BatchWorkLoad<Movie> batchWorkLoad = new BatchWorkLoad<Movie>(batchSize, movies, false);
@@ -155,10 +152,17 @@ public class RecomendationService
 					simList.add(mv);
 				} catch(Exception e) {
 					LOGGER.error(e.getMessage(), e);
-				}
-				if(LOGGER.isDebugEnabled()) {
-					LOGGER.debug(String.format("\n%s\n%s\n%s\n%d - %f%%, %fs\n", 
-							mv, userTokens, movie.getTokensList(), simList.size(), simList.size() / ((double) totalMovies) * 100, ((double) WATCH.getTime() / 1000)));
+				} finally {
+					int size = simList.size();
+					if(LOGGER.isDebugEnabled()) {
+						if(mv != null) {
+							LOGGER.debug(String.format("\n%s\n%s\n%s\n%d - %f%%, %fs\n", 
+									mv, userTokens, TFIDFCalculator.uniqueValues(movie.getTokensList()), size, size / ((double) totalMovies) * 100, ((double) WATCH.getTime() / 1000)));	
+						} else {
+							LOGGER.debug(String.format("\n%d - %f%%, %fs\n", 
+									size, size / ((double) totalMovies) * 100, ((double) WATCH.getTime() / 1000)));
+						}
+					}	
 				}
 				return null;
 			});
@@ -166,5 +170,28 @@ public class RecomendationService
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 		}
+		*/
+		
+		movies.parallelStream().forEach(movie -> {
+			ItemValue<Movie> mv = null;
+			try {
+				mv = new ItemValue<Movie>(movie, similarityService.getSimilarity(userTokens, movie.getTokensList()), recModel.randomEqualOrder);
+				simList.add(mv);
+			} catch(Exception e) {
+				LOGGER.error(e.getMessage(), e);
+			} finally {
+				int size = simList.size();
+				if(LOGGER.isDebugEnabled()) {
+					if(mv != null) {
+						LOGGER.debug(String.format("\n%s\n%s\n%s\n%d - %f%%, %fs\n", 
+								mv, userTokens, TFIDFCalculator.uniqueValues(movie.getTokensList()), size, size / ((double) totalMovies) * 100, ((double) WATCH.getTime() / 1000)));	
+					} else {
+						LOGGER.debug(String.format("\n%d - %f%%, %fs\n", 
+								size, size / ((double) totalMovies) * 100, ((double) WATCH.getTime() / 1000)));
+					}
+				}	
+			}
+		});
+		similarityService.resetCache();
 	}
 }

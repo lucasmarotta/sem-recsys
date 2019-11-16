@@ -118,6 +118,8 @@ PREFIX  dbo:  <http://dbpedia.org/ontology/>
 SELECT (count (distinct ?r2) as ?x)
 WHERE {
 	{values (?r1) {(<http://dbpedia.org/resource/Paris>)} ?r2 ?p1 ?r1 . ?r2 ?p2 ?r3 . FILTER (?r1 != ?r3 && ?r2 != ?r1 && ?r2 != ?r3)}
+	--UNION
+	--{values (?r1) {(<http://dbpedia.org/resource/Paris>)} ?r2 ?p1 ?r1 . ?r2 ?p2 ?r3 . FILTER (?r1 != ?r3 && ?r2 != ?r1 && ?r2 != ?r3)}
 	FILTER ( ?p1 != dbo:wikiPageID )
 	FILTER ( ?p1 != dbo:wikiPageRevisionID )
 	FILTER ( ?p1 != dbo:wikiPageRedirects )

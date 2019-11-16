@@ -89,26 +89,27 @@ public class LocalCacheServiceImpl implements LocalCacheService
 	{
 		List<String> allTerms = new ArrayList<String>(terms1);
 		allTerms.addAll(terms2);
-		allTerms = TFIDFCalculator.uniqueValues(allTerms).stream().filter(term -> ! isLodCacheCached(new LodCache(term))).collect(Collectors.toList());
+		List<String> allTermsNotCached = TFIDFCalculator.uniqueValues(allTerms).stream().filter(term -> ! isLodCacheCached(new LodCache(term))).collect(Collectors.toList());
 		
 		/**
 		 * Find what is on DB and put on cache
 		 */
-		List<LodCache> lodCaches = lodCacheService.getResourceList(allTerms);
+		List<LodCache> lodCaches = lodCacheService.getResourceList(allTermsNotCached);
 		lodCaches.forEach(lodCache -> {
-			cacheManager.getCache("lodCache").putIfAbsent(lodCache, lodCache);	
+			cacheManager.getCache("lodCache").put(lodCache, lodCache);
 		});
-				
+		
 		/**
 		 * Build all possible relation ids
 		 */
-		List<LodRelationId> lodRelationIds = new ArrayList<LodRelationId>();
+		allTerms.clear();
 		for (String term1 : terms1) {
 			for (String term2 : terms2) {
 				if(! term1.equalsIgnoreCase(term2)) {
 					LodRelationId lodId = new LodRelationId(term1, term2);
-					if(! isLodCacheRelationCached(lodId)) {
-						lodRelationIds.add(lodId);	
+					if(! isLodCacheRelationCached(lodId) ) {
+						allTerms.add(term1);
+						allTerms.add(term2);
 					}
 				}
 			}
@@ -117,15 +118,10 @@ public class LocalCacheServiceImpl implements LocalCacheService
 		/**
 		 * Find what is on DB and put on cache
 		 */
-		List<LodCacheRelation> lodCacheRelations = lodCacheService.getResourceRelationList(lodRelationIds);
+		List<LodCacheRelation> lodCacheRelations = lodCacheService.getAllResourceRelationCombinations(allTerms);
 		lodCacheRelations.forEach(lodCacheRelation -> {
-			cacheManager.getCache("lodCacheRelation").putIfAbsent(lodCacheRelation.getId(), lodCacheRelation);
+			cacheManager.getCache("lodCacheRelation").put(lodCacheRelation.getId(), lodCacheRelation);
 		});
-		
-		if(LOGGER.isTraceEnabled()) {
-			LOGGER.trace(String.format("%d/%d found", lodRelationIds.size(), TFIDFCalculator.uniqueValues(allTerms).size()));
-			LOGGER.trace(String.format("%d/%d found", lodCacheRelations.size(), lodRelationIds.size()));
-		}
 	}
 
 	@Override
@@ -138,8 +134,8 @@ public class LocalCacheServiceImpl implements LocalCacheService
 			LOGGER.debug("Save later rotine");
 			LOGGER.debug(lodCaches);
 			LOGGER.debug(lodCacheRelations);
+			//System.exit(1);
 		}
-		
 		lodCacheService.saveAllResources(lodCaches);	
 		lodCacheService.saveAllResourceRelations(lodCacheRelations);
 		for (String cacheName : cacheManager.getCacheNames()) {
