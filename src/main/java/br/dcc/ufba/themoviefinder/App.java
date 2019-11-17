@@ -110,17 +110,14 @@ public class App extends SpringFXApplication
 		//Gera recomendações por email de usuário
 		//consoleServices.generateRecommendationsByUserEmail("igor.silva@email.com", recModel);
 		
-		//Gera recomendações por email de usuário
-		//consoleServices.generateRecommendationsByUserEmail("igor.silva@email.com", recModel);
-		
 		//Gera recomendações para os próximos 30 usuários online que não possuem recomendações
-		//consoleServices.generateRecomendationsByOnlineUsers(recModel);
+		//consoleServices.generateRecommendationsByOnlineUsers(recModel);
 		
 		//Gera recomendações para os próximos 30 usuários offline que não possuem recomendações
-		//consoleServices.generateRecomendationsByOfflineUsers(recModel);
+		//consoleServices.generateRecommendationsByOfflineUsers(recModel);
 		
 		//Gera recomendações por usuários.
-		//consoleServices.generateRecommendationsByUsers(userService.getOfflineUsersToRecomendation(recModel.type), recModel);
+		//consoleServices.generateRecommendationsByUsers(userService.getOfflineUsersToRecommendation(recModel.type), recModel);
 		
 		//Atualiza as recomendações por id de usuário
 		//consoleServices.updateRecommendationsByUserId(1, recModel);
@@ -129,7 +126,7 @@ public class App extends SpringFXApplication
 		//consoleServices.updateRecommendationsByUserEmail("igor.silva@email.com", recModel);
 		
 		//Atualiza as recomendações por usuários. Defina runTwice como true caso seja para novos usuários e for do tipo RLWS
-		//consoleServices.updateRecommendationsByUsers(userService.getOfflineUsersToRecomendation(recModel.type), recModel, false);
+		//consoleServices.updateRecommendationsByUsers(userService.getOfflineUsersToRecommendation(recModel.type), recModel, false);
 		
 		System.exit(0);
 	}

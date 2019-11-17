@@ -17,7 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
-import br.dcc.ufba.themoviefinder.entities.models.Recomendation;
+import br.dcc.ufba.themoviefinder.entities.models.Recommendation;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.MovieService;
 import br.dcc.ufba.themoviefinder.services.similarity.SimilarityService;
@@ -89,19 +89,19 @@ public class RecommendationService
 		return getRecommendations(movie.getTokensList(), Arrays.asList(movie));
 	}
 	
-	public List<Recomendation> getRecommendationsByUser(User user)
+	public List<Recommendation> getRecommendationsByUser(User user)
 	{
 		return getRecommendations(user.getMovieTokens(), user.getMovies()).stream().map(recItem -> {
-			return new Recomendation(user, recItem.item, similarityService.getType(), recItem.value);
+			return new Recommendation(user, recItem.item, similarityService.getType(), recItem.value);
 		}).collect(Collectors.toList());
 	}
 	
-	public List<Recomendation> getRecommendationsByUserBestTerms(User user)
+	public List<Recommendation> getRecommendationsByUserBestTerms(User user)
 	{
 		List<String> bestTerms = user.getUserBestTerms(recModel);
 		List<Movie> moviesRecModel =  user.getMovies();
 		return getRecommendations(bestTerms, moviesRecModel).stream().map(recItem -> {
-			return new Recomendation(user, recItem.item, similarityService.getType(), recItem.value);
+			return new Recommendation(user, recItem.item, similarityService.getType(), recItem.value);
 		}).collect(Collectors.toList());
 	}
 	

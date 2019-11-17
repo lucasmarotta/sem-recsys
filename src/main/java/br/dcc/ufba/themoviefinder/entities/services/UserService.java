@@ -59,14 +59,14 @@ public class UserService
 		return userRepo.findTop30ByOnline(false);
 	}
 	
-	public List<User> getOfflineUsersToRecomendation(RecommendationType similarity) 
+	public List<User> getOfflineUsersToRecommendation(RecommendationType similarity) 
 	{
-		return userRepo.findTop30ToRecomendation(false, similarity.name());
+		return userRepo.findTop30ToRecommendation(false, similarity.name());
 	}
 	
-	public List<User> getOnlineUsersToRecomendation(RecommendationType similarity) 
+	public List<User> getOnlineUsersToRecommendation(RecommendationType similarity) 
 	{
-		return userRepo.findTop30ToRecomendation(true, similarity.name());
+		return userRepo.findTop30ToRecommendation(true, similarity.name());
 	}
 	
 	public List<User> findAll()

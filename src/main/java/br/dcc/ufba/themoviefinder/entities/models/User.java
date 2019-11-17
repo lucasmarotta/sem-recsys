@@ -43,7 +43,7 @@ public class User
 		fetch = FetchType.LAZY, 
 		cascade = {CascadeType.PERSIST, CascadeType.MERGE}
 	)
-	private List<Recomendation> recomendations;
+	private List<Recommendation> recommendations;
 	
 	private String password;
 	
@@ -66,7 +66,7 @@ public class User
 	public User() 
 	{
 		ratings = new ArrayList<Rating>();
-		recomendations = new ArrayList<Recomendation>();
+		recommendations = new ArrayList<Recommendation>();
 	}
 	
 	public User(int id)
@@ -185,19 +185,19 @@ public class User
 		return movies.subList(0, max);
 	}
 	
-	public List<Recomendation> getRecomendations()
+	public List<Recommendation> getRecommendations()
 	{
-		return recomendations;
+		return recommendations;
 	}
 	
-	public List<Recomendation> getRecomendations(RecommendationType similarity) 
+	public List<Recommendation> getRecommendations(RecommendationType similarity) 
 	{
-		return recomendations.stream().filter(recomendation -> similarity.equals(recomendation.getSimilarity())).collect(Collectors.toList());
+		return recommendations.stream().filter(recomendation -> similarity.equals(recomendation.getSimilarity())).collect(Collectors.toList());
 	}
 	
-	public void setRecomendations(List<Recomendation> recomendations)
+	public void setRecommendations(List<Recommendation> recomendations)
 	{
-		this.recomendations = recomendations;
+		this.recommendations = recomendations;
 	}
 	
 	public List<String> getUserBestTerms(RecommendationModel recModel)
@@ -239,8 +239,8 @@ public class User
 	@Override
 	public String toString() 
 	{
-		return "User [id=" + id + ", name=" + name + ", email=" + email + ", ratings=" + ratings + ", recomendations="
-				+ recomendations + ", password=" + password + ", profilePicture=" + profilePicture + ", facebookId="
+		return "User [id=" + id + ", name=" + name + ", email=" + email + ", ratings=" + ratings + ", recommendations="
+				+ recommendations + ", password=" + password + ", profilePicture=" + profilePicture + ", facebookId="
 				+ facebookId + ", online=" + online + ", active=" + active + ", createdAt=" + createdAt + ", updatedAt="
 				+ updatedAt + "]";
 	}

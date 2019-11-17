@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.LodRelationId;
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
-import br.dcc.ufba.themoviefinder.entities.models.Recomendation;
+import br.dcc.ufba.themoviefinder.entities.models.Recommendation;
 import br.dcc.ufba.themoviefinder.entities.models.RecommendationType;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.MovieService;
@@ -292,18 +292,18 @@ public class ConsoleServices
 	 * Generate recommendations for the next 30 online users which does have not any recommendation
 	 * @param recModel
 	 */
-	public void generateRecomendationsByOnlineUsers(RecommendationModel recModel)
+	public void generateRecommendationsByOnlineUsers(RecommendationModel recModel)
 	{
-		generateRecommendationsByUsers(userService.getOnlineUsersToRecomendation(recModel.type), recModel);
+		generateRecommendationsByUsers(userService.getOnlineUsersToRecommendation(recModel.type), recModel);
 	}
 	
 	/**
 	 * Generate recommendations for the next 30 offline users which does have not any recommendation
 	 * @param recModel
 	 */
-	public void generateRecomendationsByOfflineUsers(RecommendationModel recModel)
+	public void generateRecommendationsByOfflineUsers(RecommendationModel recModel)
 	{
-		generateRecommendationsByUsers(userService.getOfflineUsersToRecomendation(recModel.type), recModel);
+		generateRecommendationsByUsers(userService.getOfflineUsersToRecommendation(recModel.type), recModel);
 	}
 	
 	/**
@@ -325,7 +325,7 @@ public class ConsoleServices
 			
 			StopWatch watch = new StopWatch();
 			watch.start();
-			List<Recomendation> recomendations = recService.getRecommendationsByUserBestTerms(user);
+			List<Recommendation> recomendations = recService.getRecommendationsByUserBestTerms(user);
 			watch.stop();
 			
 			System.out.println("\nRecommendations for " + user.getEmail() + "\n");
@@ -376,10 +376,10 @@ public class ConsoleServices
 			
 			watch.start();
 			if(runTwice) recService.getRecommendationsByUserBestTerms(user);
-			List<Recomendation> recomendations = recService.getRecommendationsByUserBestTerms(user);
+			List<Recommendation> recomendations = recService.getRecommendationsByUserBestTerms(user);
 			watch.stop();
 			
-			user.setRecomendations(recomendations);
+			user.setRecommendations(recomendations);
 			userService.save(user);
 			System.out.println(user.getEmail() + " updated. Time Elapsed: " + (watch.getTime() / 1000) + "s");
 		});

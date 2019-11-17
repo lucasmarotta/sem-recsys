@@ -13,10 +13,10 @@ import org.apache.commons.lang3.ObjectUtils;
 import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 
 @Entity
-public class Recomendation 
+public class Recommendation 
 {
 	@EmbeddedId
-	private RecomendationId id;	
+	private RecommendationId id;	
 	
 	@ManyToOne(fetch=FetchType.EAGER)
     @MapsId("user_id")
@@ -33,39 +33,39 @@ public class Recomendation
     
     private Double rate;
 	
-	public Recomendation()
+	public Recommendation()
 	{
 		this(null, null, RecommendationType.RLWS_DIRECT, null);
 	}
 	
-	public Recomendation(User user, Movie movie, RecommendationType similarity, Double score)
+	public Recommendation(User user, Movie movie, RecommendationType similarity, Double score)
 	{
 		if(ObjectUtils.allNotNull(user, movie)) {
-			id = new RecomendationId(user.getId(), movie.getId(), similarity);	
+			id = new RecommendationId(user.getId(), movie.getId(), similarity);	
 		} else {
-			id = new RecomendationId(null, null, similarity);
+			id = new RecommendationId(null, null, similarity);
 		}		
 		this.user = user;
 		this.movie = movie;
 		this.score = score;
 	}
 	
-	public RecomendationId getRecId() 
+	public RecommendationId getRecId() 
 	{
 		return id;
 	}
 
-	public void setRecId(RecomendationId recId) 
+	public void setRecId(RecommendationId recId) 
 	{
 		this.id = recId;
 	}
 
-	public RecomendationId getId() 
+	public RecommendationId getId() 
 	{
 		return id;
 	}
 
-	public void setId(RecomendationId id) 
+	public void setId(RecommendationId id) 
 	{
 		this.id = id;
 	}
@@ -123,7 +123,7 @@ public class Recomendation
 	@Override
 	public String toString()
 	{
-		return "Recomendation [User=" + user.getEmail() + ", similarity = " + id.similarity + "]"
+		return "Recommendation [User=" + user.getEmail() + ", similarity = " + id.similarity + "]"
 				+ "\n[" + movie + ", score=" + score + "]\n" + TFIDFCalculator.uniqueValues(movie.getTokensList());
 	}
 }

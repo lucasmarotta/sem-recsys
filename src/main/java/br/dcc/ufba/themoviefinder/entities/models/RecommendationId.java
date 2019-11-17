@@ -9,7 +9,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 @Embeddable
-public class RecomendationId implements Serializable
+public class RecommendationId implements Serializable
 {
 	private static final long serialVersionUID = 3062545770329358459L;
 	
@@ -23,12 +23,12 @@ public class RecomendationId implements Serializable
     @Column(name = "similarity")
     public RecommendationType similarity;
 
-    public RecomendationId()
+    public RecommendationId()
     {
     	
     }
     
-	public RecomendationId(Integer userId, Integer movieId, RecommendationType similarity) 
+	public RecommendationId(Integer userId, Integer movieId, RecommendationType similarity) 
 	{
 		this.userId = userId;
 		this.movieId = movieId;
@@ -45,8 +45,8 @@ public class RecomendationId implements Serializable
 	public boolean equals(Object o) 
 	{
         if (this == o) return true;
-        if (!(o instanceof RecomendationId)) return false;
-        RecomendationId that = (RecomendationId) o;
+        if (!(o instanceof RecommendationId)) return false;
+        RecommendationId that = (RecommendationId) o;
         return Objects.equals(that, this);
 	}
 

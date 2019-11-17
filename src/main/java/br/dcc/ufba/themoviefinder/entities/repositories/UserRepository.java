@@ -22,9 +22,9 @@ public interface UserRepository extends JpaRepository<User, Long>
 			"WHERE u.online = :online AND NOT EXISTS\r\n" + 
 			"(\r\n" + 
 			"	SELECT r.*\r\n" + 
-			"    FROM Recomendation r\r\n" + 
+			"    FROM Recommendation r\r\n" + 
 			"    WHERE similarity = :similarity AND r.user_id = u.id\r\n" + 
 			")\r\n" + 
 			"LIMIT 30", nativeQuery=true)
-	List<User> findTop30ToRecomendation(@Param("online") boolean online, @Param("similarity") String similarity);
+	List<User> findTop30ToRecommendation(@Param("online") boolean online, @Param("similarity") String similarity);
 }
