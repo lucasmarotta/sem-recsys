@@ -50,7 +50,7 @@ public class Sparql {
 	public static String wrapStringAsResource(String value)
 	{
 		if(value != null) {
-			value = value.trim().replaceAll("\\s", "_").replaceAll("\\_+", "_");
+			value = escapeValue(value).trim().replaceAll("\\s", "_").replaceAll("\\_+", "_");
             if(value.charAt(value.length() - 1) == '_') {
             	value = value.substring(0, value.length() - 1);
             }
@@ -63,7 +63,11 @@ public class Sparql {
 		}
 		return null;
 	}
-
+	
+	private static String escapeValue(String value)
+	{
+		return value.replaceAll("`", "");
+	}
 
 	/**
 	 * @param uri1

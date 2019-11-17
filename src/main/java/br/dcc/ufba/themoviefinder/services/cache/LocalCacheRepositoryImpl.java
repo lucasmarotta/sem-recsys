@@ -56,12 +56,14 @@ public class LocalCacheRepositoryImpl implements LocalCacheRepository
 		return lodCacheRelation;
 	}
 	
+	@Override
 	@Cacheable(value="lodCache", key="#lodCache", unless="#result == null")
 	public LodCache findLodCache(LodCache lodCache)
 	{
 		return null;
 	}
 	
+	@Override
 	@Cacheable(value="lodCacheRelation", key="#lodRelationId", unless="#result == null")
 	public LodCacheRelation findLodCacheRelation(LodRelationId lodRelationId)
 	{

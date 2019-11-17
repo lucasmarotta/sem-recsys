@@ -35,10 +35,10 @@ public class Recomendation
 	
 	public Recomendation()
 	{
-		this(null, null, RecomendationType.RLWS_DIRECT, null);
+		this(null, null, RecommendationType.RLWS_DIRECT, null);
 	}
 	
-	public Recomendation(User user, Movie movie, RecomendationType similarity, Double score)
+	public Recomendation(User user, Movie movie, RecommendationType similarity, Double score)
 	{
 		if(ObjectUtils.allNotNull(user, movie)) {
 			id = new RecomendationId(user.getId(), movie.getId(), similarity);	
@@ -90,12 +90,12 @@ public class Recomendation
 		this.movie = movie;
 	}
 
-	public RecomendationType getSimilarity() 
+	public RecommendationType getSimilarity() 
 	{
 		return id.similarity;
 	}
 
-	public void setSimilarity(RecomendationType similarity) 
+	public void setSimilarity(RecommendationType similarity) 
 	{
 		id.similarity = similarity;
 	}

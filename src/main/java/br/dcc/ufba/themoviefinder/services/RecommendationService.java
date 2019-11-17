@@ -20,35 +20,35 @@ import br.dcc.ufba.themoviefinder.entities.models.Movie;
 import br.dcc.ufba.themoviefinder.entities.models.Recomendation;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.MovieService;
-import br.dcc.ufba.themoviefinder.services.similarity.UserMovieSimilarityService;
+import br.dcc.ufba.themoviefinder.services.similarity.SimilarityService;
 import br.dcc.ufba.themoviefinder.utils.ItemValue;
 import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 
 @Service
-public class RecomendationService 
-{	
-	private UserMovieSimilarityService similarityService;
-	private static final StopWatch WATCH = new StopWatch();
+public class RecommendationService 
+{
+	private SimilarityService similarityService;
 	
-	@Value("${app.recomendation-batch-size: 5}")
+	@Value("${app.recommendation-batch-size: 5}")
 	public int batchSize;
 	
-	@Value("${app.recomendation-batch-movie-size: 250}")
+	@Value("${app.recommendation-batch-movie-size: 250}")
 	public int batchMovieSize;
 	
 	@Autowired
 	private MovieService movieService;
 	
-	private RecomendationModel recModel;
+	private RecommendationModel recModel;
 
-	private static final Logger LOGGER = LogManager.getLogger(RecomendationService.class);
+	private static final StopWatch WATCH = new StopWatch();
+	private static final Logger LOGGER = LogManager.getLogger(RecommendationService.class);
 	
-	public RecomendationService()
+	public RecommendationService()
 	{
-		recModel = new RecomendationModel();
+		recModel = new RecommendationModel();
 	}
 	
-	public void setUserMovieSimilarity(UserMovieSimilarityService similarityService)
+	public void setUserMovieSimilarity(SimilarityService similarityService)
 	{
 		this.similarityService = similarityService;
 	}
@@ -73,38 +73,39 @@ public class RecomendationService
 		this.batchMovieSize = batchMovieSize;
 	}
 	
-	public RecomendationModel getRecModel() 
+	public RecommendationModel getRecModel() 
 	{
 		return recModel;
 	}
 
-	public void setRecModel(RecomendationModel recModel) 
+	public void setRecModel(RecommendationModel recModel)
 	{
 		this.recModel = recModel;
+		similarityService = recModel.getServiceByType();
 	}
 
-	public List<ItemValue<Movie>> getRecomendationsByMovie(Movie movie)
+	public List<ItemValue<Movie>> getRecommendationsByMovie(Movie movie)
 	{
-		return getRecomendations(movie.getTokensList(), Arrays.asList(movie));
+		return getRecommendations(movie.getTokensList(), Arrays.asList(movie));
 	}
 	
-	public List<Recomendation> getRecomendationsByUser(User user)
+	public List<Recomendation> getRecommendationsByUser(User user)
 	{
-		return getRecomendations(user.getMovieTokens(), user.getMovies()).stream().map(recItem -> {
+		return getRecommendations(user.getMovieTokens(), user.getMovies()).stream().map(recItem -> {
 			return new Recomendation(user, recItem.item, similarityService.getType(), recItem.value);
 		}).collect(Collectors.toList());
 	}
 	
-	public List<Recomendation> getRecomendationsByUserBestTerms(User user)
+	public List<Recomendation> getRecommendationsByUserBestTerms(User user)
 	{
 		List<String> bestTerms = user.getUserBestTerms(recModel);
 		List<Movie> moviesRecModel =  user.getMovies();
-		return getRecomendations(bestTerms, moviesRecModel).stream().map(recItem -> {
+		return getRecommendations(bestTerms, moviesRecModel).stream().map(recItem -> {
 			return new Recomendation(user, recItem.item, similarityService.getType(), recItem.value);
 		}).collect(Collectors.toList());
 	}
 	
-	private List<ItemValue<Movie>> getRecomendations(List<String> userTokens, List<Movie> movies)
+	private List<ItemValue<Movie>> getRecommendations(List<String> userTokens, List<Movie> movies)
 	{
 		if(similarityService != null) {
 			similarityService.init();
@@ -118,10 +119,10 @@ public class RecomendationService
 				if(LOGGER.isDebugEnabled()) {
 					WATCH.start();
 				}
-				addRecomendations(simList, userTokens, moviesPage.getContent(), totalMovies);
+				addRecommendations(simList, userTokens, moviesPage.getContent(), totalMovies);
 				for (int i = 1; i < qtPages; i++) {
 					moviesPage = movieService.pageMoviesExcept(movieIds, moviesPage.nextPageable());
-					addRecomendations(simList, userTokens, moviesPage.getContent(), totalMovies);
+					addRecommendations(simList, userTokens, moviesPage.getContent(), totalMovies);
 				}
 				if(LOGGER.isDebugEnabled()) {
 					WATCH.stop();
@@ -139,7 +140,7 @@ public class RecomendationService
 		}
 	}
 	
-	private void addRecomendations(List<ItemValue<Movie>> simList, List<String> userTokens, List<Movie> movies, long totalMovies)
+	private void addRecommendations(List<ItemValue<Movie>> simList, List<String> userTokens, List<Movie> movies, long totalMovies)
 	{
 		/* 
 		try {

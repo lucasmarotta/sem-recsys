@@ -11,17 +11,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
-import br.dcc.ufba.themoviefinder.entities.models.RecomendationType;
+import br.dcc.ufba.themoviefinder.entities.models.RecommendationType;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.exception.ResourceNotFoundException;
-import br.dcc.ufba.themoviefinder.services.RecomendationModel;
+import br.dcc.ufba.themoviefinder.services.RecommendationModel;
 import br.dcc.ufba.themoviefinder.services.cache.LocalCacheService;
 import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 
 @Service
-public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
+public class RLWSimilarityService implements SimilarityService
 {
-	@Value("${app.rlw-use-cache: true}")
+	@Value("${app.rlws-use-cache: true}")
 	private boolean useCache;
 	
 	@Autowired
@@ -30,47 +30,43 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	@Autowired
 	private RLWSimilarity rlwSimilarity;
 	
-	@Value("${app.rlw-direct-weight: 0.8}")
-	private double directWeight;
+	private RecommendationType type = RecommendationType.RLWS_DIRECT;
 	
-	@Value("${app.rlw-indirect-weight: 0.2}")
-	private double indirectWeight;
-	
-	private RecomendationType type = RecomendationType.RLWS_DIRECT;
-	
-	private static final Logger LOGGER = LogManager.getLogger(UserMovieRLWSimilarityService.class);
+	private static final Logger LOGGER = LogManager.getLogger(RLWSimilarityService.class);
 	
 	@Override
-	public RecomendationType getType() 
+	public RecommendationType getType() 
 	{
 		return type;
 	}
 	
-	public void setTypeToIndirect()
+	public void setType(RecommendationType type)
 	{
-		type = RecomendationType.RLWS_INDIRECT;
+		this.type = type;
 	}
 	
+	public void setWeights(double directWeight, double indirectWeight) 
+	{
+		if(rlwSimilarity != null) {
+			rlwSimilarity.setDirectWeight(directWeight);
+			rlwSimilarity.setIndirectWeight(indirectWeight);
+		}
+	}
+	
+	@Override
 	public void init()
 	{
-		rlwSimilarity.setDirectWeight(directWeight);
-		rlwSimilarity.setIndirectWeight(indirectWeight);
+		if(type.equals(RecommendationType.RLWS_DIRECT)) {
+			setWeights(.8, .2);
+		} else {
+			setWeights(.2, .8);
+		}
 		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("direct weight: " + directWeight + " indirect weight: " + indirectWeight);
+			LOGGER.debug("direct weight: " + rlwSimilarity.getDirectWeight() + " indirect weight: " + rlwSimilarity.getIndirectWeight());
 		}
 		if(! useCache) {
 			rlwSimilarity.setLocalCache(null);
-		}		
-	}
-	
-	public void setDirectWeight(double directWeight) 
-	{
-		this.directWeight = directWeight;
-	}
-
-	public void setIndirectWeight(double indirectWeight) 
-	{
-		this.indirectWeight = indirectWeight;
+		}
 	}
 	
 	public boolean isUseCache() 
@@ -90,7 +86,7 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 	}
 
 	@Override
-	public double getSimilarityFromUser(User user, Movie movie, RecomendationModel recModel) throws Exception 
+	public double getSimilarityFromUser(User user, Movie movie, RecommendationModel recModel) throws Exception 
 	{
 		List<String> userTokens = new ArrayList<String>();
 		for(Movie userMovie : user.getMoviesRecModel(recModel)) {
@@ -137,6 +133,7 @@ public class UserMovieRLWSimilarityService implements UserMovieSimilarityService
 		}
 	}
 	
+	@Override
 	public void close() 
 	{
 		

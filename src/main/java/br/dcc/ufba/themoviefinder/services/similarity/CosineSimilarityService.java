@@ -7,25 +7,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.dcc.ufba.themoviefinder.entities.models.Movie;
-import br.dcc.ufba.themoviefinder.entities.models.RecomendationType;
+import br.dcc.ufba.themoviefinder.entities.models.RecommendationType;
 import br.dcc.ufba.themoviefinder.entities.models.User;
 import br.dcc.ufba.themoviefinder.entities.services.TfIdfService;
-import br.dcc.ufba.themoviefinder.services.RecomendationModel;
+import br.dcc.ufba.themoviefinder.services.RecommendationModel;
 import br.dcc.ufba.themoviefinder.utils.CosineSimilarity;
 import br.dcc.ufba.themoviefinder.utils.DocVector;
 
 @Service
-public class UserMovieCosineSimilarityService implements UserMovieSimilarityService
+public class CosineSimilarityService implements SimilarityService
 {
 	@Autowired
 	private TfIdfService tfIdfService;
 	
+	@Override
 	public double getSimilarityFromMovie(Movie movie1, Movie movie2)
 	{
 		return getSimilarity(movie1.getTokensList(), movie2.getTokensList());
 	}
 	
-	public double getSimilarityFromUser(User user, Movie movie, RecomendationModel recModel)
+	@Override
+	public double getSimilarityFromUser(User user, Movie movie, RecommendationModel recModel)
 	{
 		List<String> userTokens = new ArrayList<String>();
 		for(Movie userMovie : user.getMoviesRecModel(recModel)) {
@@ -34,11 +36,12 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarityServ
 		return getSimilarity(userTokens, movie.getTokensList());
 	}
 	
+	@Override
 	public double getSimilarity(List<String> queryTokens, List<String> docTokens)
 	{
 		DocVector queryVector = new DocVector(queryTokens);
 		DocVector docVector = new DocVector(queryTokens);
-		String[] uniqueTerms = (String[]) queryVector.vectorTerms.keySet().toArray(new String[queryVector.vectorTerms.size()]);
+		String[] uniqueTerms = queryVector.vectorTerms.keySet().toArray(new String[queryVector.vectorTerms.size()]);
 		List<Float> queryTfIdfList = null;
 		List<Float> docTfIdfList = null;
 		
@@ -54,9 +57,9 @@ public class UserMovieCosineSimilarityService implements UserMovieSimilarityServ
 	}
 	
 	@Override
-	public RecomendationType getType() 
+	public RecommendationType getType() 
 	{
-		return RecomendationType.COSINE;
+		return RecommendationType.COSINE;
 	}
 
 	@Override

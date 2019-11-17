@@ -189,6 +189,7 @@ public class Node implements Comparator<Node>, Comparable<Node> {
 	 * 
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return this.URI +"   ID:"+ this.id;
 	}

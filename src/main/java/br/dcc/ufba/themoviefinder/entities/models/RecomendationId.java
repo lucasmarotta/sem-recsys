@@ -21,14 +21,14 @@ public class RecomendationId implements Serializable
     
     @Enumerated(EnumType.STRING)
     @Column(name = "similarity")
-    public RecomendationType similarity;
+    public RecommendationType similarity;
 
     public RecomendationId()
     {
     	
     }
     
-	public RecomendationId(Integer userId, Integer movieId, RecomendationType similarity) 
+	public RecomendationId(Integer userId, Integer movieId, RecommendationType similarity) 
 	{
 		this.userId = userId;
 		this.movieId = movieId;

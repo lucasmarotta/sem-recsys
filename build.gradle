@@ -13,14 +13,15 @@ buildscript {
 }
 
 apply plugin: "java"
-apply plugin: "application"
 apply plugin: "org.springframework.boot"
 bootJar {
     baseName 	= 'the-movie-finder'
     version  	= '0.1.0'
-    //jvmArgs  	= ["-Xms128M", "-Xmx448M", "-XX:TieredStopAtLevel=1", "-noverify"]
 }
-//applicationDefaultJvmArgs = project.jvmArgs
+
+bootRun {
+   jvmArgs = project.jvmArgs
+}
 
 group = "br.dcc.ufba"
 version = "0.1.0"

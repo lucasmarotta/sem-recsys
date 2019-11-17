@@ -15,7 +15,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
-import br.dcc.ufba.themoviefinder.services.RecomendationModel;
+import br.dcc.ufba.themoviefinder.services.RecommendationModel;
 import br.dcc.ufba.themoviefinder.utils.ItemValue;
 import br.dcc.ufba.themoviefinder.utils.TFIDFCalculator;
 
@@ -175,7 +175,7 @@ public class User
 		return ratings.stream().map(rating -> rating.getMovie()).collect(Collectors.toList());
 	}
 	
-	public List<Movie> getMoviesRecModel(RecomendationModel recModel)
+	public List<Movie> getMoviesRecModel(RecommendationModel recModel)
 	{
 		List<Movie> movies = ratings.stream().filter(rating -> rating.getRating() >= recModel.relevanceThreshold).map(Rating::getMovie).collect(Collectors.toList());
 		int max = movies.size();
@@ -190,7 +190,7 @@ public class User
 		return recomendations;
 	}
 	
-	public List<Recomendation> getRecomendations(RecomendationType similarity) 
+	public List<Recomendation> getRecomendations(RecommendationType similarity) 
 	{
 		return recomendations.stream().filter(recomendation -> similarity.equals(recomendation.getSimilarity())).collect(Collectors.toList());
 	}
@@ -200,57 +200,11 @@ public class User
 		this.recomendations = recomendations;
 	}
 	
-	public List<String> getUserBestTerms(RecomendationModel recModel)
+	public List<String> getUserBestTerms(RecommendationModel recModel)
 	{
 		List<ItemValue<String>> tfIdfValues = TFIDFCalculator.bulkTfIdf(getMoviesRecModel(recModel).stream().map(Movie::getTokensList).collect(Collectors.toList()));
 		Collections.sort(tfIdfValues, Collections.reverseOrder());
-		int max = tfIdfValues.size();
-		if(recModel.userModelSize > 0) {
-			max = Math.min(recModel.userModelSize, max);
-		}
-		return tfIdfValues.subList(0, max).stream().map(tfIdf -> tfIdf.item).collect(Collectors.toList());
-		
-		/*
-		List<Movie> movies = getMoviesRecModel(recModel);
-		if(! movies.isEmpty()) {
-			List<List<String>> listOfDocs = new ArrayList<List<String>>();
-			List<String> uniqueValues = new ArrayList<String>();
-			
-			for(Movie movie : movies) {
-				listOfDocs.add(movie.getTokensList());
-				uniqueValues.addAll(movie.getTokensList());
-			}
-			
-			int qtTerms = recModel.userModelSize;
-			if(qtTerms == -1) {
-				qtTerms = listOfDocs.stream().mapToInt(doc -> doc.size()).max().getAsInt();
-			}
-			uniqueValues = TFIDFCalculator.uniqueValues(uniqueValues);
-			
-			List<ItemValue<String>> termValueList = new ArrayList<ItemValue<String>>();
-			for(String term : uniqueValues) {
-				for (Movie movie : movies) {
-					termValueList.add(new ItemValue<String>(term, TFIDFCalculator.tfIdf(movie.getTokensList(), listOfDocs, term)));
-				}
-			}
-			uniqueValues.clear();
-			
-			Collections.sort(termValueList, Collections.reverseOrder());
-			List<ItemValue<String>> bestTerms = new ArrayList<ItemValue<String>>();
-			for (ItemValue<String> termValue : termValueList) {
-				if(bestTerms.size() < qtTerms) {
-					if(! bestTerms.stream().anyMatch(value -> bestTerms.stream().anyMatch(term -> value.item.equals(termValue.item)))) {
-						bestTerms.add(termValue);	
-					}
-				} else {
-					break;
-				}
-			}
-			return bestTerms.stream().map(term -> term.item).collect(Collectors.toList());
-
-		} 
-		return new ArrayList<String>();
-		*/
+		return tfIdfValues.stream().limit(recModel.userModelSize).map(tfIdf -> tfIdf.item).collect(Collectors.toList());
 	}
 	
 	public List<String> getMovieTokens()

@@ -18,6 +18,7 @@ public class MovieSimilarity implements Comparable<MovieSimilarity>
 		}
 	}
 
+	@Override
 	public int compareTo(MovieSimilarity toCompare) 
 	{
 		int c = Double.compare(similarity, toCompare.similarity);

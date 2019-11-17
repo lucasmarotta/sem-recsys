@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
@@ -237,7 +238,13 @@ public class SparqlWalk
 	private int execCountQuery(String queryString)
 	{
 		int finding = 0;
-		Query query = QueryFactory.create(Sparql.getPrefixes(PREFIXES) + " " + queryString);
+		Query query;
+		try {
+			query = QueryFactory.create(Sparql.getPrefixes(PREFIXES) + " " + queryString);
+		} catch(QueryException e) {
+			LOGGER.error("Failed to create query:\n" + Sparql.getPrefixes(PREFIXES) + " " + queryString, e);
+			throw e;
+		}
 		if(logQuery || LOGGER.isTraceEnabled()) {
 			LOGGER.trace(query);
 		}

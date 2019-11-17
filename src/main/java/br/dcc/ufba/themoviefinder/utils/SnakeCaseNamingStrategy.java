@@ -5,7 +5,7 @@ import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 
-public class SneakCaseNamingStrategy extends PhysicalNamingStrategyStandardImpl
+public class SnakeCaseNamingStrategy extends PhysicalNamingStrategyStandardImpl
 {
 	private static final long serialVersionUID = -4145430811342804998L;
 

@@ -26,7 +26,7 @@ public class MovieService
 	@Autowired
 	private NLPTokenizer nlpTokenizer;
 	
-	@Value("${app.recomendation-batch-movie-size: 500}")
+	@Value("${app.recommendation-batch-movie-size: 500}")
 	private int batchMovieSize;
 	
 	private static final Logger LOGGER = LogManager.getLogger(MovieService.class);

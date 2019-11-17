@@ -1,4 +1,4 @@
-package br.dcc.ufba.themoviefinder.services;
+package br.dcc.ufba.themoviefinder.lodweb;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
