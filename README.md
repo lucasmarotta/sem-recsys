@@ -42,6 +42,16 @@ Este projeto foi desenvolvido na linguagem JAVA (versão 8), utilizando as segui
 
 **OBS:** Este projeto foi construído utilizando codificação `UTF-8`, portanto tenha certeza que seu ambiente de execução esteja de acordo.
 
+## Download dos dados
+
+Para baixas os dados do banco de dados, veja os links abaixo:
+
+- [DADOS EM CSV](https://1drv.ms/u/s!Ako5giy76NI4gZNIxPMB4T5xHLrpBw?e=aCai2O)
+- [SCHEMA MYSQL](https://1drv.ms/u/s!Ako5giy76NI4gZNJd6o7PTSwSN9aAw?e=BPyv2W)
+- [DUMP DO MYSQL](https://1drv.ms/u/s!Ako5giy76NI4gZNK8EwgQ2pjN6orOw?e=euZqJU)
+
+**OBS:** Você também pode ver o schema no arquivo `data\database\schema.sql`.
+
 ## Instruções para execução
 
 Caso você prefira utilizar alguma IDE, importe como um projeto Gradle, do contrário utilize os arquivos `gradlew` (Windows ou Bash), e execute o seguinte comando:

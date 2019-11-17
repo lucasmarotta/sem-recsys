@@ -24,6 +24,9 @@
 /layout
 /logs
 /docs
+/data/database/*.7z
+/data/database/*.csv
+/data/database/dump.sql
 /src/main/resources/public/node_modules
 /src/main/resources/public/js/semantic
 /*.sql
