@@ -7,7 +7,7 @@
   "private": true,
   "dependencies": {
     "bootstrap": "^4.3.1",
-    "jquery": "^3.3.1",
+    "jquery": "^3.5.0",
     "vue-awesome-icons": "^1.2.2"
   }
 }
