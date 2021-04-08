@@ -128,7 +128,11 @@ public class RLWSimilarity
 					totalBetweenIndirect = sparqlWalk.countIndirectLinksBetween2Resources(term1Resource, term2Resource);	
 				}
 			}
-			
+
+			if(LOGGER.isTraceEnabled()) {
+				LOGGER.trace(String.format("RLWS(%s, %s): totalDirect: %.0f, totalIndirect: %.0f, totalBetweenDirect: %.0f, totalBetweenIndirect: %.0f", term1, term2, totalDirect, totalIndirect, totalBetweenDirect, totalBetweenIndirect));
+			}
+
 			if(totalBetweenDirect == totalDirect && totalBetweenIndirect == totalIndirect) {
 				return 1;
 			} else {

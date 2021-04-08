@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import br.dcc.ufba.themoviefinder.utils.BatchWorkLoad;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -142,9 +143,11 @@ public class RecommendationService
 	
 	private void addRecommendations(List<ItemValue<Movie>> simList, List<String> userTokens, List<Movie> movies, long totalMovies)
 	{
-		/* 
+		//Pré aloca a comparação dos termos entre o usuário e o filme, baseado no cache do banco. Usualmente o desempenho é inferior
+		//similarityService.updateCache(userTokens, movies);
+
+		//Paralelismo cadenciado com limite de threads
 		try {
-			//similarityService.updateCache(tokens, movies);
 			BatchWorkLoad<Movie> batchWorkLoad = new BatchWorkLoad<Movie>(batchSize, movies, false);
 			batchWorkLoad.run(movie -> {
 				ItemValue<Movie> mv = null;
@@ -171,8 +174,9 @@ public class RecommendationService
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 		}
-		*/
-		
+
+		/*
+		//Paralelismo máximo de acordo com o número núcleos do CPU
 		movies.parallelStream().forEach(movie -> {
 			ItemValue<Movie> mv = null;
 			try {
@@ -194,5 +198,6 @@ public class RecommendationService
 			}
 		});
 		similarityService.resetCache();
+		*/
 	}
 }

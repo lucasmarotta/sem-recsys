@@ -41,7 +41,7 @@
             <AppenderRef ref="Console" />
             <!-- <AppenderRef ref="FileConsole"/> -->
     	</Logger>
-    	<Logger name="br.dcc.ufba.themoviefinder" level="INFO" additivity="false">
+    	<Logger name="br.dcc.ufba.themoviefinder" level="DEBUG" additivity="false">
     	   	<AppenderRef ref="Console" />
     	   	<!-- <AppenderRef ref="FileConsole"/> -->
     	</Logger>

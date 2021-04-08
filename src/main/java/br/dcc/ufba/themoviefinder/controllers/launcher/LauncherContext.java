@@ -66,7 +66,7 @@ public class LauncherContext implements SpringFXContext
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
+	//@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException 
 	{
 		springContext = (ConfigurableApplicationContext) applicationContext;
@@ -136,6 +136,6 @@ public class LauncherContext implements SpringFXContext
 	public boolean isHeadless() 
 	{
 		HeadlessApplication headlessAnn = appClass.getAnnotation(HeadlessApplication.class);
-		return (headlessAnn != null) ? headlessAnn.value() : true;
+		return headlessAnn == null || headlessAnn.value();
 	}
 }

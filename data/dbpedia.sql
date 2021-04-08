@@ -14,24 +14,15 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
 PREFIX e: <http://learningsparql.com/ns/expenses#>
 PREFIX d: <http://learningsparql.com/ns/data#>
-SELECT ?value
-WHERE {
-	{<http://dbpedia.org/resource/Buzz_Lightyear> ?property ?value.}
-	FILTER((
-		?property = rdf:type ||
-		?property = dct:subject ||
-		?property = dbo:wikiPageRedirects ||
-		?property = dbo:wikiPageDisambiguates
-	) && ?value != owl:Thing
-	&& !STRSTARTS(STR(?value), "http://www.wikidata.org/entity/")
-	&& !STRSTARTS(STR(?value), "http://wikidata.dbpedia.org/resource/"))
-}
 
---####################################### V1
+
+
+--####################################### V1 OLD
 
 --TOTAL NUMBER OF DIRECT INCOMING/OUTGOING RESOURCE LINKS
 
 --TOTAL NUMBER OF DIRECT LINKS
+/*
 SELECT (count (distinct ?r2) as ?x)
 WHERE {
 	{values (?r1) {(<http://dbpedia.org/resource/Car>)} ?r1 ?p1 ?r2 . FILTER (?r1 != ?r2) . FILTER (!isLiteral(?r2) )}
@@ -57,8 +48,8 @@ SELECT (count (distinct ?r3) as ?x)
 WHERE {
 	{values (?r1 ?r3) {(<http://dbpedia.org/resource/Paris> <http://dbpedia.org/resource/France>)} ?r2 ?p1 ?r1 . ?r2 ?p1 ?r3 . FILTER (?r1 != ?r3) . FILTER (!isLiteral(?r2)) } UNION
 }
-
---####################################### V2
+*/
+--####################################### V2 NEW
 
 -- COMMON PREFIXES
 
@@ -119,7 +110,7 @@ SELECT (count (distinct ?r2) as ?x)
 WHERE {
 	{values (?r1) {(<http://dbpedia.org/resource/Paris>)} ?r2 ?p1 ?r1 . ?r2 ?p2 ?r3 . FILTER (?r1 != ?r3 && ?r2 != ?r1 && ?r2 != ?r3)}
 	--UNION
-	--{values (?r1) {(<http://dbpedia.org/resource/Paris>)} ?r2 ?p1 ?r1 . ?r2 ?p2 ?r3 . FILTER (?r1 != ?r3 && ?r2 != ?r1 && ?r2 != ?r3)}
+	--{values (?r1) {(<http://dbpedia.org/resource/Paris>)} ?r1 ?p1 ?r2  . ?r3 ?p2 ?r2 . FILTER (?r1 != ?r3 && ?r2 != ?r1 && ?r2 != ?r3)}
 	FILTER ( ?p1 != dbo:wikiPageID )
 	FILTER ( ?p1 != dbo:wikiPageRevisionID )
 	FILTER ( ?p1 != dbo:wikiPageRedirects )
@@ -137,7 +128,9 @@ PREFIX  :  <http://dbpedia.org/resource/>
 PREFIX  dbo:  <http://dbpedia.org/ontology/>
 SELECT (count (distinct ?r2) as ?x)
 WHERE {
-	{values (?r1 ?r3) {(<http://dbpedia.org/resource/Amorality> <http://dbpedia.org/resource/James_Bond>)} ?r2 ?p1 ?r1 . ?r2 ?p2 ?r3 . FILTER (?r1 != ?r3 && ?r2 != ?r1 && ?r2 != ?r3)}
+	{values (?r1 ?r3) {(<http://dbpedia.org/resource/Paris> <http://dbpedia.org/resource/Nuclear_Energy_Agency>)} ?r2 ?p1 ?r1 . ?r2 ?p2 ?r3 . FILTER (?r1 != ?r3 && ?r2 != ?r1 && ?r2 != ?r3)}
+	--UNION
+	--{values (?r1 ?r3) {(<http://dbpedia.org/resource/Paris> <http://dbpedia.org/resource/Nuclear_Energy_Agency>)} ?r1 ?p1 ?r2 . ?r3 ?p2 ?r2 . FILTER (?r1 != ?r3 && ?r2 != ?r1 && ?r2 != ?r3)}
 	FILTER ( ?p1 != dbo:wikiPageID )
 	FILTER ( ?p1 != dbo:wikiPageRevisionID )
 	FILTER ( ?p1 != dbo:wikiPageRedirects )

@@ -11,14 +11,16 @@ FROM
 	WHERE direct_links != 0
 ) lod
 
-SELECT 
+
+--vw_lod_coverage
+SELECT
 (
     SELECT COUNT(`resource`) / (SELECT COUNT(`resource`) FROM lod_cache)
     FROM lod_cache
     WHERE direct_links != 0
 ) dbpedia_hit_coverage,
 (
-    SELECT COUNT(rs) / (SELECT COUNT(`resource`) FROM lod_cache WHERE direct_links != 0) 
+    SELECT COUNT(rs) / (SELECT COUNT(`resource`) FROM lod_cache WHERE direct_links != 0)
     FROM
     (
         SELECT resource1 rs
@@ -28,10 +30,10 @@ SELECT
         SELECT resource2 rs
         FROM lod_cache_relation lod
         WHERE direct_links != 0
-    ) lod    
+    ) lod
 ) lod_direct_coverage,
 (
-    SELECT COUNT(rs) / (SELECT COUNT(`resource`) FROM lod_cache WHERE direct_links != 0) 
+    SELECT COUNT(rs) / (SELECT COUNT(`resource`) FROM lod_cache WHERE direct_links != 0)
     FROM
     (
         SELECT resource1 rs
@@ -41,7 +43,7 @@ SELECT
         SELECT resource2 rs
         FROM lod_cache_relation lod
         WHERE indirect_links != 0
-    ) lod    
+    ) lod
 ) lod_indirect_coverage,
 (
     SELECT COUNT(id) / (SELECT COUNT(id) FROM movie)
@@ -60,7 +62,7 @@ SELECT
             WHERE direct_links != 0
         ) lod
         WHERE movie.tokens LIKE CONCAT('%', lod.rs ,'%')
-    )    
+    )
 ) movie_lod_direct_coverage,
 (
     SELECT COUNT(id) / (SELECT COUNT(id) FROM movie)
@@ -79,39 +81,39 @@ SELECT
             WHERE indirect_links != 0
         ) lod
         WHERE movie.tokens LIKE CONCAT('%', lod.rs ,'%')
-    )    
+    )
 ) movie_lod_indirect_coverage
 
 
 /* ==========================================================================
-    RECOMENDATION ANALYSIS METRICS 
+    RECOMENDATION ANALYSIS METRICS
 ============================================================================ */
 
 -- RECOMENDATION RELEVANCE BY RATINGS
-SELECT ROW_NUMBER() OVER (PARTITION BY r.user_id, r.similarity ORDER BY r.user_id, r.similarity, r.score DESC) rn, 
+SELECT ROW_NUMBER() OVER (PARTITION BY r.user_id, r.similarity ORDER BY r.user_id, r.similarity, r.score DESC) rn,
 m.title, r.user_id, u.online, r.similarity, r.score,
 IF(
-    r.rate IS NOT NULL, IF(r.rate >= 3.5, 1, 0), 
+    r.rate IS NOT NULL, IF(r.rate >= 3.5, 1, 0),
     IF((
         SELECT AVG(ra.rating)
         FROM rating ra
         WHERE ra.movie_id = r.movie_id AND ra.user_id != r.user_id
         GROUP BY ra.movie_id
-    ) >= 3.5, 1, 0)        
+    ) >= 3.5, 1, 0)
 ) relevance
 FROM recomendation r
 INNER JOIN movie m ON r.movie_id = m.id
 INNER JOIN user u ON r.user_Id = u.id
 
 -- RECOMENDATION RELEVANCE BY IMDB RATINGS
-SELECT ROW_NUMBER() OVER (PARTITION BY r.user_id, r.similarity ORDER BY r.user_id, r.similarity, r.score DESC) rn, 
+SELECT ROW_NUMBER() OVER (PARTITION BY r.user_id, r.similarity ORDER BY r.user_id, r.similarity, r.score DESC) rn,
 m.title, r.user_id, r.similarity, r.score,
 IF(r.rate IS NOT NULL, IF(r.rate >= 3.5, 1, 0), IF(m.imdb_rating >= 6.5, 1, 0)) relevance
 FROM recomendation r
 INNER JOIN movie m ON r.movie_id = m.id
 INNER JOIN user u ON r.user_Id = u.id
 
-DELETE 
+DELETE
 FROM recomendation
 WHERE similarity = 'RLWS' AND user_id >= 4;
 SELECT * FROM `recomendation` WHERE similarity = 'RLWS';
@@ -135,7 +137,7 @@ FROM
             (
                 SELECT COUNT(rn) qtd
                 FROM vw_rec_relevance_by_rating rr
-                WHERE rr.relevance = 1 AND rr.user_id = a.user_id AND rr.online = a.online AND rr.similarity = @SIMILARITY AND rr.rn <= a.rn	
+                WHERE rr.relevance = 1 AND rr.user_id = a.user_id AND rr.online = a.online AND rr.similarity = @SIMILARITY AND rr.rn <= a.rn
             ) relevance_rank
             FROM vw_rec_relevance_by_rating a
             WHERE a.similarity = @SIMILARITY AND EXISTS
@@ -150,7 +152,7 @@ FROM
 				) u
                 WHERE a.user_Id = u.user_id
             )
-        ) av 
+        ) av
         WHERE av.user_id = a.user_id AND av.rn <= a.rn
         GROUP BY av.user_id
     ) avg_precision_rank,
@@ -161,8 +163,8 @@ FROM
     ), 0) reciprocal_rank
     FROM
     (
-        SELECT a.rn, a.title, a.user_id, a.online, a.similarity, a.score, a.relevance, 
-        a.relevance_rank / rn  precision_rank, 
+        SELECT a.rn, a.title, a.user_id, a.online, a.similarity, a.score, a.relevance,
+        a.relevance_rank / rn  precision_rank,
         IF(total_relevance = 0, 0, a.relevance_rank / total_relevance) recall_rank
         FROM
         (
@@ -170,7 +172,7 @@ FROM
             (
                 SELECT COUNT(rr.rn)
                 FROM vw_rec_relevance_by_rating rr
-                WHERE rr.relevance = 1 AND rr.user_id = a.user_id AND rr.online = a.online AND rr.similarity = @SIMILARITY AND rr.rn <= a.rn	
+                WHERE rr.relevance = 1 AND rr.user_id = a.user_id AND rr.online = a.online AND rr.similarity = @SIMILARITY AND rr.rn <= a.rn
             ) relevance_rank,
             (
                 SELECT COUNT(rr.rn)

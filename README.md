@@ -133,7 +133,7 @@ app.recmodel-type=RLWS_DIRECT
 Quanto as configurações do Log4J2, é possível definir o nível de LOG, alterando o trecho `level="DEBUG"` em `<Logger name="br.dcc.ufba.themoviefinder" level="DEBUG" additivity="false">` para outro nível. Abaixo consta algumas infomrações configuradas para serem exibidas de acordo com o nível:
 
 - **DEBUG:** Exibe o progresso e comparação de cada filme durante uma recomendação.
-- **TRACE:** Além de exibir o DEBUG, adiciona o resultadas das comparações individuais dos termos.
+- **TRACE:** Além de exibir o DEBUG, adiciona o resultado das comparações individuais dos termos.
 - **INFO:** Para qualquer nível igual a este ou superior, sem informações extras.
 
 Caso queira alterar as configurações JVM durante a excução da aplicação, como memória utilizada, altere o trecho `jvmArgs = ["-Xms128M", "-Xmx448M", "-XX:TieredStopAtLevel=1", "-noverify"]`.

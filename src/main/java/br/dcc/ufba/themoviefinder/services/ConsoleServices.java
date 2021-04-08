@@ -22,6 +22,11 @@ import br.dcc.ufba.themoviefinder.entities.services.UserService;
 import br.dcc.ufba.themoviefinder.lodweb.SparqlWalk;
 import br.dcc.ufba.themoviefinder.services.similarity.RLWSimilarityService;
 
+/**
+ * Console Services é uma classe que implementa uma série
+ * de métodos para experimentação de todos os componentes do
+ * projeto, tendo os resultados no console
+ */
 @Service
 public class ConsoleServices 
 {
@@ -87,7 +92,7 @@ public class ConsoleServices
 
 	/**
 	 * Generates movie tokens by id
-	 * @param movieTitle
+	 * @param movieId
 	 */
 	public void generateMovieById(int movieId)
 	{
@@ -241,11 +246,16 @@ public class ConsoleServices
 	 */
 	public void generateRLWSByLodIds(List<LodRelationId> lodIds, RecommendationType type)
 	{
-		similarityService.setType(type);
-		lodIds.forEach(lodId -> {
-			System.out.println(lodId.getResource1() + "\t" + lodId.getResource2() + "\t" + similarityService.getSimilarityBetween2Terms(lodId.getResource1(), lodId.getResource2()));
-		});
-		similarityService.resetCache();
+		if (type == RecommendationType.RLWS_DIRECT || type == RecommendationType.RLWS_INDIRECT) {
+			similarityService.setType(type);
+			similarityService.init();
+			lodIds.forEach(lodId -> {
+				System.out.println(lodId.getResource1() + "\t" + lodId.getResource2() + "\t" + similarityService.getSimilarityBetween2Terms(lodId.getResource1(), lodId.getResource2()));
+			});
+			similarityService.resetCache();
+		} else {
+			throw new IllegalArgumentException("RecommendationType must be RLWS_DIRECT or RLWS_INDIRECT");
+		}
 	}
 	
 	/**
@@ -270,7 +280,7 @@ public class ConsoleServices
 	
 	/**
 	 * Generates recomendations by user id
-	 * @param users
+	 * @param userId
 	 * @param recModel
 	 */
 	public void generateRecommendationsByUserId(int userId, RecommendationModel recModel)
@@ -280,7 +290,7 @@ public class ConsoleServices
 	
 	/**
 	 * Generates recommendations by user email
-	 * @param users
+	 * @param userEmail
 	 * @param recModel
 	 */
 	public void generateRecommendationsByUserEmail(String userEmail, RecommendationModel recModel)
@@ -344,7 +354,7 @@ public class ConsoleServices
 	
 	/**
 	 * Update recommendations by user id
-	 * @param users
+	 * @param userId
 	 * @param recModel
 	 */
 	public void updateRecommendationsByUserId(int userId, RecommendationModel recModel)
@@ -354,7 +364,7 @@ public class ConsoleServices
 	
 	/**
 	 * Update recommendations by user email
-	 * @param users
+	 * @param userEmail
 	 * @param recModel
 	 */
 	public void updateRecommendationsByUserEmail(String userEmail, RecommendationModel recModel)
